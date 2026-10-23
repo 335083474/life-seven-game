@@ -15,6 +15,10 @@ export function note(life, type, text, facts = {}) {
   const event = {id:life.journal.length+1, round:life.round, stage:rounds[life.round]?.stage || (life.round < 0 ? 0 : 6), age:rounds[life.round]?.age || 7, type,text,...facts};
   life.journal.push(event); return event;
 }
+function captureChapterFacts(life,stage) {
+  life.chapterFacts||={};
+  life.chapterFacts[stage]={age:rounds[life.round]?.age||7,parentsAlive:life.parentsAlive,married:life.married,spouse:life.married?person(life,life.spouseId).name:null,child:structuredClone(life.child),cards:structuredClone(life.cards),achievements:structuredClone(life.achievements),collection:structuredClone(life.collection),...(stage===6&&life.ending?{ending:structuredClone(life.ending)}:{})};
+}
 export function createLife({id, name, now, rng}) {
   const pool = [...ordinary];
   const life = {id,version:RULE_VERSION,revision:0,name,round:-1,phase:'draw',cards:[{name:'父母',level:1}],path:null,parentsAlive:true,married:false,spouseId:null,formerSpouses:[],child:null,npcs:[],journal:[],opportunities:[],achievements:[],collection:[],awards:[],pending:null,assessment:null,roll:null,lastResult:null,biography:null,endedAt:null,createdAt:now,expires:now+30*86400000};
@@ -26,6 +30,7 @@ export function createLife({id, name, now, rng}) {
   ];
   life.npcs = profiles.map(([id,name,profile,names])=>({id,name,profile,cards:[{name:'父母',level:1},...names.map(name=>({name,level:1,...(name==='健康'?{spent:0}:{})}))],opportunities:[],usedRound:-1,known:false}));
   note(life,'命运初启',`七岁，${name}拥有父母的庇护，又得到${life.cards.slice(1).map(c=>'「'+c.name+'」').join('、')}。`,{gains:life.cards.map(c=>c.name)});
+  captureChapterFacts(life,0);
   return life;
 }
 function rememberCollection(life, p, name) {
@@ -73,7 +78,9 @@ export function marry(life,targetId,sacrifice) {
   if(!ownLove&&(!sacrifice||special.includes(sacrifice)||!find(life,sacrifice)))reject('marriage_sacrifice_required',400);
   const npcSacrifice=find(other,'爱情')?.name||other.cards.find(c=>!special.includes(c.name))?.name;
   if(!npcSacrifice)reject('npc_declined');
-  remove(life,ownLove?'爱情':sacrifice);remove(other,npcSacrifice);
+  const ownCost=ownLove?'爱情':sacrifice;
+  remove(life,ownCost);remove(other,npcSacrifice);
+  note(life,'婚姻取舍',`你把「${ownCost}」转换为家庭；${other.name}把「${npcSacrifice}」转换为家庭。`,{costs:[{personId:'self',name:ownCost},{personId:targetId,name:npcSacrifice}]});
   life.married=true;life.spouseId=targetId;other.known=true;
   grant(life,'self','家庭','你们决定共同生活。',{ensure:true,required:true});grant(life,targetId,'家庭','你们决定共同生活。',{ensure:true});
   note(life,'婚姻',`你与${other.name}${life.formerSpouses.includes(targetId)?'复婚':'结婚'}。各自保有手牌，健康保护自动共享，先用自己的次数。双方也可以借用资源、赠送与交换元素。`,{relation:'married',targetId});
@@ -268,7 +275,8 @@ export function advance(life,roll,rng,now) {
     life.phase='ending';life.endedAt=now;life.expires=now+48*3600000;
     life.ending={survived:life.cards.length===7,count:life.cards.length,at:now};
     note(life,'终局',life.ending.survived?'七种不同的人生元素留存，你在终局存活。':'最终留下'+life.cards.length+'种人生元素，不足七种，按游戏规则判定死亡。',{ending:life.ending});
-  } else {life.round++;life.phase='fixed';life.assessment=null;life.roll=null;life.swan=null;}
+    captureChapterFacts(life,6);
+  } else {captureChapterFacts(life,rounds[life.round].stage);life.round++;life.phase='fixed';life.assessment=null;life.roll=null;life.swan=null;}
 }
 export function transfer(life,{direction,name,exchange},rng) {
   if(!life.married||!['fixed','free'].includes(life.phase)||life.assessment||life.pending||life.awards.length)reject('transfer_unavailable');

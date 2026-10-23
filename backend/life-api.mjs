@@ -55,7 +55,11 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
     life.biography||={chapters:[],source:'MiniMax'};
     const chapter=life.biography.chapters.length;
     if(chapter<7){
-      await quota();const answer=await infer(memoirSystem,{name:life.name,chapter,chapterName:chapters[chapter][0],ledger:life.journal.filter(e=>e.stage===chapter),previous:life.biography.chapters,facts:{ending:life.ending,parentsAlive:life.parentsAlive,child:life.child,married:life.married,spouse:life.married?person(life,life.spouseId).name:null,achievements:life.achievements,collection:life.collection,cards:life.cards}},2300);
+      const historical=life.chapterFacts?.[chapter];
+      // Legacy saves without snapshots get only facts reconstructable at this
+      // chapter, never the final marriage/child/card state in an earlier year.
+      const fallback={parentsAlive:!life.journal.some(e=>e.stage<=chapter&&e.parentsAlive===false),child:life.journal.filter(e=>e.stage<=chapter&&e.child).at(-1)?.child||null,...(chapter===6?{ending:life.ending,cards:life.cards}:{})};
+      await quota();const answer=await infer(memoirSystem,{name:life.name,chapter,chapterName:chapters[chapter][0],ledger:life.journal.filter(e=>e.stage===chapter),previous:life.biography.chapters,facts:historical||fallback},2300);
       const value=answer.value;
       if(typeof value?.title!=='string'||value.title.length>60||typeof value.text!=='string'||value.text.trim().length<25||value.text.length>2200)throw Error('ai_invalid_response');
       life.biography.chapters.push({stage:chapter,title:value.title.trim(),text:value.text.trim()});

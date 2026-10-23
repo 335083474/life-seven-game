@@ -61,6 +61,9 @@ test('whole single life from seven to ending: dropout, early marriage, birth, pa
     assert(f.life.cards.length<=7);assert.equal(new Set(f.life.cards.map(c=>c.name)).size,f.life.cards.length);
   }
   assert.equal(f.life.phase,'ending');assert.equal(f.life.ending.survived,f.life.cards.length===7);
+  assert.equal(f.life.chapterFacts[0].married,false);assert.equal(f.life.chapterFacts[0].child,null);
+  assert.equal(f.life.chapterFacts[5].child.independent,false);assert.equal(f.life.chapterFacts[5].ending,undefined);
+  assert.equal(f.life.chapterFacts[6].child.independent,true);assert.deepEqual(f.life.chapterFacts[6].ending,f.life.ending);
   for(let i=0;i<7;i++)await okay(f.call('memoir',{lifeId:f.life.id,revision:f.life.revision,requestId:crypto.randomUUID()}));assert.equal(f.life.biography.chapters.length,7);
   const saved=structuredClone(f.life);assert.deepEqual(await okay(f.call('load',{lifeId:f.life.id})),saved);
   const rows=f.DB.raw.prepare('SELECT expires FROM life_actions WHERE life_id=?').all(f.life.id);assert(rows.length>40);assert(rows.every(r=>r.expires===f.life.expires));
