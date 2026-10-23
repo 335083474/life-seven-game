@@ -1,0 +1,22 @@
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {createMiniMax} from '../backend/minimax.mjs';
+import {createLife,advance,commitFixed,rollFree,settleFree,publicLife} from '../backend/life-engine.mjs';
+import {planInput,validatePlan,planSystem,storySystem,memoirSystem} from '../backend/life-ai.mjs';
+let config={};try{config=JSON.parse(fs.readFileSync(path.join(process.env.MMX_CONFIG_DIR||path.join(os.homedir(),'.mmx'),'config.json'),'utf8'));}catch{}
+const key=config.api_key||process.env.AI_LIVE_MINIMAX_API_KEY||process.env.MINIMAX_API_KEY;
+if(!key)throw Error('No existing MiniMax credential');
+const infer=createMiniMax({MINIMAX_API_KEY:key,MINIMAX_REGION:'cn',MINIMAX_MODEL:'MiniMax-M3'});
+const life=createLife({id:crypto.randomUUID(),name:'规则验收旅人',now:Date.now(),rng:()=>0});
+advance(life,()=>10,()=>0,Date.now());commitFixed(life,0,{},()=>0);
+const input=planInput(life,{goal:'我想与许知澄合作，做一套方便老人使用的社区阅读设备，由我联系社区和组织试用，由许知澄研究技术。',partners:['chen']});
+const evaluated=await infer(planSystem,input,5000);life.assessment=validatePlan(evaluated.value,input,crypto.randomUUID(),life);
+rollFree(life,[],()=>10);settleFree(life,()=>0);
+const story=await infer(storySystem,{name:life.name,result:life.lastResult,facts:{parentsAlive:life.parentsAlive,married:life.married,child:life.child},consequences:life.journal.filter(e=>e.id>=life.lastResult.eventId),previous:life.journal},1500);
+if(typeof story.value?.narrative!=='string'||story.value.narrative.length<20)throw Error('Invalid live narrative');
+const memoir=await infer(memoirSystem,{name:life.name,chapter:0,chapterName:'命运初启',ledger:life.journal.filter(e=>e.stage===0),previous:[],facts:{parentsAlive:life.parentsAlive,married:false,child:null}},2300);
+if(typeof memoir.value?.text!=='string'||memoir.value.text.length<25)throw Error('Invalid live memoir');
+const report={at:new Date().toISOString(),provider:'MiniMax-M3',realProvider:true,assessmentValidated:true,people:life.assessment.people.map(p=>({id:p.id,role:p.role,reward:p.reward,risks:p.risks,parentSupport:p.parentSupport})),difficulty:life.assessment.difficulty,probability:life.roll.calc.probability,outcome:life.lastResult.outcome,narrative:story.value.narrative,memoir:memoir.value,usage:[evaluated.usage,story.usage,memoir.usage],secretValuesPrinted:false};
+fs.mkdirSync('artifacts/solo-release',{recursive:true});fs.writeFileSync('artifacts/solo-release/minimax-live.json',JSON.stringify(report,null,2));
+console.log(JSON.stringify({realProvider:true,assessmentValidated:true,difficulty:report.difficulty,people:report.people.length,narrativeLength:report.narrative.length,memoirLength:report.memoir.text.length,secretValuesPrinted:false}));

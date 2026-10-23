@@ -11,7 +11,7 @@
     "MINIMAX_MODEL": "MiniMax-M3",
     "DAILY_MODEL_LIMIT": "200"
   },
-  "triggers": { "crons": ["17 4 * * *"] },
+  "triggers": { "crons": ["*/15 * * * *"] },
   "d1_databases": [{
     "binding": "DB",
     "database_name": "life-seven-game",

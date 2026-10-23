@@ -1,0 +1,43 @@
+{
+  "version": "solo-1.0-test",
+  "source": "https://chatgpt.com/c/6ad9c1ce-2858-83ec-9a14-2439b3fe3cd1",
+  "scope": "单人及系统人物；不是官方规则逐项复刻；没有真实多人、广告或支付",
+  "confirmed": [
+    {"rule":"单人加NPC，预设行动与自由输入，MiniMax评估语义、程序掷骰结算", "source":"V0.3", "code":["backend/life-ai.mjs","backend/life-api.mjs"]},
+    {"rule":"每回合固定→自由→黑天鹅，一次正式自由行动；正式合作也消耗机会", "source":"V0.5/V0.7", "code":["backend/events.mjs","backend/life-engine.mjs"]},
+    {"rule":"成功按角色贡献获得奖励；普通失败不失牌；大失败从事前因果候选随机失一张；合作全事件只直接失一张，发起者概率更高", "source":"V0.8/V0.10–V0.12", "code":["backend/life-ai.mjs","backend/life-engine.mjs"]},
+    {"rule":"D100自然01大成功；成功率<50时96–100大失败，否则100大失败", "source":"V0.13", "code":["backend/rules.mjs","backend/life-engine.mjs"]},
+    {"rule":"同目标换卡不能改变基础难度；正式锁定前可以改目标和组合；无合法风险先调整；事前只展示类型，事后可查候选", "source":"V0.39/V0.41–V0.45", "code":["backend/life-ai.mjs","backend/life-api.mjs","game.js"]},
+    {"rule":"父母可自愿代偿一次失牌；自由事件需事前逻辑许可；失去支持不等于死亡；固定父母离世是真实死亡，不能重复扣已失去卡", "source":"V0.45/V0.46", "code":["backend/life-engine.mjs","game.js"]}
+  ],
+  "user_selected_testing_directions": [
+    {"rule":"机遇仅用于后续相关自由事件的首次失败，可挽救大失败；自愿使用，一次事件最多一次，保留较好结果；每位参与者个人持有", "source":"V0.14–V0.19", "code":"backend/life-engine.mjs"},
+    {"rule":"末回合大成功保留贡献对应的特殊成就，不加卡不改生存；死亡也保留", "source":"V0.20–V0.22", "code":"backend/life-engine.mjs"},
+    {"rule":"同名元素升级II，贡献翻倍；同名贡献100/50/25%；单事件最多3人，每人最多2卡", "source":"V0.29–V0.38", "code":"backend/life-engine.mjs"},
+    {"rule":"基础65/45/25/10/5；原贡献封顶24再乘1/1/.8/.5/.25；每位合作者+3；最高90", "source":"V0.37/V0.38", "code":"backend/life-engine.mjs"},
+    {"rule":"升学知识/梦想/阅历/自由；社团才艺/勇气/知识/自由；辍学独立社会历练技能/毅力/人脉/勇气", "source":"V0.25–V0.28", "code":"backend/events.mjs"},
+    {"rule":"离婚双方失家庭再随机1张合法卡，不抽孩子；快乐优先抚养，同状态共同抚养；不自动失快乐", "source":"V0.50–V0.55", "code":"backend/life-engine.mjs"},
+    {"rule":"生育双方各得孩子；快乐已有不重复，没有则补；之后独立变化；只有预设重大亲子事件可连锁；成年离家双方失孩子保留快乐", "source":"V0.47–V0.55", "code":"backend/life-engine.mjs"},
+    {"rule":"健康I/II有1/2次特定厄运保护，卡保留；升级不重置已用；重新获得重置；夫妻自动共享、自用优先；同时受灾各有各扣，合计最后一次可救双方", "source":"V0.56–V0.65", "code":"backend/inventory.mjs"},
+    {"rule":"七章、七岁抽卡起步；晚年选择道路得对应元素；III典藏保持II能力不增加卡位", "source":"七阶段重构及V0.66/V0.67", "code":["backend/events.mjs","backend/life-engine.mjs","art.js"]}
+  ],
+  "implementation_parameters_not_previously_frozen": [
+    "依9个有意义的固定事件安排9个常规回合；开局抽卡不算常规回合",
+    "D100最终概率四舍五入；合作失牌权重发起者3、合作者各1",
+    "可以放弃尚未使用的自由行动机会，不伪造骰子、不获得奖励，仍面对黑天鹅；用于避免空手无合法风险时无法继续",
+    "遵循最新反馈去掉正向黑天鹅，当前D100 01–65平静、66–100厄运；使用真实服务端骰子，不把35%称为旧规则已确认值",
+    "疾病/意外伤害/身心压力/夫妻共同疾病允许健康；时代逆风/关系变化/预设亲子失联不允许；各事件等权抽取",
+    "父母、家庭、孩子暂不升级；普通卡第三次任何阶段均可典藏；普通失牌整张失去",
+    "28种暂用名单含善良、修养，权利统一用权力；不宣称全部为已核实的原版卡",
+    "NPC三种性格有自己的资源与固定成长、独立行动和黑天鹅；正式邀请由司书按角色判断愿意与否；不能作真人同意证明",
+    "配偶借用计入本人2卡限制、同一张卡只计一次；普通卡可转移，保留健康已用次数；系统配偶可拒绝无偿交出健康或最后资源",
+    "相亲选择已愿意同行的NPC、转换爱情或舍弃普通卡；等待真爱不自动结婚；无配偶不强制生育；已有孩子不重复生育",
+    "为可续玩，进行中存档最长30天；结局48小时到期不可访问，定时清理任务每15分钟执行；包括全部重试回执中的完整故事"
+  ],
+  "commercial_scope": {
+    "source":"商业模式V1.0用户完全接受建议",
+    "implemented":"免费游戏、免费完整事实回顾及七章AI传记、免费结局摘要下载、终局48小时保留",
+    "not_implemented":"广告解锁完整版文字下载、付费精装PDF、支付、真实多人；当前不出售公平性"
+  },
+  "verification": ["tests/life.test.mjs","tests/life-api.test.mjs","tests/api.test.mjs"]
+}
