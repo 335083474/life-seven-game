@@ -1,2 +1,7 @@
 artifacts/
 *.log
+node_modules/
+.wrangler/
+.dev.vars*
+.env*
+!.env.example

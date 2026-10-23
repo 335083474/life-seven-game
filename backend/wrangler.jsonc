@@ -1,0 +1,21 @@
+{
+  "name": "life-seven-game-api",
+  "main": "api.mjs",
+  "compatibility_date": "2026-10-23",
+  "account_id": "d00f61338fefb2242944521e341be0d6",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": {
+    "WEB_ORIGIN": "https://335083474.github.io,http://127.0.0.1:8767,http://localhost:8767",
+    "MINIMAX_REGION": "cn",
+    "MINIMAX_MODEL": "MiniMax-M3",
+    "DAILY_MODEL_LIMIT": "200"
+  },
+  "triggers": { "crons": ["17 4 * * *"] },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "life-seven-game",
+    "database_id": "53e5a7cd-d360-40b2-b0d4-d4e73b63b566",
+    "migrations_dir": "migrations"
+  }]
+}
