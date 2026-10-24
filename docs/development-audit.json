@@ -977,13 +977,28 @@
     }
   ],
   "verification": {
-    "automatedTests": 54,
-    "realMiniMaxLocales": [
-      "zh-CN",
-      "en"
-    ],
-    "realMemoirChaptersPerLocale": 7,
-    "realProviderDatabase": "isolated in-memory test database",
-    "narrativeSemanticLimit": "来源和状态检查不能证明全部自由文学文本无语义错误；仍需人工质量抽检"
+    "automatedChecks": 55,
+    "isolatedRealMiniMax": {
+      "locales": [
+        "zh-CN",
+        "en"
+      ],
+      "roundsEach": 9,
+      "memoirChaptersEach": 7,
+      "scope": "isolated in-memory state with test dice"
+    },
+    "publicRelease": {
+      "rules": "solo-1.1-preview",
+      "workerVersion": "975d9237-a2e5-4438-9ec5-21c7f6cb1676",
+      "rounds": 9,
+      "realMemoirChapters": 7,
+      "resumeVerified": true,
+      "endingRetentionHours": 48,
+      "staticResourcesHashMatched": 15
+    },
+    "limitations": [
+      "Structured source checks do not prove every literary sentence is semantically faithful.",
+      "26 open rule decisions remain open."
+    ]
   }
 }

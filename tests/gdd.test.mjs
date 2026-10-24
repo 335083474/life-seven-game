@@ -108,3 +108,10 @@ test('GDD 8.5 / T-059: unknown source IDs or contradictory family-state checks r
   for(const mode of ['future','parents']){bad=mode;const r=await f.call('narrate',{lifeId:f.life.id,revision:f.life.revision,requestId:crypto.randomUUID()});assert.equal(r.status,502);assert.deepEqual(f.life.cards,cards);assert.equal(f.rolls(),1);}
   bad=null;await okay(f.call('narrate',{lifeId:f.life.id,revision:f.life.revision,requestId:crypto.randomUUID()}));assert(f.life.lastResult.narrativeMeta.factIds.length);
 });
+
+
+test('GDD story validation retries malformed prose with an explicit repair contract and keeps settled facts intact',async t=>{
+  let narratives=0,repair=false;const f=fixture(t,{model:(_b,input)=>{if(!input.result)return;const value=storyValue(input);narratives++;if(narratives===1)value.narrative='short';else repair=!!input.validationRepair?.requiredKeys.includes('factIds');return value;}});
+  await free(f);await okay(f.command('roll',{selection:[]}));await okay(f.command('settle'));const cards=structuredClone(f.life.cards);
+  await okay(f.call('narrate',{lifeId:f.life.id,revision:f.life.revision,requestId:crypto.randomUUID()}));assert.equal(narratives,2);assert(repair);assert.deepEqual(f.life.cards,cards);assert.equal(f.rolls(),1);assert(f.life.lastResult.narrativeMeta.factIds.includes(f.life.lastResult.eventId));
+});

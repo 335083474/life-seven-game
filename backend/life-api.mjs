@@ -41,7 +41,10 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
   const output=state=>({life:publicLife(state)});
   async function inferProse(system,input,maxTokens,memoir=false){
     for(let attempt=0;attempt<2;attempt++){
-      try{await quota();const answer=await infer(system,input,maxTokens);return {answer,sources:validateSources(answer.value,input,{memoir})};}
+      try{await quota();const answer=await infer(system,attempt?{...input,validationRepair:{instruction:'The previous response failed validation. Return one complete JSON object with the required prose, integer factIds from this input, and factsCheck copied exactly from requiredFacts. No extra checkpoint keys.',requiredKeys:memoir?['title','text','factIds','factsCheck']:['narrative','factIds','factsCheck']}}:input,maxTokens);
+        const value=answer.value,prose=memoir?value?.text:value?.narrative;
+        if(typeof prose!=='string'||prose.trim().length<(memoir?25:20)||prose.length>(memoir?2200:1600)||(memoir&&(typeof value?.title!=='string'||!value.title.trim()||value.title.length>60)))throw Error('ai_invalid_response');
+        return {answer,sources:validateSources(value,input,{memoir})};}
       catch(e){if(attempt||e.message!=='ai_invalid_response')throw e;}
     }
   }
