@@ -35,6 +35,11 @@ test('invalid or causeless model risks fail before dice; parent cannot be an arb
     await init(f);await okay(f.command('fixed',{choice:0}));const result=await f.assess();assert.equal(result.status,kind==='none'?422:502);assert.equal(f.rolls(),0);assert.equal(f.life.phase,'free');
   }
 });
+
+test('one malformed semantic response is retried before any roll without changing legal rules',async t=>{
+  const f=fixture(t,{model:(_b,input,n)=>n===1?{difficulty:'必胜'}:modelValue(input)});await init(f);await okay(f.command('fixed',{choice:0}));await okay(f.assess());
+  assert.equal(f.calls(),2);assert.equal(f.rolls(),0);assert.equal(f.life.assessment.difficulty,'普通');
+});
 test('one later related opportunity can rescue a fumble before loss, keeping the better die; cannot chase success',async t=>{
   const f=fixture(t,{dice:[1,10,10,10,10,10,10,10,100,20]});await init(f);await okay(f.command('fixed',{choice:0}));await okay(f.assess());await okay(f.command('roll',{selection:[]}));assert.equal((await f.command('reroll',{opportunityId:'invented'})).status,409);await okay(f.command('settle'));await drain(f);assert.equal(f.life.opportunities.length,1);
   await okay(f.command('advance'));await okay(f.command('swan'));await okay(f.command('advance'));await okay(f.command('fixed',{choice:0}));await drain(f);await okay(f.assess());

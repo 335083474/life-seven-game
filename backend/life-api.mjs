@@ -36,8 +36,11 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
     if(life.phase!=='free'||life.pending||life.awards.length)reject('wrong_phase');
     const input=planInput(life,body);
     if(input.actionKind==='marry'&&!life.cards.some(c=>c.name==='爱情')&&!life.cards.some(c=>c.name===body.sacrifice&&!['父母','家庭','孩子'].includes(c.name)))reject('marriage_sacrifice_required',400);
-    await quota();const answer=await infer(planSystem,input,5000);
-    const plan=validatePlan(answer.value,input,body.requestId,life);
+    let plan;
+    for(let attempt=0;attempt<2;attempt++){
+      try{await quota();const answer=await infer(planSystem,input,5000);plan=validatePlan(answer.value,input,body.requestId,life);break;}
+      catch(e){if(attempt||e.message!=='ai_invalid_response')throw e;}
+    }
     life.difficulties||={};const key=life.round+':'+input.goal;
     if(life.difficulties[key])plan.difficulty=life.difficulties[key];else life.difficulties[key]=plan.difficulty;
     life.assessment=plan;
