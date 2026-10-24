@@ -82,3 +82,5 @@ node scripts/dev-solo.mjs
 - 新模型的思考计入输出预算，因此复杂调用单独预留预算；每局元数据保留模型、思考档位、首段文字与完成耗时。首字延迟不是零，供应商排队/思考仍会影响等待。
 
 参数依据：[MiniMax官方模型调用](https://platform.minimax.cn/docs/guides/text-generation)、[兼容接口字段](https://platform.minimax.io/docs/api-reference/text-openai-api)。M3.1-Flash不支持关闭思考，省略effort默认max。
+
+[速度优化与实际验证](docs/ai-performance.md)。

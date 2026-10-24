@@ -977,7 +977,7 @@
     }
   ],
   "verification": {
-    "automatedChecks": 55,
+    "automatedChecks": 64,
     "isolatedRealMiniMax": {
       "locales": [
         "zh-CN",
@@ -999,6 +999,7 @@
     "limitations": [
       "Structured source checks do not prove every literary sentence is semantically faithful.",
       "26 open rule decisions remain open."
-    ]
+    ],
+    "performanceFollowup": "docs/ai-performance.json"
   }
 }

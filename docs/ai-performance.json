@@ -1,0 +1,219 @@
+{
+  "date": "2026-10-24",
+  "automatedChecks": 64,
+  "policy": {
+    "simple": {
+      "tasks": [
+        "plan",
+        "story",
+        "localize"
+      ],
+      "model": "MiniMax-M3",
+      "thinking": "disabled"
+    },
+    "complex": {
+      "tasks": [
+        "memoir",
+        "plan-repair"
+      ],
+      "model": "MiniMax-M3.1-Flash",
+      "thinking": "adaptive",
+      "reasoning_effort": "medium"
+    }
+  },
+  "samples": {
+    "zh-CN": {
+      "rounds": 9,
+      "sourceCheckedChapters": 7,
+      "modelCalls": 10,
+      "resumeVerified": true,
+      "streamMetrics": [
+        {
+          "route": "narrate",
+          "firstDraftMs": 1524,
+          "totalMs": 2244,
+          "draftCount": 4
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 4846,
+          "totalMs": 7300,
+          "draftCount": 100
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 5448,
+          "totalMs": 7224,
+          "draftCount": 19
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 8210,
+          "totalMs": 11741,
+          "draftCount": 112
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 20183,
+          "totalMs": 21271,
+          "draftCount": 21
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 10824,
+          "totalMs": 20979,
+          "draftCount": 129
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 11025,
+          "totalMs": 15093,
+          "draftCount": 28
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 5404,
+          "totalMs": 8604,
+          "draftCount": 81
+        }
+      ]
+    },
+    "en": {
+      "rounds": 9,
+      "sourceCheckedChapters": 7,
+      "modelCalls": 9,
+      "resumeVerified": true,
+      "streamMetrics": [
+        {
+          "route": "narrate",
+          "firstDraftMs": 2820,
+          "totalMs": 3904,
+          "draftCount": 7
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 5335,
+          "totalMs": 8218,
+          "draftCount": 24
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 3018,
+          "totalMs": 5499,
+          "draftCount": 100
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 5401,
+          "totalMs": 8182,
+          "draftCount": 133
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 9314,
+          "totalMs": 11729,
+          "draftCount": 71
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 11852,
+          "totalMs": 15629,
+          "draftCount": 28
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 10321,
+          "totalMs": 15987,
+          "draftCount": 38
+        },
+        {
+          "route": "memoir",
+          "firstDraftMs": 9200,
+          "totalMs": 14178,
+          "draftCount": 35
+        }
+      ]
+    }
+  },
+  "workerVersion": "4c356688-20a8-481e-b51b-99332962eabe",
+  "scope": "Real provider, isolated in-memory game state. Test dice; not a latency SLA. Source contract verified; literary semantics still require review.",
+  "publicVerification": {
+    "at": "2026-10-24T02:15:52.808Z",
+    "rounds": 9,
+    "memoirChapters": 7,
+    "resumeVerified": true,
+    "streaming": true,
+    "health": {
+      "service": "life-seven-game-api",
+      "version": 2,
+      "rules": "solo-1.1-preview",
+      "scope": "single-player-technical-preview",
+      "aiConfigured": true,
+      "storage": true,
+      "model": "MiniMax-M3",
+      "complexModel": "MiniMax-M3.1-Flash",
+      "complexEffort": "medium",
+      "proseStreaming": true
+    },
+    "streamMetrics": [
+      {
+        "route": "narrate",
+        "status": 200,
+        "firstDraftMs": 2532,
+        "draftCount": 5,
+        "totalMs": 3440
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 4274,
+        "draftCount": 4,
+        "totalMs": 6929
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 3560,
+        "draftCount": 100,
+        "totalMs": 7568
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 28357,
+        "draftCount": 28,
+        "totalMs": 32310
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 6715,
+        "draftCount": 93,
+        "totalMs": 9926
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 7118,
+        "draftCount": 100,
+        "totalMs": 10388
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 57465,
+        "draftCount": 5,
+        "totalMs": 60884
+      },
+      {
+        "route": "memoir",
+        "status": 200,
+        "firstDraftMs": 56114,
+        "draftCount": 91,
+        "totalMs": 61622
+      }
+    ],
+    "screenshot": "docs/ai-performance.jpg",
+    "staticResourcesVerified": 6
+  }
+}
