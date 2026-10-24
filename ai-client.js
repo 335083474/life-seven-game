@@ -37,14 +37,20 @@ window.LifeDM = (() => {
   };
   return {
     newLife() { /* One durable browser identity can resume its own lives. */ },
-    async call(route, body) {
+    async call(route, body, onProgress=null) {
       let response;
       try {
         response = await fetch(base + '/api/' + route, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session },
-          body: JSON.stringify(body), signal: AbortSignal.timeout(65000), credentials: 'omit'
+          method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session, ...(onProgress?{Accept:'application/x-ndjson'}:{}) },
+          body: JSON.stringify(body), signal: AbortSignal.timeout(onProgress?190000:150000), credentials: 'omit'
         });
       } catch { throw Object.assign(Error('暂时联系不上命运司书，请检查网络后重试。'), { code: 'network_error' }); }
+      if(response.ok&&onProgress&&response.headers.get('Content-Type')?.includes('application/x-ndjson')){
+        const reader=response.body.getReader(),decoder=new TextDecoder();let pending='',result=null;
+        function line(raw){if(!raw.trim())return;const event=JSON.parse(raw);if(event.type==='error')throw Object.assign(Error(errors[event.error]||'这次请求未能完成，请稍后重试。'),{code:event.error});if(event.type==='result')result={life:event.life};else onProgress(event);}
+        try{for(;;){const {done,value}=await reader.read();if(done)break;pending+=decoder.decode(value,{stream:true});let end;while((end=pending.indexOf('\n'))>=0){line(pending.slice(0,end));pending=pending.slice(end+1);}}pending+=decoder.decode();if(pending.trim())line(pending);if(!result)throw Error();return result;}
+        catch(e){await reader.cancel().catch(()=>{});if(e.code)throw e;throw Object.assign(Error('暂时联系不上命运司书，请检查网络后重试。'),{code:'network_error'});}
+      }
       let data;
       try { data = await response.json(); } catch { throw Error('司书的回应未能读取，请重试。'); }
       if (!response.ok) throw Object.assign(Error(errors[data.error] || '这次请求未能完成，请稍后重试。'), { code: data.error, diceLocked: data.diceLocked });

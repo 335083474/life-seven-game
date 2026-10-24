@@ -18,7 +18,7 @@ export function createApi({fetchModel=fetch,clock=Date.now,roll=rollD100,rng=ran
     const path=new URL(request.url).pathname,origin=request.headers.get('Origin');
     const allowed=(env.WEB_ORIGIN||'https://335083474.github.io').split(',');
     const cors=allowed.includes(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'POST, OPTIONS'}:{};
-    if(path==='/health'&&request.method==='GET')return json({service:'life-seven-game-api',version:2,rules:TEST_RULESET.version,scope:'single-player-technical-preview',aiConfigured:Boolean(env.MINIMAX_API_KEY),storage:Boolean(env.DB),model:env.MINIMAX_MODEL||'MiniMax-M3'});
+    if(path==='/health'&&request.method==='GET')return json({service:'life-seven-game-api',version:2,rules:TEST_RULESET.version,scope:'single-player-technical-preview',aiConfigured:Boolean(env.MINIMAX_API_KEY),storage:Boolean(env.DB),model:env.MINIMAX_MODEL||'MiniMax-M3',complexModel:env.MINIMAX_COMPLEX_MODEL||env.MINIMAX_MODEL||'MiniMax-M3',complexEffort:env.MINIMAX_COMPLEX_EFFORT||'medium',proseStreaming:true});
     try{
       if(!allowed.includes(origin))throw error('origin_not_allowed',403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});
@@ -38,7 +38,21 @@ export function createApi({fetchModel=fetch,clock=Date.now,roll=rollD100,rng=ran
           if(!row)throw error(id.startsWith('global:')?'daily_limit':'rate_limited',429);
         }
       }
-      if(path.startsWith('/api/life/'))return json(await lifeApi({path,body,owner,env,now,infer,quota,roll,rng}),200,cors);
+      if(path.startsWith('/api/life/')){
+        const args={path,body,owner,env,now,infer,quota,roll,rng};
+        if(request.headers.get('Accept')==='application/x-ndjson'&&['/api/life/narrate','/api/life/memoir'].includes(path)){
+          let disconnected=false;const encoder=new TextEncoder();
+          const stream=new ReadableStream({async start(controller){
+            const send=event=>{if(!disconnected)try{controller.enqueue(encoder.encode(JSON.stringify(event)+'\n'));}catch{disconnected=true;}};
+            send({type:'start'});
+            try{const result=await lifeApi({...args,progress:send});send({type:'result',...result});}
+            catch(e){send({type:'error',error:e.status?e.message:'ai_invalid_response'});}
+            finally{if(!disconnected)controller.close();}
+          },cancel(){disconnected=true;}});
+          return new Response(stream,{headers:{...cors,'Content-Type':'application/x-ndjson; charset=utf-8','Cache-Control':'no-store, no-transform','X-Content-Type-Options':'nosniff'}});
+        }
+        return json(await lifeApi(args),200,cors);
+      }
       async function claim(kind,input){
         if(!uuid.test(body.requestId||''))throw error('invalid_request');
         const id=owner+':'+body.requestId,fingerprint=await sha(JSON.stringify(input));

@@ -31,5 +31,5 @@ export function fixture(t,{dice=[],model,random=()=>0}={}){
   async function call(route,body={},token=session){now+=61000;const r=await api.fetch(new Request('https://test/api/life/'+route,{method:'POST',headers:{Origin:env.WEB_ORIGIN,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)}),env);const data=await r.json();if(data.life)life=data.life;return {status:r.status,data};}
   async function command(action,args={},extra={}){return call('action',{lifeId:life.id,revision:life.revision,requestId:crypto.randomUUID(),action,args,...extra});}
   async function assess(goal='我想学习新的知识。',extra={}){return call('assess',{lifeId:life.id,revision:life.revision,requestId:crypto.randomUUID(),goal,...extra});}
-  return {DB,env,api,call,command,assess,get life(){return life;},rolls:()=>rolls,calls:()=>calls,now:()=>now};
+  return {DB,env,api,session,call,command,assess,get life(){return life;},rolls:()=>rolls,calls:()=>calls,now:()=>now};
 }

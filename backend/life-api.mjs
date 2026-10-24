@@ -14,7 +14,7 @@ export function randomBelow(max){
   const a=new Uint32Array(1),limit=Math.floor(4294967296/max)*max;
   do{crypto.getRandomValues(a);}while(a[0]>=limit);return a[0]%max;
 }
-export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=randomBelow}) {
+export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=randomBelow,progress=()=>{}}) {
   if(path==='/api/life/load'){
     if(!uuid.test(body.lifeId||''))reject('invalid_request',400);
     return {life:publicLife(await loadLife(env.DB,body.lifeId,owner,now))};
@@ -41,9 +41,9 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
   const output=state=>({life:publicLife(state)});
   async function inferProse(system,input,maxTokens,memoir=false){
     for(let attempt=0;attempt<2;attempt++){
-      try{await quota();const answer=await infer(system,attempt?{...input,validationRepair:{instruction:'The previous response failed validation. Return one complete JSON object with the required prose, integer factIds from this input, and factsCheck copied exactly from requiredFacts. No extra checkpoint keys.',requiredKeys:memoir?['title','text','factIds','factsCheck']:['narrative','factIds','factsCheck']}}:input,maxTokens);
+      try{progress({type:'reset'});await quota();const answer=await infer(system,attempt?{...input,validationRepair:{instruction:'The previous response failed validation. Return one complete JSON object with the required prose, integer factIds from this input, and factsCheck copied exactly from requiredFacts. No extra checkpoint keys.',requiredKeys:memoir?['title','text','factIds','factsCheck']:['narrative','factIds','factsCheck']}}:input,maxTokens,{task:memoir?'memoir':'story',onDraft:text=>progress({type:'draft',text})});
         const value=answer.value,prose=memoir?value?.text:value?.narrative;
-        if(typeof prose!=='string'||prose.trim().length<(memoir?25:20)||prose.length>(memoir?2200:1600)||(memoir&&(typeof value?.title!=='string'||!value.title.trim()||value.title.length>60)))throw Error('ai_invalid_response');
+        if(typeof prose!=='string'||prose.trim().length<(memoir?25:20)||prose.length>(memoir?2200:input.locale==='en'?800:200)||(memoir&&(typeof value?.title!=='string'||!value.title.trim()||value.title.length>60)))throw Error('ai_invalid_response');
         return {answer,sources:validateSources(value,input,{memoir})};}
       catch(e){if(attempt||e.message!=='ai_invalid_response')throw e;}
     }
@@ -65,7 +65,7 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
     if(input.actionKind==='marry'&&!life.cards.some(c=>c.name==='爱情')&&!life.cards.some(c=>c.name===body.sacrifice&&!['父母','家庭','孩子'].includes(c.name)))reject('marriage_sacrifice_required',400);
     let plan;
     for(let attempt=0;attempt<2;attempt++){
-      try{await quota();const answer=await infer(planSystem+languageInstruction(body.locale,'plan'),input,5000);plan=validatePlan(answer.value,input,body.requestId,life);plan.aiMeta={model:answer.model,promptVersion:'life-plan-2-matches',usage:answer.usage,elapsedMs:answer.elapsedMs,locale:normalizeLocale(body.locale)};break;}
+      try{await quota();const answer=await infer(planSystem+languageInstruction(body.locale,'plan'),input,5000,{task:attempt?'plan-repair':'plan'});plan=validatePlan(answer.value,input,body.requestId,life);plan.aiMeta={model:answer.model,promptVersion:'life-plan-2-matches',usage:answer.usage,thinking:answer.thinking,effort:answer.effort,elapsedMs:answer.elapsedMs,locale:normalizeLocale(body.locale)};break;}
       catch(e){if(attempt||e.message!=='ai_invalid_response')throw e;}
     }
     life.difficulties||={};const key=[life.round,input.actionKind,input.targetId||'',input.goal].join(':');
@@ -76,11 +76,11 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
     if(!life.lastResult.narrative){
       const facts={parentsAlive:life.parentsAlive,married:life.married,spouseId:life.spouseId,child:life.child,cards:life.cards};
       const input={locale:normalizeLocale(body.locale),name:life.name,result:{eventId:life.lastResult.eventId,goal:life.lastResult.goal,dice:life.lastResult.dice,outcome:life.lastResult.outcome},consequences:factsForAI(life.journal.filter(e=>e.id>=life.lastResult.eventId)),facts,previous:factsForAI(life.journal.filter(e=>e.id<life.lastResult.eventId)).slice(-45),threads:storyThreads(life.journal),requiredFacts:requiredFacts(facts,life.lastResult)};
-      const {answer,sources}=await inferProse(storySystem+sourceInstruction+languageInstruction(body.locale,'story'),input,1800);
+      const {answer,sources}=await inferProse(storySystem+sourceInstruction+languageInstruction(body.locale,'story'),input,1100);
       const story=answer.value?.narrative;
       if(typeof story!=='string'||story.length<20||story.length>1600)throw Error('ai_invalid_response');
       life.lastResult.narrative=story.trim();life.lastResult.source='MiniMax';
-      const meta={...sources,model:answer.model,promptVersion:STORY_PROMPT_VERSION,usage:answer.usage,generatedAt:now,sourceHashes:sources.factIds.map(id=>({id,hash:life.journal.find(e=>e.id===id).hash}))};
+      const meta={...sources,model:answer.model,promptVersion:STORY_PROMPT_VERSION,usage:answer.usage,thinking:answer.thinking,effort:answer.effort,elapsedMs:answer.elapsedMs,firstTextMs:answer.firstTextMs,generatedAt:now,sourceHashes:sources.factIds.map(id=>({id,hash:life.journal.find(e=>e.id===id).hash}))};
       life.lastResult.narrativeMeta=meta;const event=life.journal.find(e=>e.id===life.lastResult.eventId);event.narrative=story.trim();event.narrativeMeta=meta;
     }
   } else if(path==='/api/life/memoir'){
@@ -96,7 +96,7 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
       const {answer,sources}=await inferProse(memoirSystem+sourceInstruction+languageInstruction(body.locale,'memoir'),input,2700,true);
       const value=answer.value;
       if(typeof value?.title!=='string'||value.title.length>60||typeof value.text!=='string'||value.text.trim().length<25||value.text.length>2200)throw Error('ai_invalid_response');
-      life.biography.chapters.push({stage:chapter,title:value.title.trim(),text:value.text.trim(),...sources,model:answer.model,promptVersion:STORY_PROMPT_VERSION,usage:answer.usage,generatedAt:now,sourceHashes:sources.factIds.map(id=>({id,hash:life.journal.find(e=>e.id===id).hash}))});
+      life.biography.chapters.push({stage:chapter,title:value.title.trim(),text:value.text.trim(),...sources,model:answer.model,promptVersion:STORY_PROMPT_VERSION,usage:answer.usage,thinking:answer.thinking,effort:answer.effort,elapsedMs:answer.elapsedMs,firstTextMs:answer.firstTextMs,generatedAt:now,sourceHashes:sources.factIds.map(id=>({id,hash:life.journal.find(e=>e.id===id).hash}))});
     }
   } else if(path==='/api/life/action'){
     const args=body.args||{};

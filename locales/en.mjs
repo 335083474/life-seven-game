@@ -675,5 +675,10 @@ export default {
   "这项已有资源与预设行动的执行有关。": "This existing resource is related to a preset action.",
   "行动严重受挫可能损害这项相关的已有资源。": "A severe setback may damage this related existing resource.",
   "旧存档迁入时校验": "Sealed when the legacy save was imported",
-  "记录校验未通过，已停止这次操作并保留已保存的进度。": "Record integrity could not be verified. This operation was stopped and your saved progress was kept."
+  "记录校验未通过，已停止这次操作并保留已保存的进度。": "Record integrity could not be verified. This operation was stopped and your saved progress was kept.",
+  "司书正在落笔，文字逐步呈现；核验后保存。": "The archivist is writing. Text appears as it arrives and is saved after validation.",
+  "请司书写一则短手记": "Write a brief journal note",
+  "规则结算已保存。可选生成一则短手记，或直接继续；完整传记在终局撰写。": "The result is saved. Request an optional brief note or continue now. Your full memoir is written at the end.",
+  "所有可选元素一次评估；换卡即时重算，不再请求司书。": "All available elements are assessed together. Changing cards updates the odds instantly without another AI request."
+
 };

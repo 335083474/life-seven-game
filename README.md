@@ -71,3 +71,14 @@ node scripts/dev-solo.mjs
 参考：[MiniMax 官方接口](https://platform.minimax.io/docs/api-reference/text-openai-api)、[Cloudflare Secret 配置](https://developers.cloudflare.com/workers/configuration/secrets/)。
 
 原始视觉来自 ChatGPT 对话“制作电子版游戏”中用户确认的宿命文学版画方案，保留深墨绿、旧纸色、暗金线刻和原始SVG图形。规则按原讨论的确认与测试方向补齐，后续以版本化规则合同继续平衡。
+
+
+### 等待时间与模型分工（2026-10-24）
+
+- 一次结构化评估覆盖玩家和参与系统人物的全部可选元素；换卡只在浏览器用同一份评估重算概率，不调用模型。目标、参与者或关系对象变化才重新评估。评估不生成剧情。
+- 平时先保存程序裁决与简短事实手记；AI短手记按需生成，中文目标40–80字。完整七章传记只在终局按需生成。
+- `Accept: application/x-ndjson` 可用于 `life/narrate` / `life/memoir`。事件为 start、reset、draft（完整当前草稿文字）、result（已验证并保存的状态）或 error。未通过来源校验的草稿不写入存档；重试先清空草稿。普通JSON调用继续兼容。
+- M3：日常评估、翻译、短手记，`thinking.type=disabled`。M3.1-Flash：终局传记与一次评估格式修复，`thinking.type=adaptive`、明确 `reasoning_effort=medium`，不沿用供应商默认max；可在服务端改为high。推理内容不发给浏览器。
+- 新模型的思考计入输出预算，因此复杂调用单独预留预算；每局元数据保留模型、思考档位、首段文字与完成耗时。首字延迟不是零，供应商排队/思考仍会影响等待。
+
+参数依据：[MiniMax官方模型调用](https://platform.minimax.cn/docs/guides/text-generation)、[兼容接口字段](https://platform.minimax.io/docs/api-reference/text-openai-api)。M3.1-Flash不支持关闭思考，省略effort默认max。

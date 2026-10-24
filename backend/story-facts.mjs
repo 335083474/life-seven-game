@@ -28,4 +28,4 @@ export function validateSources(value,input,{memoir=false}={}){
   return {factIds:ids,factsCheck:input.requiredFacts};
 }
 export const sourceInstruction='\n额外强制返回 factIds 和 factsCheck。factIds 是正文确实依据的输入事件id整数数组，只能引用当前与更早事实，至少一条本次/本章事实；事件叙事必须包含result.eventId，不能引用未来或不存在的id。factsCheck 必须完整原样复制输入 requiredFacts，正文中的亲属存亡、婚姻、独立、行动成败和终局必须与它一致。不要把来源核对过程写进文学正文。';
-export const STORY_PROMPT_VERSION='life-story-2-sources';
+export const STORY_PROMPT_VERSION='life-story-3-short-stream';

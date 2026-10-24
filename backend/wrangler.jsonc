@@ -9,6 +9,8 @@
     "WEB_ORIGIN": "https://335083474.github.io,http://127.0.0.1:8767,http://localhost:8767",
     "MINIMAX_REGION": "cn",
     "MINIMAX_MODEL": "MiniMax-M3",
+    "MINIMAX_COMPLEX_MODEL": "MiniMax-M3.1-Flash",
+    "MINIMAX_COMPLEX_EFFORT": "medium",
     "DAILY_MODEL_LIMIT": "200"
   },
   "triggers": { "crons": ["*/15 * * * *"] },
