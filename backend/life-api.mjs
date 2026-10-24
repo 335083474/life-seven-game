@@ -2,6 +2,8 @@ import {createLife, publicLife, commitFixed, chooseAward, advance, rollFree, rer
 import {chapters} from './events.mjs';
 import {digest, loadLife, saveLife, receipt} from './life-store.mjs';
 import {planSystem, storySystem, memoirSystem, planInput, validatePlan} from './life-ai.mjs';
+import {missingTranslations,languageInstruction,translationSystem} from './life-locale.mjs';
+import {normalizeLocale} from '../locale.mjs';
 
 const uuid=/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 // Unbiased integer sampler, also dependency injected for whole-life tests.
@@ -32,13 +34,24 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
   if(before.revision!==body.revision)reject('revision_conflict');
   const life=structuredClone(before);
   const output=state=>({life:publicLife(state)});
-  if(path==='/api/life/assess'){
+  if(path==='/api/life/localize'){
+    const locale=normalizeLocale(body.locale);
+    const all=missingTranslations(publicLife(life),locale),texts=[];let length=0;
+    for(const text of all){if(texts.length>=18||(texts.length&&length+text.length>2800))break;texts.push(text);length+=text.length;}
+    if(texts.length){
+      await quota();const answer=await infer(translationSystem,{locale,texts},6500);
+      const values=answer.value?.translations;
+      if(!Array.isArray(values)||values.length!==texts.length||values.some(v=>typeof v!=='string'||!v.trim()||v.length>8000||(locale==='en'&&/\p{Script=Han}/u.test(v))))throw Error('ai_invalid_response');
+      life.displayTranslations||={};life.displayTranslations[locale]||={};
+      texts.forEach((text,i)=>life.displayTranslations[locale][text]=values[i].trim());
+    }
+  } else if(path==='/api/life/assess'){
     if(life.phase!=='free'||life.pending||life.awards.length)reject('wrong_phase');
     const input=planInput(life,body);
     if(input.actionKind==='marry'&&!life.cards.some(c=>c.name==='爱情')&&!life.cards.some(c=>c.name===body.sacrifice&&!['父母','家庭','孩子'].includes(c.name)))reject('marriage_sacrifice_required',400);
     let plan;
     for(let attempt=0;attempt<2;attempt++){
-      try{await quota();const answer=await infer(planSystem,input,5000);plan=validatePlan(answer.value,input,body.requestId,life);break;}
+      try{await quota();const answer=await infer(planSystem+languageInstruction(body.locale,'plan'),input,5000);plan=validatePlan(answer.value,input,body.requestId,life);break;}
       catch(e){if(attempt||e.message!=='ai_invalid_response')throw e;}
     }
     life.difficulties||={};const key=life.round+':'+input.goal;
@@ -47,7 +60,7 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
   } else if(path==='/api/life/narrate'){
     if(!life.lastResult||life.pending||life.awards.length)reject('narration_unavailable');
     if(!life.lastResult.narrative){
-      await quota();const answer=await infer(storySystem,{name:life.name,result:life.lastResult,consequences:life.journal.filter(e=>e.id>=life.lastResult.eventId),facts:{parentsAlive:life.parentsAlive,married:life.married,spouseId:life.spouseId,child:life.child,cards:life.cards},previous:life.journal.filter(e=>e.id<life.lastResult.eventId).slice(-45)},1500);
+      await quota();const answer=await infer(storySystem+languageInstruction(body.locale,'story'),{name:life.name,result:life.lastResult,consequences:life.journal.filter(e=>e.id>=life.lastResult.eventId),facts:{parentsAlive:life.parentsAlive,married:life.married,spouseId:life.spouseId,child:life.child,cards:life.cards},previous:life.journal.filter(e=>e.id<life.lastResult.eventId).slice(-45)},1500);
       const story=answer.value?.narrative;
       if(typeof story!=='string'||story.length<20||story.length>1600)throw Error('ai_invalid_response');
       life.lastResult.narrative=story.trim();life.lastResult.source='MiniMax';
@@ -62,7 +75,7 @@ export async function lifeApi({path,body,owner,env,now,infer,quota,roll,rng=rand
       // Legacy saves without snapshots get only facts reconstructable at this
       // chapter, never the final marriage/child/card state in an earlier year.
       const fallback={parentsAlive:!life.journal.some(e=>e.stage<=chapter&&e.parentsAlive===false),child:life.journal.filter(e=>e.stage<=chapter&&e.child).at(-1)?.child||null,...(chapter===6?{ending:life.ending,cards:life.cards}:{})};
-      await quota();const answer=await infer(memoirSystem,{name:life.name,chapter,chapterName:chapters[chapter][0],ledger:life.journal.filter(e=>e.stage===chapter),previous:life.biography.chapters,facts:historical||fallback},2300);
+      await quota();const answer=await infer(memoirSystem+languageInstruction(body.locale,'memoir'),{name:life.name,chapter,chapterName:chapters[chapter][0],ledger:life.journal.filter(e=>e.stage===chapter),previous:life.biography.chapters,facts:historical||fallback},2300);
       const value=answer.value;
       if(typeof value?.title!=='string'||value.title.length>60||typeof value.text!=='string'||value.text.trim().length<25||value.text.length>2200)throw Error('ai_invalid_response');
       life.biography.chapters.push({stage:chapter,title:value.title.trim(),text:value.text.trim()});

@@ -23,7 +23,7 @@ export function planInput(life,body){
   if(!Array.isArray(partners)||partners.length>2||new Set(partners).size!==partners.length||partners.includes('self'))reject('invalid_request',400);
   const actionKind=body.actionKind||'pursuit';
   if(!['pursuit','marry','divorce','birth'].includes(actionKind))reject('invalid_request',400);
-  if(actionKind==='pursuit'&&/^(我|我们).{0,18}(求婚|复婚|结婚|离婚|生孩子|生育)/.test(goal))reject('choose_relationship_action',422);
+  if(actionKind==='pursuit'&&(/^(我|我们).{0,18}(求婚|复婚|结婚|离婚|生孩子|生育)/.test(goal)||/\b(propose marriage|remarry|divorce|have a baby|have a child|give birth|marry)\b/i.test(goal)))reject('choose_relationship_action',422);
   if(actionKind==='marry'&&(life.married||!body.targetId))reject('marriage_unavailable');
   if(actionKind==='divorce'&&!life.married)reject('not_married');
   if(actionKind==='birth'&&(!life.married||life.child))reject('birth_unavailable');
