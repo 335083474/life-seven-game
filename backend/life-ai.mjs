@@ -23,7 +23,7 @@ export function planInput(life,body){
   if(!Array.isArray(partners)||partners.length>2||new Set(partners).size!==partners.length||partners.includes('self'))reject('invalid_request',400);
   const actionKind=body.actionKind||'pursuit';
   if(!['pursuit','marry','divorce','birth'].includes(actionKind))reject('invalid_request',400);
-  if(actionKind==='pursuit'&&(/^(我|我们).{0,18}(求婚|复婚|结婚|离婚|生孩子|生育)/.test(goal)||/\b(propose marriage|remarry|divorce|have a baby|have a child|give birth|marry)\b/i.test(goal)))reject('choose_relationship_action',422);
+  if(actionKind==='pursuit'&&(/^(我|我们).{0,18}(求婚|复婚|结婚|离婚|生孩子|生育)/.test(goal)||/^(I|we)\s+(?:(?:want|plan|hope|intend|would like|decide)\s+to\s+)?(?:propose marriage|remarry|divorce|have a baby|have a child|give birth|marry)\b/i.test(goal)))reject('choose_relationship_action',422);
   if(actionKind==='marry'&&(life.married||!body.targetId))reject('marriage_unavailable');
   if(actionKind==='divorce'&&!life.married)reject('not_married');
   if(actionKind==='birth'&&(!life.married||life.child))reject('birth_unavailable');
@@ -35,7 +35,7 @@ export function planInput(life,body){
     const p=person(life,id);if(id!=='self'&&p.usedRound===life.round)reject('npc_action_used');
     return {id,name:p.name,profile:p.profile||'发起者，按自己的真实选择生活。',available:availableCards(life,id),riskCards:p.cards.filter(c=>c.name!=='父母'),parentsAvailable:life.parentsAlive&&p.cards.some(c=>c.name==='父母'),opportunities:p.opportunities.filter(o=>!o.used&&o.fromRound<life.round)};
   });
-  return {goal,actionKind,targetId,sacrifice:body.sacrifice||null,round:life.round,stage:rounds[life.round].stage,ordinary,people,target:targetId?{id:targetId,name:person(life,targetId).name,profile:person(life,targetId).profile}:null,facts:{path:life.path,parentsAlive:life.parentsAlive,married:life.married,spouseId:life.spouseId,child:life.child},history:life.journal.slice(-90)};
+  return {locale:body.locale==='en'?'en':'zh-CN',goal,actionKind,targetId,sacrifice:body.sacrifice||null,round:life.round,stage:rounds[life.round].stage,ordinary,people,target:targetId?{id:targetId,name:person(life,targetId).name,profile:person(life,targetId).profile}:null,facts:{path:life.path,parentsAlive:life.parentsAlive,married:life.married,spouseId:life.spouseId,child:life.child},history:life.journal.slice(-90)};
 }
 function string(value,max=400){if(typeof value!=='string'||!value.trim()||value.length>max)throw Error('ai_invalid_response');return value.trim();}
 export function validatePlan(value,input,id,life){
@@ -54,7 +54,10 @@ export function validatePlan(value,input,id,life){
     if(!Array.isArray(p.opportunities))throw Error('ai_invalid_response');
     const opportunities=p.opportunities.map(o=>{if(!source.opportunities.some(c=>c.id===o.id))throw Error('ai_invalid_response');return {id:o.id,reason:string(o.reason)};});
     if(new Set(opportunities.map(o=>o.id)).size!==opportunities.length)throw Error('ai_invalid_response');
-    return {id:source.id,role:string(p.role,80),decisionReason:string(p.decisionReason),matches,reward:{name:p.reward.name,reason:string(p.reward.reason)},risks,parentSupport:{allowed:source.parentsAvailable&&p.parentSupport.allowed,reason:string(p.parentSupport.reason)},opportunities,opportunityScope:string(p.opportunityScope,120),achievement:string(p.achievement,40)};
+    // English requires more characters for the same prose. These are display
+    // limits only; card identities, risk legality and probability are unchanged.
+    const english=input.locale==='en';
+    return {id:source.id,role:string(p.role,english?160:80),decisionReason:string(p.decisionReason),matches,reward:{name:p.reward.name,reason:string(p.reward.reason)},risks,parentSupport:{allowed:source.parentsAvailable&&p.parentSupport.allowed,reason:string(p.parentSupport.reason)},opportunities,opportunityScope:string(p.opportunityScope,english?300:120),achievement:string(p.achievement,english?120:40)};
   });
   if(!people.some(p=>p.risks.length))reject('no_legal_risk',422);
   return {id,goal:input.goal,action:input.actionKind,targetId:input.targetId,sacrifice:input.sacrifice,difficulty:value.difficulty,reason:string(value.reason,400),riskType:value.riskType,people,lockedAtRevision:life.revision};

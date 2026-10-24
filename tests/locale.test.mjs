@@ -51,3 +51,15 @@ test('language detection ignores proper player names and reads cached translatio
   s.displayTranslations={en:{[s.assessment.reason]:'A professional challenge requiring practice.'}};
   assert.equal(translateText('知识','en'),'Knowledge');assert.equal(s.journal[0].text,'Alice获得「知识」。这一选择成为人生的积累。');
 });
+
+test('English prose has room to express the same assessment and relationship words in an ordinary goal remain valid',async t=>{
+  const f=fixture(t,{model:(_b,input)=>{
+    if(!input.people)return;
+    const value=modelValue(input);value.people[0].role='You prepare the lessons and organize the venue while coordinating workshop recruitment through existing friendships.';
+    value.people[0].opportunityScope='Future community teaching projects that draw on the workshop planning, lesson design, volunteer coordination and local friendships developed during this real action.';
+    value.people[0].achievement='A Community Educator Who Kept Learning Throughout Later Life';return value;
+  }});
+  await f.call('new',{requestId:crypto.randomUUID(),name:'Locale QA'});await f.command('advance');await f.command('fixed',{choice:0});
+  assert.equal((await f.assess('I want to write a short play about divorce and invite friends to a rehearsal.',{locale:'en'})).status,200);
+  const direct=await f.assess('I want to divorce my spouse.',{locale:'en'});assert.equal(direct.data.error,'choose_relationship_action');
+});

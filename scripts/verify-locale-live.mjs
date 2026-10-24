@@ -12,8 +12,12 @@ const infer=createMiniMax({MINIMAX_API_KEY:config.api_key,MINIMAX_REGION:'cn',MI
 const life=createLife({id:crypto.randomUUID(),name:'Language QA',now:Date.now(),rng:()=>0});
 advance(life,()=>10,()=>0,Date.now());commitFixed(life,0,{},()=>0);
 const input=planInput(life,{goal:'I want to design and trial an accessible community reading device with Xu Zhicheng. I will organize local testing while they develop the technology.',partners:['chen']});
+if(process.argv.includes('--workshop')){
+  life.cards=[{name:'父母',level:1},{name:'才艺',level:2},{name:'技能',level:1},{name:'朋友',level:1},{name:'知识',level:1}];
+  Object.assign(input,planInput(life,{locale:'en',goal:'I want to organize a paid weekend art workshop for local teenagers, prepare lessons, rent a small studio and recruit students through my friends.'}));
+}
 let plan;
-for(let attempt=0;attempt<2;attempt++){try{plan=validatePlan((await infer(planSystem+languageInstruction('en','plan'),input,5000)).value,input,crypto.randomUUID(),life);break;}catch(e){if(attempt)throw e;}}
+for(let attempt=0;attempt<2;attempt++){let raw;try{raw=(await infer(planSystem+languageInstruction('en','plan'),input,5000)).value;plan=validatePlan(raw,input,crypto.randomUUID(),life);break;}catch(e){fs.mkdirSync('artifacts/languages',{recursive:true});fs.writeFileSync('artifacts/languages/invalid-plan-'+attempt+'.json',JSON.stringify({input,raw},null,2));if(attempt)throw e;}}
 for(const prose of [plan.reason,...plan.people.flatMap(p=>[p.role,p.reward.reason,...p.risks.map(r=>r.reason),p.parentSupport.reason,p.opportunityScope,p.achievement])])assert(!/\p{Script=Han}/u.test(prose),'Mixed English prose: '+prose);
 life.assessment=plan;rollFree(life,[],()=>10);settleFree(life,()=>0);
 const story=(await infer(storySystem+languageInstruction('en','story'),{name:life.name,result:life.lastResult,facts:life.chapterFacts[0],consequences:life.journal.filter(e=>e.id>=life.lastResult.eventId),previous:life.journal},1600)).value;
