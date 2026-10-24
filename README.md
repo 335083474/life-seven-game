@@ -1,6 +1,8 @@
 # 逆转人生 · 命运档案馆
 
-从七岁开始，经历七个人生阶段的单人人生游戏。当前规则为 `solo-1.0-test`。
+从七岁开始，经历七个人生阶段的单人人生游戏。当前为 `solo-1.1-preview` 单人技术预览，平衡数值仍是测试参数。
+
+已按新版 `LIFE-GDD-PRD-001 V1.0` 的70条验收和26项未决逐项核对：[开发对照与补漏记录](docs/development-audit.md) / [机器可读映射](docs/development-audit.json)。没有把NPC测试当作真实联机验收，也没有把未决规则自动升级为正式规则。
 
 ## 运行
 
@@ -26,7 +28,9 @@ python -m http.server 8767
 - 服务端保存整局状态与事件账本；刷新可续玩，并发与重复请求不会重复领奖或换骰。卡满与保护选择必须先完成。
 - 免费完整事实手记、七章 AI 传记与结局摘要下载；手机、桌面布局和键盘对话框。
 
-黑天鹅使用服务端D100：01—65无事，66—100厄运，不会发正向奖励。35%属于当前测试参数，不宣称是原版已定概率。完整来源、用户选择的测试方向及未最终冻结的实现参数见 [rules-contract.json](rules-contract.json)。
+黑天鹅使用服务端D100：01—65无事，66—100厄运，不会发正向奖励。夫妻同回合黑天鹅先收集再统一结算健康保护。未确认白名单的重大亲子连锁默认关闭。35%属于当前测试参数，不宣称是原版已定概率。完整来源、用户选择的测试方向及未最终冻结的实现参数见 [rules-contract.json](rules-contract.json)。
+
+参数集中于 `backend/settings.mjs`，新局及行动保留规则快照；按真实出生年龄决定孩子独立。正文可打开「查看故事依据」，事实手记可搜索和按章筛选。来源ID、状态检查和哈希不能证明全部文学语义无误，仍需质量抽检。没有来源元数据的旧文案不会被伪造为新版已验收文案。
 
 ## MiniMax 命运司书
 
@@ -62,7 +66,7 @@ node scripts/dev-solo.mjs
 
 配置位于 `backend/wrangler.jsonc`，复用时须更换 Cloudflare 账户和 D1 ID；前端接口地址位于 `ai-client.js`。配置密钥的脚本读取本机 mmx 已有配置，或 `AI_LIVE_MINIMAX_API_KEY` / `MINIMAX_API_KEY` 环境变量，通过标准输入传递，不写进文件或命令参数。不要将 `.dev.vars`、环境文件或 Wrangler 缓存提交到仓库。
 
-单人接口：`POST /api/life/new`、`load`、`assess`、`action`、`narrate`、`memoir`。浏览器随机Bearer标识持久保存在本机；只有该标识可读取自己的存档。写入使用版本比较和原子事务，`requestId`保存幂等回执。每次动作的卡牌、关系、骰点均从D1状态派生，不接受浏览器提交的任意手牌或经历。`GET /health`仅公开配置状态。旧独立AI接口保留兼容旧原型，但不能修改新单人存档。
+单人接口：`POST /api/life/new`、`load`、`assess`、`action`、`narrate`、`memoir`、`localize`。浏览器随机Bearer标识持久保存在本机；只有该标识可读取自己的存档。写入使用版本比较和原子事务，`requestId`保存幂等回执。每次动作的卡牌、关系、骰点均从D1状态派生，不接受浏览器提交的任意手牌或经历。`GET /health`仅公开配置状态。旧独立AI接口保留兼容旧原型，但不能修改新单人存档。
 
 参考：[MiniMax 官方接口](https://platform.minimax.io/docs/api-reference/text-openai-api)、[Cloudflare Secret 配置](https://developers.cloudflare.com/workers/configuration/secrets/)。
 

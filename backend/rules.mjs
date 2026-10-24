@@ -1,5 +1,6 @@
 export const cards = ['父母','家庭','孩子','爱情','快乐','朋友','知识','技能','智慧','才艺','勇气','沉稳','毅力','幽默','善良','修养','财富','地位','权力','尊重','名气','人脉','健康','梦想','自由','阅历','信仰','颜值'];
-export const tiers = { '简单': [65, 1], '普通': [45, 1], '困难': [25, .8], '极难': [10, .5], '传奇': [5, .25] };
+import {TEST_RULESET} from './settings.mjs';
+export const tiers = TEST_RULESET.difficultyTable;
 const fail = () => { throw Object.assign(new Error('invalid_request'), {status:400}); };
 export function text(value, max, min=1) {
   if(typeof value!=='string'||value.trim().length<min||value.length>max) fail();

@@ -6,6 +6,7 @@ window.LifeDM = (() => {
   if (!/^[a-f0-9-]{36}$/i.test(session || '')) session = crypto.randomUUID();
   try { localStorage.setItem('life-seven-session-v2',session); } catch {}
   const errors = {
+    fact_integrity: '记录校验未通过，已停止这次操作并保留已保存的进度。',
     ai_not_configured: '命运司书尚未就绪，请稍后再试。',
     ai_unavailable: '司书暂时未能回应，请重试。',
     ai_invalid_response: '这次回应未通过检查，请重试。',

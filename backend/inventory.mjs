@@ -1,7 +1,8 @@
 // Cards describe resources and relationships, never the literal life of a person.
-export const levelValue = card => Math.min(card?.level || 0, 2);
+import {TEST_RULESET} from './settings.mjs';
+export const levelValue = card => Math.min(card?.level || 0, TEST_RULESET.healthTierCap);
 export const find = (person, name) => person.cards.find(card => card.name === name);
-export const healthLeft = person => Math.max(0, levelValue(find(person, '健康')) - (find(person, '健康')?.spent || 0));
+export const healthLeft = person => Math.max(0, Math.min(find(person,'健康')?.level||0,person.rulesSnapshot?.healthTierCap||person.healthTierCap||TEST_RULESET.healthTierCap) - (find(person, '健康')?.spent || 0));
 export function remove(person, name) {
   const card = find(person, name);
   if (card) person.cards.splice(person.cards.indexOf(card), 1);

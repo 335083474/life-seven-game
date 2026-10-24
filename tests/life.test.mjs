@@ -63,7 +63,7 @@ test('divorce resolves family and random costs before custody; no automatic joy/
 test('ordinary child swan does not cascade; only explicit major event cascades joy',()=>{
   const l=family();l.phase='round-end';l.pending={source:'swan',targets:[{personId:'self',name:'孩子',reason:'日常陪伴变化'}],health:false,parentAllowed:true};resolveProtection(l,'accept',()=>0);
   assert(l.cards.some(c=>c.name==='快乐'));assert(l.npcs[0].cards.some(c=>c.name==='孩子'));assert(l.child.alive);
-  const m=family();m.phase='swan';rollSwan(m,()=>100,n=>n-1);assert(m.pending.childChain);resolveProtection(m,'accept',()=>0);
+  const m=family();m.rulesSnapshot.childChainEnabled=true;m.phase='swan';rollSwan(m,()=>100,n=>n-1);assert(m.pending.childChain);resolveProtection(m,'accept',()=>0);
   assert(!m.cards.some(c=>c.name==='孩子'||c.name==='快乐'));assert(!m.npcs[0].cards.some(c=>c.name==='孩子'||c.name==='快乐'));assert(m.child.alive);
 });
 test('full hand queues real choices; required child cannot be skipped or throw away required joy',()=>{

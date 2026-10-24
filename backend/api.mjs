@@ -1,3 +1,4 @@
+import {TEST_RULESET} from './settings.mjs';
 import {createMiniMax} from './minimax.mjs';
 import {evaluateInput,biographyInput,assessment,verdict,rollD100} from './rules.mjs';
 import {lifeApi,randomBelow} from './life-api.mjs';
@@ -17,7 +18,7 @@ export function createApi({fetchModel=fetch,clock=Date.now,roll=rollD100,rng=ran
     const path=new URL(request.url).pathname,origin=request.headers.get('Origin');
     const allowed=(env.WEB_ORIGIN||'https://335083474.github.io').split(',');
     const cors=allowed.includes(origin)?{'Access-Control-Allow-Origin':origin,'Vary':'Origin','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'POST, OPTIONS'}:{};
-    if(path==='/health'&&request.method==='GET')return json({service:'life-seven-game-api',version:2,rules:'solo-1.0-test',aiConfigured:Boolean(env.MINIMAX_API_KEY),storage:Boolean(env.DB),model:env.MINIMAX_MODEL||'MiniMax-M3'});
+    if(path==='/health'&&request.method==='GET')return json({service:'life-seven-game-api',version:2,rules:TEST_RULESET.version,scope:'single-player-technical-preview',aiConfigured:Boolean(env.MINIMAX_API_KEY),storage:Boolean(env.DB),model:env.MINIMAX_MODEL||'MiniMax-M3'});
     try{
       if(!allowed.includes(origin))throw error('origin_not_allowed',403);
       if(request.method==='OPTIONS')return new Response(null,{status:204,headers:cors});

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createMiniMax} from '../backend/minimax.mjs';
-const files=['game.js','art.js','ai-client.js','backend/events.mjs','backend/life-engine.mjs','backend/life-api.mjs'];
+const files=['game.js','art.js','ai-client.js','backend/events.mjs','backend/life-engine.mjs','backend/life-api.mjs','backend/npc-plans.mjs'];
 const phrases=new Set();
 for(const file of files){
   const source=fs.readFileSync(file,'utf8');

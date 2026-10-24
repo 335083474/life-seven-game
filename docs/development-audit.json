@@ -1,0 +1,989 @@
+{
+  "baseline": {
+    "id": "LIFE-GDD-PRD-001",
+    "version": "V1.0",
+    "date": "2026-10-24",
+    "sha256": "e96e0ef612090481f757fded2b5276ec0d1102817006715380d5a1b67fd73cb7",
+    "source": "用户提供的网页版Markdown附件；原文仅保存在本地忽略目录"
+  },
+  "implementation": "solo-1.1-preview",
+  "scope": "单人技术预览及系统人物；不把NPC覆盖当作真实联机验收",
+  "summary": {
+    "candidate": 25,
+    "verified": 23,
+    "multiplayer": 7,
+    "partial": 11,
+    "decision": 2,
+    "commercial": 2
+  },
+  "cases": [
+    {
+      "id": "T-001",
+      "condition": "玩家第一次开始游戏",
+      "decisionStatus": "C/P",
+      "status": "candidate",
+      "note": "服务端父母+3种不重复天赋；开局无额外自由/黑天鹅；牌池仍为候选。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-002",
+      "condition": "已在第Ⅲ阶段，玩家查询进度",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "界面分别显示章、年龄、回合与三环节。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "game.js"
+      ]
+    },
+    {
+      "id": "T-003",
+      "condition": "所有玩家仅A完成固定事件",
+      "decisionStatus": "C",
+      "status": "multiplayer",
+      "note": "无真实房间与全员屏障，不用单人推进冒充联机。",
+      "evidence": []
+    },
+    {
+      "id": "T-004",
+      "condition": "单人模式只有一名真人",
+      "decisionStatus": "C/O",
+      "status": "verified",
+      "note": "三位有固定ID的系统人物可合作、结婚、共同养育。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-005",
+      "condition": "联机A发起自由事件，B收到邀请但未接受",
+      "decisionStatus": "C",
+      "status": "multiplayer",
+      "note": "真人邀请/接受流程未实现；系统人物在掷骰前由语义评估同意。",
+      "evidence": []
+    },
+    {
+      "id": "T-006",
+      "condition": "A、B、C均正式参与同一事件",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "NPC正式合作在roll锁定时占用机会；尚无真人房间。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-007",
+      "condition": "已正式参与合作的B再接受别人的正式合作",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "NPC usedRound会拒绝重复占用；真人跨行动事务待联机。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-008",
+      "condition": "第四位真人请求加入A、B、C的自由事件",
+      "decisionStatus": "T",
+      "status": "partial",
+      "note": "单人接口最多邀请2位NPC，第四位参与者被参数校验阻止；真人房间待做。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-009",
+      "condition": "A与B合作，A修改风险前提或目标",
+      "decisionStatus": "C",
+      "status": "multiplayer",
+      "note": "真人全员确认与确认失效机制尚未做。",
+      "evidence": []
+    },
+    {
+      "id": "T-010",
+      "condition": "B只更换自己的两张选卡",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "玩家换卡只重算概率，NPC按其方案自动选卡；真人自主选卡/确认待做。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "game.js"
+      ]
+    },
+    {
+      "id": "T-011",
+      "condition": "A试图换卡并让AI重设原目标基础难度",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "同目标在本回合缓存基础难度；关系类型/对象区分缓存。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-012",
+      "condition": "A把“开小店”改成“做世界首富”",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "换目标重新评估难度、奖励和风险，不能沿用旧方案掷骰。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-013",
+      "condition": "单个玩家投入3张卡",
+      "decisionStatus": "C/P",
+      "status": "candidate",
+      "note": "前后端限制每人至多2卡，配偶借卡不额外加人或复制贡献。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "game.js"
+      ]
+    },
+    {
+      "id": "T-014",
+      "condition": "AI输出一张不在28种名单的奖励",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "名单、关系卡奖励及候选持有资格均由服务端验证。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-015",
+      "condition": "断线后重复点击“确认/掷骰”",
+      "decisionStatus": "技术P0",
+      "status": "verified",
+      "note": "D1原子CAS和requestId回执；重试不重复结算。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-016",
+      "condition": "两名玩家同步提交合作结算",
+      "decisionStatus": "技术P0",
+      "status": "multiplayer",
+      "note": "尚无两名真人共同事件，单人双标签CAS不是该用例的完整替代。",
+      "evidence": []
+    },
+    {
+      "id": "T-017",
+      "condition": "困难25%，一人知识Ⅱ高度匹配+技能Ⅰ一般匹配",
+      "decisionStatus": "T",
+      "status": "candidate",
+      "note": "基础25、知识II16+技能I4，经0.8为41%；独立公式测试覆盖。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-018",
+      "condition": "困难25%，3人不同高度匹配Ⅰ各1张",
+      "decisionStatus": "T/O",
+      "status": "decision",
+      "note": "保留exact=50.2、测试舍入50；统一用于显示/成功/大失败。最终取整规则仍需产品定稿。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-019",
+      "condition": "同名知识Ⅱ、知识Ⅰ、知识Ⅰ均高度匹配",
+      "decisionStatus": "T",
+      "status": "candidate",
+      "note": "16+8*0.5+8*0.25=22，按强度而非加入顺序排序。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-020",
+      "condition": "传奇5%，三人卡达+24上限",
+      "decisionStatus": "T",
+      "status": "candidate",
+      "note": "当前传奇上限例为17%。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-021",
+      "condition": "简单65%，三人卡达+24上限",
+      "decisionStatus": "T",
+      "status": "candidate",
+      "note": "当前简单例原始95，候选封顶90。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-022",
+      "condition": "P=35%，D100=01",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "01优先判定大成功。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-023",
+      "condition": "P=35%，D100=98",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "低于50时96—100大失败；候选骰前锁定。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-024",
+      "condition": "P=35%，D100=64",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "普通失败只消耗行动，不直接扣牌。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-025",
+      "condition": "P=65%，D100=98",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "65%时98为普通失败。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-026",
+      "condition": "P=65%，D100=100",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "100为大失败。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-027",
+      "condition": "P=50%，D100=96",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "统一整数50%时96为普通失败。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-028",
+      "condition": "P=50.2%（未决精度）和D100=50",
+      "decisionStatus": "O",
+      "status": "decision",
+      "note": "实现为可复现的nearest-integer测试策略；尚不能标记最终批准。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-029",
+      "condition": "事件原目标与所有持有元素完全无合法失牌因果",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "整场无合法候选则骰前422，无骰子或状态损失。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-030",
+      "condition": "AI看到骰值后试图增加失牌候选",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "SHA-256绑定完整事前评估、选卡、公式；改动后拒绝结算。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-031",
+      "condition": "三人合作大失败",
+      "decisionStatus": "C/O权重",
+      "status": "partial",
+      "note": "NPC团队一张直接失牌；3:1:1精确抽样验证。权重未定稿，真人公共事务未实现。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-032",
+      "condition": "两位合作者同时持有自己的机遇、第一次失败",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "NPC合作同意与机遇花费同意分离；真人同时授权竞态待联机。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-033",
+      "condition": "有效机遇、首次D100=98，再掷23且P≥23",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "先100再20可保留成功，只结算一次，无首次惩罚残留。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-034",
+      "condition": "有效机遇、首次已为普通成功",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "首次已成功不能使用机遇追01。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-035",
+      "condition": "机遇源自科技创业大成功，用于完全无关的登山",
+      "decisionStatus": "P",
+      "status": "partial",
+      "note": "验证机遇ID/归属/先前回合，语义关联交MiniMax判断；未完成大量异目标基准评测。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-036",
+      "condition": "最后一回合多人共同大成功",
+      "decisionStatus": "P",
+      "status": "partial",
+      "note": "每位NPC合作者可分别记录personId/成就；实际真人合作和文学质量仍待验收。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-037",
+      "condition": "同一玩家已有6种元素但一张为梦想Ⅲ",
+      "decisionStatus": "C/P",
+      "status": "verified",
+      "note": "按不同卡名数而非等级数判定生存。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-038",
+      "condition": "创业大失败，AI在普通随机失牌候选中加入父母",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "父母不能进入普通自由事件风险池。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-039",
+      "condition": "骰前已锁定父母代偿资格、骰后将失财富",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "只有骰前许可且父母仍健在/有卡才可自愿代偿；文案说明不等于死亡。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-040",
+      "condition": "骰前未锁父母代偿资格、玩家看到大失败后要求父母帮忙",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "骰后不能创建父母代偿资格。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-041",
+      "condition": "玩家过去已用父母卡代偿，但父母仍健在",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "支持耗尽与真实离世分开；已离世分支不会再次写死亡或扣卡。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-042",
+      "condition": "父母已真实去世，玩家尝试再次获得“父母代偿”",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "parentsAlive为false时禁止代偿，即使遗留错误状态仍持牌。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-043",
+      "condition": "生育时双方各自已有快乐",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "已有快乐不升级/重复发；共享同一个孩子实体。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-044",
+      "condition": "生育时A无快乐、B有快乐",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "双方各处理孩子和快乐，人物实体只建一次；满手分别处理。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-045",
+      "condition": "一方孩子卡与快乐卡后来因独立事件变化",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "孩子、快乐后续独立变化。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-046",
+      "condition": "离婚时双方各有家庭",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "先失家庭，再各抽合法非孩子牌。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-047",
+      "condition": "离婚结算后仅A有快乐",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "按离婚损失后的快乐状态分配主要抚养。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-048",
+      "condition": "离婚结算后双方都没有快乐",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "双方无快乐默认共同抚养，卡不自动恢复，孩子未死亡。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-049",
+      "condition": "同一个孩子成年离家、父母双方有孩子卡",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "按bornAge算实际年龄，未成年不强制离家；早育成年可提前独立且不重复扣。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-050",
+      "condition": "普通黑天鹅抽中孩子卡",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "普通失孩子不扣快乐；未确认的重大亲子连锁默认关闭。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-051",
+      "condition": "健康Ⅰ使用过1次直接升级健康Ⅱ",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "升级保留已用次数；I用1次后II仍剩1次。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-052",
+      "condition": "健康Ⅰ用完、失去后通过合法事件重新获得Ⅰ",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "真实失去再合法重新获得可重置；转移不作为重获。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-053",
+      "condition": "丈夫无保护，妻子有健康Ⅱ最后1次且婚姻有效",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "有效婚姻健康自动共享，先自用再配偶；每卡记录实际花费者。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-054",
+      "condition": "夫妻分别各有1次，同时遭遇符合条件厄运",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "同回合先收集夫妻双方独立骰，两份可用则扣两份。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-055",
+      "condition": "夫妻合计最后只剩1次，同回合同时遭健康可保护厄运",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "同回合两人均符合，合计最后1次可救双方，并留共同记录。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-056",
+      "condition": "两次健康厄运发生于不同回合",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "同回合批次结算；spent跨回合保留，不能复用。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-057",
+      "condition": "离婚之后一方尝试继续消耗前配偶健康次数",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "离婚即停止共享，前配偶次数不被借用。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-058",
+      "condition": "非健康类黑天鹅厄运",
+      "decisionStatus": "P",
+      "status": "candidate",
+      "note": "非健康类事件不消耗健康，不触发劫后余生。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-059",
+      "condition": "父母帮助代偿后多年进入父母离世",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "新增factIds、factsCheck和来源哈希；生死等状态错误会拒绝。自由文学文本仍需人工抽验，不宣称语义100%正确。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-060",
+      "condition": "多人共同创业后分道扬镳",
+      "decisionStatus": "C",
+      "status": "multiplayer",
+      "note": "暂无真实多人及各真人私有传记。",
+      "evidence": []
+    },
+    {
+      "id": "T-061",
+      "condition": "玩家曾约定环球旅行但终局未完成",
+      "decisionStatus": "C",
+      "status": "partial",
+      "note": "保存原目标、每次结果、未竟尝试和事实来源；文学是否妥善表达遗憾仍需语义抽检。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "tests/gdd.test.mjs"
+      ]
+    },
+    {
+      "id": "T-062",
+      "condition": "某玩家终局仅6种元素且有特殊事件成就",
+      "decisionStatus": "C/P",
+      "status": "candidate",
+      "note": "死亡也保留成就并可生成七章；死亡路径完整阅读在测试覆盖。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-063",
+      "condition": "终局首次打开人生故事",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "完整事实和AI传记均无付费墙。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "game.js"
+      ]
+    },
+    {
+      "id": "T-064",
+      "condition": "玩家希望保存短结局摘要",
+      "decisionStatus": "C",
+      "status": "verified",
+      "note": "摘要只导出本人结局、本人特殊成就和典藏；暂无向外自动分享行为。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs",
+        "game.js"
+      ]
+    },
+    {
+      "id": "T-065",
+      "condition": "玩家完成自愿激励广告",
+      "decisionStatus": "C/O广告供应",
+      "status": "commercial",
+      "note": "未接激励广告/权益核销/无填充回退，不能显示假广告解锁。",
+      "evidence": []
+    },
+    {
+      "id": "T-066",
+      "condition": "玩家小额付费购买纪念册",
+      "decisionStatus": "C/T",
+      "status": "commercial",
+      "note": "未接订单、支付、PDF排版与下载权益，不伪造完成。",
+      "evidence": []
+    },
+    {
+      "id": "T-067",
+      "condition": "完整故事留存48小时到期",
+      "decisionStatus": "T/C",
+      "status": "candidate",
+      "note": "当前测试从最终结算起48小时；过期不可读，定时实际清理状态和全部故事回执。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    },
+    {
+      "id": "T-068",
+      "condition": "玩家共享了涉及队友的故事",
+      "decisionStatus": "实施P0",
+      "status": "multiplayer",
+      "note": "无真实多人隐私权限与公共导出，不宣称通过。",
+      "evidence": []
+    },
+    {
+      "id": "T-069",
+      "condition": "真人断线后再次进入房间",
+      "decisionStatus": "实施P0",
+      "status": "multiplayer",
+      "note": "单人已可恢复/防重试；真实房间恢复与同步尚未实现。",
+      "evidence": []
+    },
+    {
+      "id": "T-070",
+      "condition": "用户更改角色名字或AI转写",
+      "decisionStatus": "实施P0",
+      "status": "partial",
+      "note": "主角/NPC/孩子使用稳定ID，AI不能新增参与者；局中改名和真人别名转换未做。",
+      "evidence": [
+        "tests/life.test.mjs",
+        "tests/life-api.test.mjs"
+      ]
+    }
+  ],
+  "openDecisions": [
+    {
+      "id": "O-01",
+      "question": "七阶段每阶段到底多少常规回合？第一阶段是否只有抽卡，开场黑天鹅是否保留？",
+      "priority": "**阻塞主流程**",
+      "status": "open",
+      "previewPolicy": "固定事件数组驱动当前9回合，开局只抽卡；不将9回合升格为正式设计。"
+    },
+    {
+      "id": "O-02",
+      "question": "最终概率含小数时如何D100取整？跨越50%大失败阈值怎么判断？",
+      "priority": "**阻塞裁决**",
+      "status": "open",
+      "previewPolicy": "候选nearest-integer，exact值留档；同一整数用于显示、成功和50%门槛。"
+    },
+    {
+      "id": "O-03",
+      "question": "自由事件没有合法失牌候选时能否改目标、团队部分成员无候选时如何重分权重？",
+      "priority": "**阻塞大失败**",
+      "status": "open",
+      "previewPolicy": "整场无候选骰前阻断；部分成员无候选时排除该成员重分权重，仅为测试处理。"
+    },
+    {
+      "id": "O-04",
+      "question": "合作大失败发起者/合作者失卡权重具体是多少？",
+      "priority": "**阻塞多人**",
+      "status": "open",
+      "previewPolicy": "发起者3、合作者各1，版本化候选。"
+    },
+    {
+      "id": "O-05",
+      "question": "正常/大成功给卡的数量上限？7格已满时可否拒绝新卡、如何替换？",
+      "priority": "**阻塞卡牌**",
+      "status": "open",
+      "previewPolicy": "普通成功每人最多1张；满7格显式放弃或替换；必要家庭选择须腾位。"
+    },
+    {
+      "id": "O-06",
+      "question": "父母自愿代偿、健康保护、婚姻连锁、其他特殊牌效果的准确结算优先级",
+      "priority": "**阻塞组合结算**",
+      "status": "open",
+      "previewPolicy": "同回合先收集夫妻骰→自动健康→自愿父母→承受损失/已批准联动；正式优先级仍未定。"
+    },
+    {
+      "id": "O-07",
+      "question": "Ⅰ、Ⅱ、Ⅲ级失卡：整张失去还是降一级？Ⅲ级第4次获得怎么办？",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "普通I→II→III，III后仍III；默认整张失去。第四次转换未定。"
+    },
+    {
+      "id": "O-08",
+      "question": "「家庭」「孩子」「父母」「爱情」「健康」可否升Ⅱ/Ⅲ？健康Ⅲ保护次数多少？",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "父母/家庭/孩子暂不升级，爱情按普通卡；健康III暂与II同2次，均非定稿。"
+    },
+    {
+      "id": "O-09",
+      "question": "夫妻调用普通元素卡算不算正式合作、是否占位/行动/两卡名额？",
+      "priority": "**阻塞多人平衡**",
+      "status": "open",
+      "previewPolicy": "借配偶计入本人2卡；不多加人数，同卡去重；真人配偶额外参与资格未定。"
+    },
+    {
+      "id": "O-10",
+      "question": "结婚时「爱情」转换「家庭」的具体两人结算/无爱情时牺牲哪张卡？",
+      "priority": "**阻塞婚姻**",
+      "status": "open",
+      "previewPolicy": "双方用爱情或各一张普通卡转换家庭，系统人物同意记录；正式双人方案仍未定。"
+    },
+    {
+      "id": "O-11",
+      "question": "离婚随机失牌池除孩子外还有哪些排除项？无合法卡怎么办？",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "离婚暂排除孩子/家庭；空池不凭空扣卡；白名单仍待确认。"
+    },
+    {
+      "id": "O-12",
+      "question": "生育时第二个孩子、单亲/未婚育儿、快乐Ⅱ已满、同名孩子卡升级怎么处理？",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "当前只支持本局一个孩子、有效婚姻生育；多人/多胎/未婚育儿未实现。"
+    },
+    {
+      "id": "O-13",
+      "question": "重大亲子事件的白名单、真正失亲与强连锁的触发条件",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "重大亲子连锁默认关闭，白名单确认后才可启用；普通失孩子不连扣快乐。"
+    },
+    {
+      "id": "O-14",
+      "question": "孩子离家事件年龄/时间与没有子女玩家的替代固定事件",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "按出生年龄算，成年18为测试值；可提前独立，未成年/已独立/无孩子均有分支。"
+    },
+    {
+      "id": "O-15",
+      "question": "夫妻黑天鹅同时发生时，如两人保护次数和厄运类型不对称、父母代偿并存，如何统一结算？",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "夫妻黑天鹅统一收集并一次结算，最后1份稀有保护已测；其他复合条件继续保留为候选。"
+    },
+    {
+      "id": "O-16",
+      "question": "黑天鹅好运/厄运的概率、抽牌池和健康适用类型清单",
+      "priority": "**阻塞黑天鹅**",
+      "status": "open",
+      "previewPolicy": "后续用户明确不要正向奖励，因此不恢复文档参考的好运；01–65静、66–100厄运仍是测试分布。"
+    },
+    {
+      "id": "O-17",
+      "question": "大成功机遇允许囤积几份、是否过期、AI关联判定算法、重掷消耗顺序",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "机遇个人持有、后续相关事件首次失败、自愿且一场一次；NPC另有花费同意。库存上限/多人竞争顺序未定。"
+    },
+    {
+      "id": "O-18",
+      "question": "最后一回合大成功人生成就的公开方式、跨局收录与多人奖励校验",
+      "priority": "中",
+      "status": "open",
+      "previewPolicy": "本局按personId保存事件成就，死亡保留；未做跨局永久收集。"
+    },
+    {
+      "id": "O-19",
+      "question": "长期商业合伙的收益/退出，以及夫妻间普通卡牌转赠与返还、保护刷新禁刷细则",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "普通卡可转赠/交换，健康按真实剩余次数合并，未知方向请求被拒绝；未建商业股权/分红系统。"
+    },
+    {
+      "id": "O-20",
+      "question": "NPC数量、主动提案、求婚与抚养决策规则",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "固定3个NPC候选，各有年龄/教育/职业/资源/行动；固定婚恋为系统角色规则，尚无通用社交规划器或NPC数量设置。"
+    },
+    {
+      "id": "O-21",
+      "question": "联机超时、退出房间、挂机/断线、取消邀请/取消行动怎么处理？",
+      "priority": "**阻塞联机发布**",
+      "status": "open",
+      "previewPolicy": "无真实房间，超时、退出与真人取消策略整体待联机设计。"
+    },
+    {
+      "id": "O-22",
+      "question": "用户能查看自己/队友多少锁定风险信息，以及审计保留期",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "单人NPC资料无真人隐私；预先风险概况、事后可按需核验。真人可见性仍待定。"
+    },
+    {
+      "id": "O-23",
+      "question": "各卡高度/一般匹配的提示准则、28卡对不同目标的归因标准",
+      "priority": "重要",
+      "status": "open",
+      "previewPolicy": "逐卡reason由AI提供并校验；分数由程序；尚需30–50组语义匹配质量基准。"
+    },
+    {
+      "id": "O-24",
+      "question": "是否保留开局“理想七张”对照及其与免费摘要的关系",
+      "priority": "中",
+      "status": "open",
+      "previewPolicy": "不加理想七张胜负规则；保留为候选产品增强。"
+    },
+    {
+      "id": "O-25",
+      "question": "正式中文/英文名、具体插画资产、IP和商标核查",
+      "priority": "发布阻塞",
+      "status": "open",
+      "previewPolicy": "界面中英文均为临时项目名称；正式品牌/素材/IP核验未完成，不宣称正式商业发行。"
+    },
+    {
+      "id": "O-26",
+      "question": "广告平台无法填充、付费订单失败、48小时保留起算点、下载权益恢复",
+      "priority": "商业化阻塞",
+      "status": "open",
+      "previewPolicy": "免费完整阅读/摘要、当前48h终局起算已实现；广告、订单、PDF、权益恢复待接入，不提供假成功。"
+    }
+  ],
+  "verification": {
+    "automatedTests": 54,
+    "realMiniMaxLocales": [
+      "zh-CN",
+      "en"
+    ],
+    "realMemoirChaptersPerLocale": 7,
+    "realProviderDatabase": "isolated in-memory test database",
+    "narrativeSemanticLimit": "来源和状态检查不能证明全部自由文学文本无语义错误；仍需人工质量抽检"
+  }
+}

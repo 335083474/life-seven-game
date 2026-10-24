@@ -1,3 +1,4 @@
+import {TEST_RULESET} from './settings.mjs';
 export const chapters = [
   ['命运初启', '7岁'], ['少年抉择', '14—18岁'], ['青春远行', '19—24岁'],
   ['立业之初', '25—32岁'], ['人生交汇', '33—42岁'], ['盛衰离别', '43—55岁'], ['余生', '60岁以后']
@@ -16,7 +17,7 @@ export const rounds = [
   {id:'oldage', stage:6, age:68, title:'此后的时间，留给什么？', choices:[['安享晚年','在平静中修养身心','修养'],['陪伴亲友','把日子留给重要的人','快乐'],['退而不休','继续留下经验与价值','尊重'],['再追旧梦','拾起多年未竟的心愿','梦想'],['回馈社会','把曾接受的善意传下去','善良']]}
 ];
 export function fixedEvent(life) {
-  const event = structuredClone(rounds[life.round]);
+  const event = structuredClone(rounds[life.round]),adult=life.rulesSnapshot?.adultAge||TEST_RULESET.adultAge;
   if (!event) return null;
   if (event.id === 'youth' && life.path === '辍学') {
     event.title = '在社会中历练';
@@ -27,8 +28,8 @@ export function fixedEvent(life) {
     event.choices = [['继续经营婚姻','记住当初的选择'],['结束婚姻','认真面对分别的代价']];
   }
   if (event.id === 'birth' && life.child) {
-    event.title = '陪伴孩子成长';
-    event.choices = [['继续养育','不重复生育或赠送孩子与快乐']];
+    event.title = childAge(life)>=adult?'陪伴已成年的孩子':'陪伴孩子成长';
+    event.choices = [[childAge(life)>=adult?'尊重孩子的独立':'继续养育','不重复生育或赠送孩子与快乐']];
   } else if (event.id === 'birth' && !life.married) {
     event.title = '安排此后生活';
     event.choices = [['继续独立生活','这一回合不强制结婚或生育']];
@@ -36,9 +37,16 @@ export function fixedEvent(life) {
   if (event.id === 'independence' && !life.child) {
     event.title = '人生走到新的路口';
     event.choices = [['重新安排生活','没有孩子离家，也不扣除不存在的孩子卡']];
+  } else if(event.id==='independence'&&life.child.independent){
+    event.title='亲情的另一种陪伴';event.choices=[['尊重独立生活','孩子早已独立，亲情依然延续']];
+  } else if(event.id==='independence'&&childAge(life)<adult){
+    event.title='孩子仍在成长';event.choices=[['继续陪伴成长','孩子尚未成年，不会被强制安排离家']];
   }
+  if(event.id==='parents'&&!life.parentsAlive){event.title='记住父母留下的爱';event.choices=[['珍惜留下的记忆','离世已经记录，不会再次发生或重复扣牌']];}
+  if(event.id==='crisis')event.title=({'自主创业':'创业路上的风浪','自由职业':'自由职业的转折','发展中公司':'工作中的变局','稳定单位':'熟悉生活中的变局'}[life.career]||'人生路上的风浪');
   return event;
 }
+export const childAge=life=>life.child?Math.max(0,(rounds[life.round]?.age||7)-life.child.bornAge):null;
 // Eligibility is data, fixed before rolling, never an AI afterthought.
 export const swans = [
   {id:'illness', title:'一场疾病', health:true, joint:false, text:'一场突如其来的疾病打乱生活。'},

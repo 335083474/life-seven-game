@@ -96,6 +96,8 @@ test('whole adverse life reaches death, final critical achievement survives the 
   }
   assert.equal(f.life.phase,'ending');assert.equal(f.life.ending.survived,false);assert(f.life.achievements.some(a=>a.personId==='self'&&a.title==='晚年的求知者'));
   assert(f.life.cards.length<7);
+  for(let i=0;i<7;i++)await okay(f.call('memoir',{lifeId:f.life.id,revision:f.life.revision,requestId:crypto.randomUUID()}));
+  assert.equal(f.life.biography.chapters.length,7);assert.equal(f.life.biography.chapters[6].factsCheck.endingSurvived,false);
   f.DB.raw.prepare('UPDATE lives SET expires=0').run();f.DB.raw.prepare('UPDATE life_actions SET expires=0').run();
   await defaultApi.scheduled({},f.env);assert.equal(f.DB.raw.prepare('SELECT count(*) n FROM lives').get().n,0);assert.equal(f.DB.raw.prepare('SELECT count(*) n FROM life_actions').get().n,0);
 });

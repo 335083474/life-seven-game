@@ -2,6 +2,21 @@ const failure = (code, status = 409) => Object.assign(Error(code), {status});
 export async function digest(value) {
   return [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))].map(x => x.toString(16).padStart(2, '0')).join('');
 }
+const objective=event=>Object.fromEntries(Object.entries(event).filter(([key])=>!['narrative','narrativeMeta','hash','previousHash','sealedAt','hashOrigin'].includes(key)));
+export async function sealLedger(after,before,now){
+  if(before){
+    if(after.journal.length<before.journal.length)throw failure('fact_integrity',409);
+    for(let i=0;i<before.journal.length;i++)if(JSON.stringify(objective(before.journal[i]))!==JSON.stringify(objective(after.journal[i])))throw failure('fact_integrity',409);
+  }
+  let previousHash=null;
+  for(let i=0;i<after.journal.length;i++){
+    const event=after.journal[i],hash=await digest(JSON.stringify({previousHash,fact:objective(event)}));
+    if(event.hash&&(event.hash!==hash||event.previousHash!==previousHash))throw failure('fact_integrity',409);
+    if(!event.hash){event.hash=hash;event.previousHash=previousHash;event.sealedAt=now;event.hashOrigin=before&&i<before.journal.length?'legacy-import':'server-event';}
+    previousHash=hash;
+  }
+  after.factHead=previousHash;
+}
 export async function loadLife(DB, id, owner, now) {
   const row = await DB.prepare('SELECT * FROM lives WHERE id=? AND owner=? AND expires>?').bind(id, owner, now).first();
   if (!row) throw failure('life_not_found', 404);
@@ -10,6 +25,7 @@ export async function loadLife(DB, id, owner, now) {
 // Both the state and receipt are committed in one D1 transaction. CAS prevents
 // two tabs advancing or awarding twice. No in-memory lock is authoritative.
 export async function saveLife(DB, before, after, owner, requestId, fingerprint, now, output) {
+  await sealLedger(after,before,now);
   after.revision = before.revision + 1;
   const serialized = JSON.stringify(after);
   const key = owner + ':' + requestId;

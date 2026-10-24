@@ -13,6 +13,7 @@ test('all fixed events, cards, chapters and adverse events have English copy; de
   for(const copy of Object.keys(chineseDecorations))assert.notEqual(translateText(copy),copy,copy);
   for(const copy of ['简单','普通','困难','极难','传奇','高度匹配','一般匹配','暂不匹配','经济风险','事业风险','人际风险','身心风险','情感风险','探索风险','生活风险'])assert.ok(!/\p{Script=Han}/u.test(translateText(copy,'en')),copy);
   assert.equal(normalizeLocale('unsupported'),'zh-CN');
+  assert.match(translateText('#1 · Ⅰ · 7岁 · 命运初启','en'),/7 years old/);
 });
 
 test('language translation caches prose without altering assessments, dice, cards, history or future risks',async t=>{
