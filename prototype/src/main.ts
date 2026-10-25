@@ -63,11 +63,26 @@ function setPagesVisible(visible:boolean){leftDOM.classList.toggle('inactive',!v
 function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit,.dice-hit,.inspect-dice'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');toastTimer=window.setTimeout(()=>$('#notice').classList.remove('visible'),3300);}
 
-// Audio is entirely opt-in; no downloads or autoplay.
+// Audio is opt-in; the paper recording loads only after sound is enabled.
 let audio:AudioContext|undefined;
+let paperBuffer:AudioBuffer|undefined,paperLoading:Promise<AudioBuffer|undefined>|undefined,paperRequest=0;
+let paperVoice:{source:AudioBufferSourceNode;gain:GainNode}|undefined;
+function stopPaper(){
+  paperRequest++;if(!paperVoice||!audio)return;
+  const {source,gain}=paperVoice;paperVoice=undefined;gain.gain.cancelScheduledValues(audio.currentTime);gain.gain.setValueAtTime(gain.gain.value,audio.currentTime);gain.gain.linearRampToValueAtTime(0,audio.currentTime+.025);source.stop(audio.currentTime+.03);
+}
+async function playPaper(context:AudioContext){
+  stopPaper();const request=paperRequest;
+  const buffer=paperBuffer??await(paperLoading??=(async()=>{const response=await fetch(new URL('assets/page-turn-soft.mp3',document.baseURI));if(!response.ok)throw Error('Paper audio unavailable');return paperBuffer=await context.decodeAudioData(await response.arrayBuffer());})().catch(()=>undefined).finally(()=>{paperLoading=undefined;}));
+  if(!buffer||!sound||request!==paperRequest)return;
+  const source=context.createBufferSource(),gain=context.createGain();source.buffer=buffer;
+  gain.gain.setValueAtTime(0,context.currentTime);gain.gain.linearRampToValueAtTime(.6,context.currentTime+.025);
+  source.connect(gain).connect(context.destination);paperVoice={source,gain};
+  source.onended=()=>{source.disconnect();gain.disconnect();if(paperVoice?.source===source)paperVoice=undefined;};source.start();
+}
 function play(kind:'paper'|'dice'|'mark'){
-  if(!sound)return;try{audio??=new AudioContext();void audio.resume();if(kind==='mark'){for(const frequency of [146.83,220]){const oscillator=audio.createOscillator(),envelope=audio.createGain();oscillator.type='sine';oscillator.frequency.value=frequency;envelope.gain.setValueAtTime(.0001,audio.currentTime);envelope.gain.exponentialRampToValueAtTime(.025,audio.currentTime+.035);envelope.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+1.8);oscillator.connect(envelope).connect(audio.destination);oscillator.start();oscillator.stop(audio.currentTime+1.9);}return;}const n=Math.floor(audio.sampleRate*(kind==='paper'?.32:.12)),buffer=audio.createBuffer(1,n,audio.sampleRate),channel=buffer.getChannelData(0);for(let i=0;i<n;i++)channel[i]=(Math.random()*2-1)*Math.pow(1-i/n,2)*.1;
-    const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain();source.buffer=buffer;filter.type=kind==='paper'?'highpass':'lowpass';filter.frequency.value=kind==='paper'?1400:430;gain.gain.value=kind==='paper'?.33:.6;source.connect(filter).connect(gain).connect(audio.destination);source.start();
+  if(!sound)return;try{audio??=new AudioContext();void audio.resume().catch(()=>{});if(kind==='paper'){void playPaper(audio).catch(()=>{});return;}if(kind==='mark'){for(const frequency of [146.83,220]){const oscillator=audio.createOscillator(),envelope=audio.createGain();oscillator.type='sine';oscillator.frequency.value=frequency;envelope.gain.setValueAtTime(.0001,audio.currentTime);envelope.gain.exponentialRampToValueAtTime(.025,audio.currentTime+.035);envelope.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+1.8);oscillator.connect(envelope).connect(audio.destination);oscillator.start();oscillator.stop(audio.currentTime+1.9);}return;}const n=Math.floor(audio.sampleRate*.12),buffer=audio.createBuffer(1,n,audio.sampleRate),channel=buffer.getChannelData(0);for(let i=0;i<n;i++)channel[i]=(Math.random()*2-1)*Math.pow(1-i/n,2)*.1;
+    const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=430;gain.gain.value=.6;source.connect(filter).connect(gain).connect(audio.destination);source.start();
   }catch{/* The experience remains playable without Web Audio. */}
 }
 function openBook(){if(busy||state.opened)return;state.opened=true;setBusy(true);$('#invitation').classList.add('leaving');$('#close-book').hidden=false;play('paper');animate(1900,p=>{opening=smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{opening=1;setPagesVisible(true);$('#table-caption').hidden=false;renderPages();setBusy(false);toast('翻开这一页，先选一条想走的路。');});}
@@ -140,7 +155,7 @@ rightDOM.addEventListener('click',event=>{const button=(event.target as HTMLElem
 });
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
 $('#restart').addEventListener('click',()=>{if(busy){toast('请等这一页落定。');return;}dialog.close();state.page=0;state.roll=null;state.selected=[];state.intention='bookshop';cards.forEach(c=>c.selected=false);renderPages();if(state.opened)closeBook();});
-$('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');});
+$('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');else stopPaper();});
 document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||busy)return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened&&state.page===0)turnTo(1);if(e.key==='ArrowLeft'&&state.opened&&state.page===1)turnTo(0);});
 window.addEventListener('pointermove',e=>{if(mobile||busy||document.querySelector('dialog[open]'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
 window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&!busy);});

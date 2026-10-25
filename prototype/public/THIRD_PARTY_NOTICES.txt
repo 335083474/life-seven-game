@@ -77,3 +77,10 @@ https://creativecommons.org/licenses/by/4.0/
 Changes: original percentile d10 selected for preview only; legacy materials converted,
 body opacity and IOR corrected, dark material adjusted; centered and scaled; Meshopt compression.
 The source has no companion 0-9 die, so this appearance is not enabled for gameplay.
+
+Pages that Turn #5 by Joseph SARDIN / BigSoundBank
+https://bigsoundbank.com/pages-that-turn-5-s2212.html
+CC0 1.0 (public domain dedication)
+https://creativecommons.org/publicdomain/zero/1.0/
+Changes: tempo adjusted, high-frequency attenuation, transient compression,
+reduced gain, short fades; mono 44.1 kHz MP3. Used only after sound is enabled.

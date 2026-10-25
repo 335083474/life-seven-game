@@ -220,6 +220,17 @@
       "modifications": "Source and subset provenance records"
     },
     {
+      "file": "page-turn-soft.mp3",
+      "bytes": 16972,
+      "sha256": "e01179f7cc3e575960351e672d64076166d2295c707be0d16c9859d19dc5189d",
+      "title": "Pages that Turn #5 - softened page turn",
+      "creator": "Joseph SARDIN / BigSoundBank",
+      "source": "https://bigsoundbank.com/pages-that-turn-5-s2212.html",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "modifications": "Tempo 1.35x, 90 Hz high-pass, 2200 Hz low-pass, transient compression, reduced gain, short fades, mono 44.1 kHz MP3. Runtime fade-in and non-overlapping paper playback."
+    },
+    {
       "file": "rapier-LICENSE.txt",
       "bytes": 11343,
       "sha256": "4c05555705e3efde601fb1252ae48f1d63992af8a8fb8947745b7fa834e8f519",

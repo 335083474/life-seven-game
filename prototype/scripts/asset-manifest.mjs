@@ -8,6 +8,7 @@ const skins=JSON.parse(await fs.readFile(path.join(root,'dice-skins.json'),'utf8
 const fonts=JSON.parse(await fs.readFile(path.join(root,'fonts.json'),'utf8'));
 for(const name of (await fs.readdir(root)).filter(n=>n!=='manifest.json').sort()){
   const data=await fs.readFile(path.join(root,name));
+  if(name==='page-turn-soft.mp3'){files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:'Pages that Turn #5 - softened page turn',creator:'Joseph SARDIN / BigSoundBank',source:'https://bigsoundbank.com/pages-that-turn-5-s2212.html',license:'CC0 1.0',licenseUrl:'https://creativecommons.org/publicdomain/zero/1.0/',modifications:'Tempo 1.35x, 90 Hz high-pass, 2200 Hz low-pass, transient compression, reduced gain, short fades, mono 44.1 kHz MP3. Runtime fade-in and non-overlapping paper playback.'});continue;}
   if(name==='rapier-LICENSE.txt'){files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:'Rapier 3D physics engine license',creator:'Dimforge contributors',source:'https://github.com/dimforge/rapier.js',license:'Apache-2.0',licenseUrl:'https://www.apache.org/licenses/LICENSE-2.0',modifications:'Unmodified license text'});continue;}
   if(name.startsWith('archive-')||name==='fonts.json'){
     const font=fonts.find(f=>name===f.file||name===f.file.replace('.woff2','-OFL.txt'));

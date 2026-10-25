@@ -54,3 +54,10 @@ Three.js 的 MIT 许可和美术署名随构建附于 `THIRD_PARTY_NOTICES.txt`�
 用户下载的原始 GLB 已收到，并保存在忽略目录 `artifacts/dice-skins/source/rune/original.glb`；源文件未修改。原包中的 `d10` 实际为 00–90 百分骰，不包含配套 0–9 个位骰。`prepare-dice-skins.mjs rune` 目前只输出用于检查的 `percentile`，不是可发布的整副骰子。已转换旧 Specular/Glossiness 材质、修正发白的 IOR 和几乎不透明的混合模式。部分连体刻字不能简单删除末尾零来获得完整个位字形。
 
 物理检查：使用两份同一百分骰几何做碰撞检查（并非声称原包有两颗），12 条指定面轨迹通过；最终游戏数字映射尚未冻结。暗色符文目前只开放预览；补齐配套个位骰后才能选用。独立审查预览：`rune-audit.html`。
+
+
+## 柔和翻页声（2026-10-26）
+
+翻页不再使用1400Hz高通的合成白噪声。改用 Joseph SARDIN / BigSoundBank 的 Pages that Turn #5（CC0）真实纸页录音，经2200Hz低通、瞬态压缩、降音量与淡入淡出处理。仅在玩家开启声音后请求和解码；关闭声音会淡出当前纸声并取消尚未加载完成的播放请求。连续操作不叠加纸声，加载失败时保持安静。
+
+原始音频保留在忽略目录 artifacts/audio-candidates-20261025/raw/page-turn.mp3。运行 `python prototype/scripts/prepare-paper-audio.py` 可复现处理；完整来源、修改与发行文件哈希在资产清单中。FFmpeg解码验证通过，成品约1.35秒，文件峰值约-23.5dBFS，运行时纸声增益0.6。未以自动检查代替玩家对音色的主观评价。
