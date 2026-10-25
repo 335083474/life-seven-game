@@ -2,6 +2,54 @@
   "version": 2,
   "assets": [
     {
+      "file": "archive-body-OFL.txt",
+      "bytes": 5171,
+      "sha256": "1a25e35da1031c6c3436fde545bb9cb5aca954e9873afe510c834b8b79bd21a0",
+      "title": "LXGW WenKai",
+      "creator": "LXGW / Fontworks",
+      "source": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.530/LXGWWenKai-Regular.ttf",
+      "license": "SIL OFL 1.1",
+      "licenseUrl": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/OFL.txt",
+      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b"
+    },
+    {
+      "file": "archive-body.woff2",
+      "bytes": 113268,
+      "sha256": "e9a4ea30f4605f5135a521c7c33af79818faecf23393a04d604a4eabe2908864",
+      "title": "LXGW WenKai",
+      "creator": "LXGW / Fontworks",
+      "source": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.530/LXGWWenKai-Regular.ttf",
+      "license": "SIL OFL 1.1",
+      "licenseUrl": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/OFL.txt",
+      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b"
+    },
+    {
+      "file": "archive-display-OFL.txt",
+      "bytes": 4397,
+      "sha256": "d7bdb1cee215b689e23c2f95672a6084c790542170648267a55114103d756a08",
+      "title": "Ma Shan Zheng",
+      "creator": "The Ma Shan Zheng Project Authors",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf",
+      "license": "SIL OFL 1.1",
+      "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/OFL.txt",
+      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb"
+    },
+    {
+      "file": "archive-display.woff2",
+      "bytes": 197072,
+      "sha256": "6bcbc5db61b8300114800e770fce31498b6dd6dd98592bef91da964ecd853db8",
+      "title": "Ma Shan Zheng",
+      "creator": "The Ma Shan Zheng Project Authors",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf",
+      "license": "SIL OFL 1.1",
+      "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/OFL.txt",
+      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb"
+    },
+    {
       "file": "book_encyclopedia_set_01.glb",
       "bytes": 357832,
       "sha256": "df0b9eec46179c9a0bc558c08c494dad919699d2b7f66d45eec70135bbc04f0c",
@@ -123,6 +171,17 @@
       "license": "CC0 1.0",
       "licenseUrl": "https://polyhaven.com/license",
       "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "fonts.json",
+      "bytes": 1474,
+      "sha256": "8126015970c431987178bb62de5b971b9cbd923500169e509d71796750304dd3",
+      "title": "Book typography source records",
+      "creator": "Font authors listed in fonts.json",
+      "source": "fonts.json",
+      "license": "SIL OFL 1.1",
+      "licenseUrl": "https://openfontlicense.org/",
+      "modifications": "Source and subset provenance records"
     },
     {
       "file": "victor-book.glb",

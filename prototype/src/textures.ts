@@ -1,6 +1,6 @@
 import * as T from 'three';
 
-const serif='"Noto Serif CJK SC","Songti SC","SimSun",serif';
+const serif='"Archive Body","Kaiti SC","KaiTi",serif';
 function canvas(w:number,h:number){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
 export function texture(c:HTMLCanvasElement){const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.anisotropy=8;return t;}
 let seed=1977;function random(){seed=(Math.imul(seed,1664525)+1013904223)|0;return (seed>>>0)/4294967296;}

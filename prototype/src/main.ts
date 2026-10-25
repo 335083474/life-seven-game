@@ -5,11 +5,13 @@ import {LifeCard} from './objects';
 import {RelicDie as TenDie} from './relic-die';
 import {installDiceInspector} from './dice-inspector';
 import {ImportedFateBook as FateBook} from './fate-book';
-import {initialState,elements,intentions,toggleElement,chance,d100,settle} from './state.mjs';
+import {initialState,elements,intentions,toggleElement,d100,settle} from './state.mjs';
 import './style.css';
+import './book-typography.css';
+import {bookLeft,bookRight} from './book-content';
 
 const $=<E extends HTMLElement=HTMLElement>(selector:string)=>document.querySelector<E>(selector)!;
-const esc=(v:unknown)=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const fontsReady=Promise.all([document.fonts.load('26px "Archive Body"'),document.fonts.load('48px "Archive Display"')]).catch(()=>[]);
 const stage=$('#stage'),pageHost=$('#pages'),state=initialState();
 let renderer:T.WebGLRenderer;
 try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});}catch{
@@ -23,7 +25,7 @@ const key=new T.DirectionalLight('#ffddb0',2.2);key.position.set(-3.5,8.5,3.2);k
 const readingLight=new T.SpotLight('#ffe8bd',70,20,.70,1,2);readingLight.position.set(1,7.5,1.5);readingLight.target.position.set(0,.7,0);scene.add(readingLight,readingLight.target);
 const rim=new T.DirectionalLight('#a8c3d7',.38);rim.position.set(5,5,-4);scene.add(rim);
 const diceLight=new T.PointLight('#f0d6a5',7,7,2);diceLight.position.set(5.2,3.3,1.5);scene.add(diceLight);
-const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(({book:model,dice:models})=>{dice.forEach((die,i)=>die.setModel(models[i]));installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
+const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(async({book:model,dice:models})=>{await fontsReady;dice.forEach((die,i)=>die.setModel(models[i]));installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
 const book=new FateBook();scene.add(book.group);
 const cards=elements.map((_element,index)=>new LifeCard(index));cards.forEach(c=>scene.add(c.group));
 const dice=[new TenDie(true),new TenDie(false)];dice.forEach(d=>scene.add(d.group));
@@ -52,17 +54,9 @@ function layout(){
   if(mobile){dice.forEach(d=>d.group.scale.setScalar(.26));}else dice.forEach(d=>d.group.scale.setScalar(.37));cameraTargets();dirty=true;
 }
 
-const arch=`<svg class="book-etching" viewBox="0 0 280 195" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8"><path d="M92 166V78a48 48 0 0 1 96 0v88zM99 166V79a41 41 0 0 1 82 0v87"/><path d="M115 164V82a25 25 0 0 1 50 0v82M70 168h140M54 178h171M130 164l12-33 8 32M142 132v-20M142 144l-10 9m12-9 12 9"/><circle cx="140" cy="79" r="18" stroke-dasharray="1 4"/><path d="M20 164l40-55 33 55M186 164l34-43 39 43M27 164h59m109 0h55M130 22h20M140 12v20"/><path d="M46 168l-6 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9m20-9-7 9" opacity=".45"/></g></svg>`;
-const pageNumber=(n:number)=>`<span class="page-number">— ${String(n).padStart(2,'0')} —</span>`;
 const goal=()=>intentions.find(g=>g.id===state.intention)||intentions[0];
-function leftContent(){const g=goal();return `<span class="kicker">第三章 · 青年之书</span><div class="chapter-roman">Ⅲ</div><div class="rule"></div><h2>${state.page<2?'一生，尚未写定。':'走过，便有了痕迹。'}</h2>${arch}<p>${state.page===0?'你来到一座陌生的城市。<br>行囊很轻，来日很长。':state.page===1?esc(g.title)+'。<br>'+esc(g.short):'有些选择带来抵达，<br>有些选择教人等待。'}</p><div class="faint">第二十二年 · 青春远行</div>${pageNumber(22+state.page*2)}`;}
-function rightContent(){const g=goal();
-  if(state.page===0)return `<span class="kicker">第三章 · 青年之书</span><h2>青春远行</h2><p>这一页，你想如何书写？</p><div class="intentions">${intentions.map((intent,i)=>`<button class="intention" data-intent="${intent.id}" aria-pressed="${state.intention===intent.id}"><span>${'ABC'[i]}</span><span><strong>${intent.title}</strong><small>${intent.short}</small></span></button>`).join('')}</div><button class="page-next" data-next>写下这一选择 <span>→</span></button>${pageNumber(23)}`;
-  if(state.page===1)return `<span class="kicker">此刻，由你决定</span><h2>此刻，你所倚仗的</h2><p class="small">${esc(g.description)}</p><div class="selection-slots">${[0,1].map(i=>{const e=elements.find(c=>c.id===state.selected[i]);return `<div class="selection-slot ${e?'filled':''}">${e?`<strong>${e.name}</strong><small>${e.level===2?'Ⅱ · 精进':'Ⅰ · 初识'}</small>`:'<span class="empty">＋</span><small>从桌面选择</small>'}</div>`;}).join('')}</div><div class="chance"><span>这次尝试的成功率</span><strong>${chance(state)}<small>%</small></strong></div><button class="page-roll" data-roll ${state.selected.length===2?'':'disabled'}>掷下命运之骰 <span>↗</span></button><button class="page-back" data-back>← 重写选择</button>${pageNumber(25)}`;
-  const roll=state.roll!;const successful=roll.outcome==='成功'||roll.outcome==='大成功';return `<span class="kicker">往事已成 · 人生的一页</span><div class="result-number">${String(roll.dice).padStart(2,'0')}</div><div class="result-caption">${roll.outcome}</div><div class="rule"></div><h3>${esc(g.title)}</h3><p class="result-prose">${successful?g.success:g.failure}</p><div class="result-meta">D100 · 成功率 ${roll.probability}% · ${state.selected.map(id=>elements.find(e=>e.id===id)!.name).join('、')}</div><button class="page-next" data-another>另写一段人生 <span>→</span></button>${pageNumber(27)}`;
-}
-function pageFacts(){return {leftTitle:'一生，尚未写定。',leftBody:goal().short,rightTitle:state.page===0?'青春远行':state.page===1?'此刻，你所倚仗的':state.roll?.outcome||'往事已成',rightBody:state.page===0?'这一页，你想把日子写成什么模样？\n'+intentions.map(i=>i.title).join('\n'):state.page===1?goal().description:state.roll?.outcome==='成功'||state.roll?.outcome==='大成功'?goal().success:goal().failure};}
-function renderPages(){leftDOM.innerHTML=leftContent();rightDOM.innerHTML=rightContent();updateTargets();$('#selection-count').textContent=state.page===1?`已选 ${state.selected.length} / 2 · ${state.selected.length<2?'点选桌上元素':'可以掷骰了'}`:state.page===2?'这一页，已经写入往事':'七种元素 · 陪你走过这一生';$('#selection-hint').textContent=state.page===1?'选择此刻的倚仗':'此生所持';dirty=true;}
+function pageFacts(){return {leftTitle:state.page<2?'一生，尚未写定':'走过，便有痕迹',leftBody:state.page===0?'你来到一座陌生的城市。\n行囊很轻，来日很长。':state.page===1?goal().title+'。\n'+goal().short:'有些选择带来抵达，\n有些选择教人等待。',rightTitle:state.page===0?'青春远行':state.page===1?'此刻的倚仗':state.roll?.outcome||'往事已成',rightBody:state.page===0?'行至此处，你想如何落笔？\n'+intentions.map(i=>i.title).join('\n'):state.page===1?goal().description:state.roll?.outcome==='成功'||state.roll?.outcome==='大成功'?goal().success:goal().failure};}
+function renderPages(){leftDOM.dataset.page=rightDOM.dataset.page=String(state.page);leftDOM.innerHTML=bookLeft(state);rightDOM.innerHTML=bookRight(state);updateTargets();$('#selection-count').textContent=state.page===1?`已选 ${state.selected.length} / 2 · ${state.selected.length<2?'点选桌上元素':'可以掷骰了'}`:state.page===2?'这一页，已经写入往事':'七种元素 · 陪你走过这一生';$('#selection-hint').textContent=state.page===1?'选择此刻的倚仗':'此生所持';dirty=true;}
 function setPagesVisible(visible:boolean){leftDOM.classList.toggle('inactive',!visible||mobile);rightDOM.classList.toggle('inactive',!visible);}
 function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit,.inspect-dice'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');toastTimer=window.setTimeout(()=>$('#notice').classList.remove('visible'),3300);}

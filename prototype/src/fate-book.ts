@@ -62,8 +62,8 @@ export class ImportedFateBook{
   private page(title:string,body:string,half=1){
     const canvas=document.createElement('canvas');canvas.width=768;canvas.height=1100;const ctx=canvas.getContext('2d')!;
     if(this.atlas?.image){const image=this.atlas.image as HTMLImageElement;ctx.drawImage(image,half*image.width/2,0,image.width/2,image.height,0,0,768,1100);}else{ctx.fillStyle='#dccba0';ctx.fillRect(0,0,768,1100);}
-    ctx.fillStyle='#74603e';ctx.font='24px "SimSun",serif';ctx.fillText('命运之书 · 青春远行',92,115);ctx.fillStyle='#233629';ctx.font='46px "SimSun",serif';ctx.fillText(title,92,252);ctx.fillStyle='#5c513b';ctx.font='27px "SimSun",serif';
-    let line='',y=366;for(const character of body){if(character==='\n'||ctx.measureText(line+character).width>570){ctx.fillText(line,92,y);line=character==='\n'?'':character;y+=53;}else line+=character;}ctx.fillText(line,92,y);
+    ctx.fillStyle='#725338';ctx.font='27px "Archive Body","KaiTi",serif';ctx.fillText('命运之书 · 青年纪',92,115);ctx.fillStyle='#38291e';ctx.font='68px "Archive Display","KaiTi",serif';ctx.fillText(title,92,248);ctx.strokeStyle='#84613b';ctx.beginPath();ctx.moveTo(92,285);ctx.lineTo(662,285);ctx.stroke();ctx.fillStyle='#4d3827';ctx.font='38px "Archive Body","KaiTi",serif';
+    let line='',y=366;for(const character of body){if(character==='\n'||ctx.measureText(line+character).width>570){ctx.fillText(line,92,y);line=character==='\n'?'':character;y+=67;}else line+=character;}ctx.fillText(line,92,y);
     const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.anisotropy=8;return texture;
   }
   beginTurn(oldTitle:string,oldBody:string,newTitle:string,newBody:string){

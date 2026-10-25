@@ -27,6 +27,16 @@ Each source page and shipped file hash is listed in assets/manifest.json.
 Changes: selected candleholder 03 and encyclopedia books 01/06/13,
 GLB/Meshopt and WebP compression, scale, placement and scene lighting.
 
+BOOK TYPOGRAPHY
+Fate Archive Body is a renamed, character-subset derivative of LXGW WenKai:
+https://github.com/lxgw/LxgwWenKai
+Fate Archive Display is a renamed, character-subset derivative of Ma Shan Zheng:
+https://github.com/googlefonts/mashanzheng
+Both are distributed under SIL Open Font License 1.1, with original copyright
+and full license notices in assets/archive-body-OFL.txt and
+assets/archive-display-OFL.txt. Source versions and SHA256: assets/fonts.json.
+These derivative names do not imply endorsement by the original font authors.
+
 THREE.JS
 The MIT License
 
