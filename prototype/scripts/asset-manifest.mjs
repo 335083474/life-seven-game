@@ -6,13 +6,13 @@ const source='https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d95
 const files=[];
 for(const name of (await fs.readdir(root)).filter(n=>n!=='manifest.json').sort()){
   const data=await fs.readFile(path.join(root,name));
-  const hero=name==='victor-book.glb';
+  const hero=name==='victor-book.glb',dice=name.startsWith('fate-d');
   const id=name.startsWith('ferndale')?'ferndale_studio_09':name.replace(/-(color|normal|roughness)\.webp$|\.glb$/,'');
-  files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:hero?'Book':id,
-    creator:hero?'victorberdugo1':'Poly Haven contributors (see source page)',source:hero?source:'https://polyhaven.com/a/'+id,
-    license:hero?'CC BY 4.0':'CC0 1.0',licenseUrl:hero?'https://creativecommons.org/licenses/by/4.0/':'https://polyhaven.com/license',
-    modifications:hero?'WebP textures and Meshopt compression; runtime triangle split, hinge rig, added Chinese print and deforming page animation. Original model is static.':'Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting.',
-    ...(hero?{originalSha256:'3210393d368848c7c3b8f78741dbfac52d1ebe0060b768e0204639bfe15e7c83'}:{})});
+  files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:hero?'Book':dice?'Pointy Metal/Crystal Dice':id,
+    creator:hero?'victorberdugo1':dice?'Tenshinzo':'Poly Haven contributors (see source page)',source:hero?source:dice?'https://sketchfab.com/3d-models/pointy-metalcrystal-dice-a4f0e91b8cad44a682f09d9bae14c114':'https://polyhaven.com/a/'+id,
+    license:hero||dice?'CC BY 4.0':'CC0 1.0',licenseUrl:hero||dice?'https://creativecommons.org/licenses/by/4.0/':'https://polyhaven.com/license',
+    modifications:hero?'WebP textures and Meshopt compression; runtime triangle split, hinge rig, added Chinese print and deforming page animation. Original model is static.':dice?'Extracted original d10/d100 body and solid numeral meshes; Meshopt compression. Runtime axial shortening, dark bronze material, added scroll relief, metal frames and gemstone finials.':'Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting.',
+    ...(hero?{originalSha256:'3210393d368848c7c3b8f78741dbfac52d1ebe0060b768e0204639bfe15e7c83'}:dice?{originalSha256:'e3af967b84c6a0d8c8d03370854af55ad19da37ad52ada2e7478ef32457f217a'}:{})});
 }
 await fs.writeFile(path.join(root,'manifest.json'),JSON.stringify({version:2,assets:files},null,2)+'\n');
 console.log(`${files.length} licensed assets; ${files.reduce((n,f)=>n+f.bytes,0)} bytes`);

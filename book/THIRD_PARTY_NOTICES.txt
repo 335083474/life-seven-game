@@ -10,6 +10,15 @@ Card faces also adapt the book's original parchment and ornamental border,
 with new Chinese typography and element symbols, under the same CC BY 4.0.
 Attribution is provided without implying endorsement by the original author.
 
+Pointy Metal/Crystal Dice by Tenshinzo
+https://sketchfab.com/3d-models/pointy-metalcrystal-dice-a4f0e91b8cad44a682f09d9bae14c114
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Changes: extracted d10 and d100 body/numeral meshes, Meshopt compression,
+axial shortening, dark bronze materials, added scroll relief, metal frames,
+gemstone finials, face calibration and interactive inspection viewer.
+The original creator does not endorse this adaptation.
+
 Poly Haven assets, CC0 1.0:
 https://polyhaven.com/license
 brass_candleholders (Tina), vintage_pocket_watch (Tal Swicegood),

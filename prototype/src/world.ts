@@ -22,11 +22,11 @@ export class ArchiveWorld{
     const manager=new T.LoadingManager();manager.onProgress=(_url,loaded,total)=>progress(`正在迎回旧日的物件 · ${loaded} / ${total}`);
     const loader=new GLTFLoader(manager).setMeshoptDecoder(MeshoptDecoder),textures=new T.TextureLoader(manager);
     const map=async(name:string,color=false)=>{const t=await textures.loadAsync(base+name);t.colorSpace=color?T.SRGBColorSpace:T.NoColorSpace;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());t.wrapS=t.wrapT=T.RepeatWrapping;return t;};
-    const [candle,watch,books,woodColor,woodNormal,woodRough,coverColor,coverNormal,coverRough,hdr,hero]=await Promise.all([
+    const [candle,watch,books,woodColor,woodNormal,woodRough,coverColor,coverNormal,coverRough,hdr,hero,percent,unit]=await Promise.all([
       loader.loadAsync(base+'brass_candleholders.glb'),loader.loadAsync(base+'vintage_pocket_watch.glb'),loader.loadAsync(base+'book_encyclopedia_set_01.glb'),
       map('dark_wood-color.webp',true),map('dark_wood-normal.webp'),map('dark_wood-roughness.webp'),
       map('book_pattern-color.webp',true),map('book_pattern-normal.webp'),map('book_pattern-roughness.webp'),
-      new HDRLoader(manager).loadAsync(base+'ferndale-studio-09.hdr'),loader.loadAsync(base+'victor-book.glb')
+      new HDRLoader(manager).loadAsync(base+'ferndale-studio-09.hdr'),loader.loadAsync(base+'victor-book.glb'),loader.loadAsync(base+'fate-d100.glb'),loader.loadAsync(base+'fate-d10.glb')
     ]);
     const pmrem=new T.PMREMGenerator(renderer);const environment=pmrem.fromEquirectangular(hdr);scene.environment=environment.texture;scene.environmentIntensity=.40;hdr.dispose();pmrem.dispose();
 
@@ -50,7 +50,7 @@ export class ArchiveWorld{
       const holder=new T.Group();holder.add(child);const scale=11.5;holder.scale.setScalar(scale);holder.rotation.set(0,-.25+index*.11,Math.PI/2);
       const thickness=(bounds.max.x-bounds.min.x)*scale;height+=thickness/2;holder.position.set(4.9+index*.06,height-.02,-3.25+index*.04);height+=thickness/2;this.group.add(holder);
     }
-    progress('书页已经备好。');return hero.scene;
+    progress('书页已经备好。');return {book:hero.scene,dice:[percent.scene,unit.scene]};
   }
   update(time:number,turning:boolean,opening:number){
     if(this.watchHolder)this.watchHolder.visible=opening>.4;

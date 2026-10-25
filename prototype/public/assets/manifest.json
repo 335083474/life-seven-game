@@ -90,6 +90,30 @@
       "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
     },
     {
+      "file": "fate-d10.glb",
+      "bytes": 83744,
+      "sha256": "29abe78aec4ac62a60b59fd3361c93dbdc37ea85bdf924e76e319c6a78e1bd4f",
+      "title": "Pointy Metal/Crystal Dice",
+      "creator": "Tenshinzo",
+      "source": "https://sketchfab.com/3d-models/pointy-metalcrystal-dice-a4f0e91b8cad44a682f09d9bae14c114",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Extracted original d10/d100 body and solid numeral meshes; Meshopt compression. Runtime axial shortening, dark bronze material, added scroll relief, metal frames and gemstone finials.",
+      "originalSha256": "e3af967b84c6a0d8c8d03370854af55ad19da37ad52ada2e7478ef32457f217a"
+    },
+    {
+      "file": "fate-d100.glb",
+      "bytes": 135452,
+      "sha256": "2703a79e34ff8fbe5ca6d05070ec0ee0750d168bed2c0b34d96da7d37125f331",
+      "title": "Pointy Metal/Crystal Dice",
+      "creator": "Tenshinzo",
+      "source": "https://sketchfab.com/3d-models/pointy-metalcrystal-dice-a4f0e91b8cad44a682f09d9bae14c114",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "Extracted original d10/d100 body and solid numeral meshes; Meshopt compression. Runtime axial shortening, dark bronze material, added scroll relief, metal frames and gemstone finials.",
+      "originalSha256": "e3af967b84c6a0d8c8d03370854af55ad19da37ad52ada2e7478ef32457f217a"
+    },
+    {
       "file": "ferndale-studio-09.hdr",
       "bytes": 1598657,
       "sha256": "d23f07c2cbe711d78c1e8842acea2e5c72a764778aafb98d2edb355337021e31",

@@ -1,7 +1,9 @@
 import * as T from 'three';
 import {CSS3DRenderer,CSS3DObject} from 'three/addons/renderers/CSS3DRenderer.js';
 import {ArchiveWorld} from './world';
-import {LifeCard,TenDie} from './objects';
+import {LifeCard} from './objects';
+import {RelicDie as TenDie} from './relic-die';
+import {installDiceInspector} from './dice-inspector';
 import {ImportedFateBook as FateBook} from './fate-book';
 import {initialState,elements,intentions,toggleElement,chance,d100,settle} from './state.mjs';
 import './style.css';
@@ -20,7 +22,8 @@ scene.add(new T.AmbientLight('#d9d3be',.10));const hemi=new T.HemisphereLight('#
 const key=new T.DirectionalLight('#ffddb0',2.2);key.position.set(-3.5,8.5,3.2);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-10;key.shadow.camera.right=10;key.shadow.camera.top=9;key.shadow.camera.bottom=-9;key.shadow.camera.far=25;key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=3;scene.add(key);
 const readingLight=new T.SpotLight('#ffe8bd',70,20,.70,1,2);readingLight.position.set(1,7.5,1.5);readingLight.target.position.set(0,.7,0);scene.add(readingLight,readingLight.target);
 const rim=new T.DirectionalLight('#a8c3d7',.38);rim.position.set(5,5,-4);scene.add(rim);
-const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(model=>{book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
+const diceLight=new T.PointLight('#f0d6a5',7,7,2);diceLight.position.set(5.2,3.3,1.5);scene.add(diceLight);
+const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(({book:model,dice:models})=>{dice.forEach((die,i)=>die.setModel(models[i]));installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
 const book=new FateBook();scene.add(book.group);
 const cards=elements.map((_element,index)=>new LifeCard(index));cards.forEach(c=>scene.add(c.group));
 const dice=[new TenDie(true),new TenDie(false)];dice.forEach(d=>scene.add(d.group));
@@ -61,7 +64,7 @@ function rightContent(){const g=goal();
 function pageFacts(){return {leftTitle:'一生，尚未写定。',leftBody:goal().short,rightTitle:state.page===0?'青春远行':state.page===1?'此刻，你所倚仗的':state.roll?.outcome||'往事已成',rightBody:state.page===0?'这一页，你想把日子写成什么模样？\n'+intentions.map(i=>i.title).join('\n'):state.page===1?goal().description:state.roll?.outcome==='成功'||state.roll?.outcome==='大成功'?goal().success:goal().failure};}
 function renderPages(){leftDOM.innerHTML=leftContent();rightDOM.innerHTML=rightContent();updateTargets();$('#selection-count').textContent=state.page===1?`已选 ${state.selected.length} / 2 · ${state.selected.length<2?'点选桌上元素':'可以掷骰了'}`:state.page===2?'这一页，已经写入往事':'七种元素 · 陪你走过这一生';$('#selection-hint').textContent=state.page===1?'选择此刻的倚仗':'此生所持';dirty=true;}
 function setPagesVisible(visible:boolean){leftDOM.classList.toggle('inactive',!visible||mobile);rightDOM.classList.toggle('inactive',!visible);}
-function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
+function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit,.inspect-dice'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');toastTimer=window.setTimeout(()=>$('#notice').classList.remove('visible'),3300);}
 
 // Audio is entirely opt-in; no downloads or autoplay.
@@ -97,8 +100,8 @@ rightDOM.addEventListener('click',event=>{const button=(event.target as HTMLElem
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
 $('#restart').addEventListener('click',()=>{if(busy){toast('请等这一页落定。');return;}dialog.close();state.page=0;state.roll=null;state.selected=[];state.intention='bookshop';cards.forEach(c=>c.selected=false);renderPages();if(state.opened)closeBook();});
 $('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');});
-document.addEventListener('keydown',e=>{if(dialog.open||busy)return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened&&state.page===0)turnTo(1);if(e.key==='ArrowLeft'&&state.opened&&state.page===1)turnTo(0);});
-window.addEventListener('pointermove',e=>{if(mobile||busy||dialog.open)return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open]')||busy)return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened&&state.page===0)turnTo(1);if(e.key==='ArrowLeft'&&state.opened&&state.page===1)turnTo(0);});
+window.addEventListener('pointermove',e=>{if(mobile||busy||document.querySelector('dialog[open]'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
 window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&!busy);});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;dirty=true;});
 renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();toast('画面暂时中断。恢复后可以继续这一页。');});
