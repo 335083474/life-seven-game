@@ -16,7 +16,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.055;
 button,input,textarea{font:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.38}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ochre);outline-offset:4px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--ochre);outline-offset:4px}
 button:active{transform:translateY(1px)}
 ::selection{background:var(--ochre);color:var(--night)}
 .serif{font-family:var(--serif)}.caps{font-family:Georgia,serif;font-size:10px;letter-spacing:.25em;text-transform:uppercase}.thin{font-weight:300}.hidden{display:none!important}
@@ -32,7 +32,7 @@ button:active{transform:translateY(1px)}
 .topnav button.active,.topnav button:hover{color:#f4e6c9}.topnav button.active:after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--ochre)}
 .topmeta{font-size:10px;letter-spacing:.15em;color:#bea984;display:flex;align-items:center;gap:14px}.topmeta span{border:1px solid rgba(188,157,102,.4);padding:5px 10px}
 .nav-mobile{display:none}
-.btn{border:1px solid transparent;padding:14px 24px;display:inline-flex;gap:14px;align-items:center;justify-content:center;min-height:48px;letter-spacing:.08em;font-size:12px;font-weight:500;background:transparent;color:inherit;transition:background .2s,border-color .2s,color .2s;white-space:nowrap}
+.btn{text-decoration:none;border:1px solid transparent;padding:14px 24px;display:inline-flex;gap:14px;align-items:center;justify-content:center;min-height:48px;letter-spacing:.08em;font-size:12px;font-weight:500;background:transparent;color:inherit;transition:background .2s,border-color .2s,color .2s;white-space:nowrap}
 .btn .signet{width:17px;height:17px}.btn--gold{background:#c4a474;color:#172820;border-color:#d4b987}.btn--gold:hover:not(:disabled){background:#efd09c}
 .btn--line{border-color:rgba(205,181,135,.56);color:#e9dcc4}.btn--line:hover{background:rgba(232,216,177,.1)}
 .btn--paper{background:var(--pine);border-color:#20372e;color:#f6e8cf}.btn--paper:hover{background:#345047}
@@ -222,5 +222,5 @@ button:active{transform:translateY(1px)}
 <div id="app"></div>
 <script type="importmap">{"imports":{"./art.js":"./art.js?v=speed-20261024-1","./locale.mjs":"./locale.mjs?v=speed-20261024-1","./locales/en.mjs":"./locales/en.mjs?v=speed-20261024-1","./backend/events.mjs":"./backend/events.mjs?v=speed-20261024-1","./backend/life-engine.mjs":"./backend/life-engine.mjs?v=speed-20261024-1","./backend/rules.mjs":"./backend/rules.mjs?v=speed-20261024-1","./backend/inventory.mjs":"./backend/inventory.mjs?v=speed-20261024-1","./backend/settings.mjs":"./backend/settings.mjs?v=speed-20261024-1","./backend/life-locale.mjs":"./backend/life-locale.mjs?v=speed-20261024-1","./backend/story-facts.mjs":"./backend/story-facts.mjs?v=speed-20261024-1","./backend/npc-plans.mjs":"./backend/npc-plans.mjs?v=speed-20261024-1"}}</script>
 <script src="ai-client.js?v=speed-20261024-1"></script>
-<script type="module" src="game.js?v=speed-20261024-1"></script>
+<script type="module" src="game.js?v=book-entry-20261025"></script>
 </body></html>
