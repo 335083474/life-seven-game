@@ -1,3 +1,22 @@
+ART ASSETS
+
+Book by victorberdugo1
+https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Changes: compressed textures and geometry; split mesh at spine; custom hinge,
+Chinese printing and deforming page animation. The source model is static.
+Attribution is provided without implying endorsement by the original author.
+
+Poly Haven assets, CC0 1.0:
+https://polyhaven.com/license
+brass_candleholders (Tina), vintage_pocket_watch (Tal Swicegood),
+book_encyclopedia_set_01, dark_wood, book_pattern, ferndale_studio_09.
+Each source page and shipped file hash is listed in assets/manifest.json.
+Changes: selected candleholder 03 and encyclopedia books 01/06/13,
+GLB/Meshopt and WebP compression, scale, placement and scene lighting.
+
+THREE.JS
 The MIT License
 
 Copyright © 2010-2026 three.js authors

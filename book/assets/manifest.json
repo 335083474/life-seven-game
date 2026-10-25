@@ -1,0 +1,127 @@
+{
+  "version": 2,
+  "assets": [
+    {
+      "file": "book_encyclopedia_set_01.glb",
+      "bytes": 357832,
+      "sha256": "df0b9eec46179c9a0bc558c08c494dad919699d2b7f66d45eec70135bbc04f0c",
+      "title": "book_encyclopedia_set_01",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/book_encyclopedia_set_01",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "book_pattern-color.webp",
+      "bytes": 411920,
+      "sha256": "a6106885a218a936b7acbf293a3726bdac73edac3f097049fd6dabc5e8118772",
+      "title": "book_pattern",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/book_pattern",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "book_pattern-normal.webp",
+      "bytes": 176766,
+      "sha256": "5afd0329b339d5a1c8b9cc7c0b46df104b3deea6a51f6c22abdc55be658b6ccd",
+      "title": "book_pattern",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/book_pattern",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "book_pattern-roughness.webp",
+      "bytes": 576968,
+      "sha256": "0602d2c9a66b915336b8a388e52a68c10efbdb2e3efe6b19edff4e62deff42c9",
+      "title": "book_pattern",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/book_pattern",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "brass_candleholders.glb",
+      "bytes": 886044,
+      "sha256": "d1af8283adbeb797a8332c8939e7650c3a13f2b1a588d451741a1d4a7435373c",
+      "title": "brass_candleholders",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/brass_candleholders",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "dark_wood-color.webp",
+      "bytes": 199962,
+      "sha256": "8ab5192a500af4e427347d29611fb72a37811fdceb1447aaf0411ea3b6a45594",
+      "title": "dark_wood",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/dark_wood",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "dark_wood-normal.webp",
+      "bytes": 18026,
+      "sha256": "44f4af79031ec4ae43d14418462e0d8c005afedaae5189e2e4a95915aeed14a7",
+      "title": "dark_wood",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/dark_wood",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "dark_wood-roughness.webp",
+      "bytes": 156856,
+      "sha256": "8dcedf24b3b7391554f530734b01947ff2bbb8bdee55ef29037ef729e573b9d4",
+      "title": "dark_wood",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/dark_wood",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "ferndale-studio-09.hdr",
+      "bytes": 1598657,
+      "sha256": "d23f07c2cbe711d78c1e8842acea2e5c72a764778aafb98d2edb355337021e31",
+      "title": "ferndale_studio_09",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/ferndale_studio_09",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    },
+    {
+      "file": "victor-book.glb",
+      "bytes": 3610476,
+      "sha256": "d18d874bf5a4bd7f646ee6b364ba52fe6d67777ac9a74d805b2b17389985c0f2",
+      "title": "Book",
+      "creator": "victorberdugo1",
+      "source": "https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "modifications": "WebP textures and Meshopt compression; runtime triangle split, hinge rig, added Chinese print and deforming page animation. Original model is static.",
+      "originalSha256": "3210393d368848c7c3b8f78741dbfac52d1ebe0060b768e0204639bfe15e7c83"
+    },
+    {
+      "file": "vintage_pocket_watch.glb",
+      "bytes": 380036,
+      "sha256": "a824fd41abe1cce2498cd14cbccd0feecbb002171bfb1b4c98cfb9d3bc02daf9",
+      "title": "vintage_pocket_watch",
+      "creator": "Poly Haven contributors (see source page)",
+      "source": "https://polyhaven.com/a/vintage_pocket_watch",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://polyhaven.com/license",
+      "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
+    }
+  ]
+}

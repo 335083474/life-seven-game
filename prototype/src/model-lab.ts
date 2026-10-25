@@ -1,0 +1,10 @@
+import * as T from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(1);renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.2;document.body.appendChild(renderer.domElement);
+const scene=new T.Scene();scene.background=new T.Color('#242a2c');const camera=new T.PerspectiveCamera(40,innerWidth/innerHeight,.01,50);camera.position.set(0,5,4);const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.1,0);controls.update();
+const room=new RoomEnvironment(),pmrem=new T.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(room,.04).texture;room.dispose();pmrem.dispose();scene.environmentIntensity=.6;scene.add(new T.HemisphereLight('#ffffff','#24221d',1));const light=new T.DirectionalLight('#ffe7c7',3);light.position.set(-3,6,4);scene.add(light);
+const gltf=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('/assets/victor-book.glb');scene.add(gltf.scene);document.querySelector('#parts')!.textContent='原模型分件';gltf.scene.traverse(child=>{if(child instanceof T.Mesh){const label=document.createElement('label'),checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=true;checkbox.onchange=()=>child.visible=checkbox.checked;label.append(checkbox,child.name);document.querySelector('#parts')!.appendChild(label);}});
+function frame(){requestAnimationFrame(frame);controls.update();renderer.render(scene,camera);}frame();
