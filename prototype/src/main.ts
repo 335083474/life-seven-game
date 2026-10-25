@@ -26,6 +26,7 @@ const readingLight=new T.SpotLight('#ffe8bd',70,20,.70,1,2);readingLight.positio
 const rim=new T.DirectionalLight('#a8c3d7',.38);rim.position.set(5,5,-4);scene.add(rim);
 const diceLight=new T.PointLight('#f0d6a5',7,7,2);diceLight.position.set(5.2,3.3,1.5);scene.add(diceLight);
 const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(async({book:model,dice:models})=>{await fontsReady;dice.forEach((die,i)=>die.setModel(models[i]));openDiceInspector=installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
+void assetReady.then(()=>import('./dice-physics')).then(module=>module.initDicePhysics()).catch(()=>{/* Retry loading the physics engine on the first throw. */});
 const book=new FateBook();scene.add(book.group);
 const cards=elements.map((_element,index)=>new LifeCard(index));cards.forEach(c=>scene.add(c.group));
 const dice=[new TenDie(true),new TenDie(false)];dice.forEach(d=>scene.add(d.group));
@@ -51,8 +52,9 @@ function layout(){
   mobile=innerWidth<700;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
   cards.forEach((c,i)=>{if(mobile){const row=i<4?0:1,col=row===0?i:i-4,count=row===0?4:3;c.home.set(1.66+(col-(count-1)/2)*.89,.08,3.68+row*1.27);c.group.scale.setScalar(.72);c.group.rotation.y=(col-(count-1)/2)*.015;}
     else{c.home.set((i-3)*1.22,.08,3.55+Math.abs(i-3)*.025);c.group.scale.setScalar(1);c.group.rotation.y=(i-3)*-.025;}c.group.position.copy(c.home);});
-  dice[0].base.set(mobile?1.18:4.8,.43,mobile?2.85:.85);dice[1].base.set(mobile?2.1:5.35,.43,mobile?3.05:2.12);dice.forEach(d=>d.group.position.copy(d.base));
-  if(mobile){dice.forEach(d=>d.group.scale.setScalar(.26));}else dice.forEach(d=>d.group.scale.setScalar(.37));cameraTargets();dirty=true;
+  const narrow=!mobile&&innerWidth/innerHeight<1.35;
+  dice[0].base.set(mobile?1.18:narrow?4.2:4.6,.43,mobile?2.85:.85);dice[1].base.set(mobile?2.1:narrow?4.35:5.05,.43,mobile?3.05:2.12);dice.forEach(d=>d.group.position.copy(d.base));
+  dice.forEach(d=>d.group.scale.setScalar(mobile?.26:narrow?.32:.37));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
 }
 
 const goal=()=>intentions.find(g=>g.id===state.intention)||intentions[0];
@@ -86,9 +88,21 @@ function turnTo(page:number,fromRoll=false){
   });
 }
 function selectCard(index:number){if(busy||!state.opened)return;if(state.page!==1){toast('先在书中写下选择，再选两张元素。');return;}const result=toggleElement(state,elements[index].id);if(!result.ok){toast(result.message!);return;}cards.forEach((c,i)=>c.selected=state.selected.includes(elements[i].id));renderPages();setBusy(false);dirty=true;}
-function rollDice(){if(busy||state.page!==1||state.selected.length!==2||state.roll!==null)return;const result=settle(state,d100());rolling=true;setBusy(true);$('#dice-label').hidden=false;$('#dice-status').textContent='让骰子落定…';$('#dice-value').textContent='··';
-  dice[0].faceUp(Math.floor(result.dice%100/10));dice[1].faceUp(result.dice%10);play('dice');let lastBounce=0;
-  animate(2600,p=>{fateFocus=reduced.matches?0:Math.sin(Math.PI*p)*.8;dice.forEach((d,i)=>d.roll(p,i));const bounce=Math.floor(p*5);if(bounce>lastBounce&&bounce<5){lastBounce=bounce;play('dice');}},()=>{fateFocus=0;rolling=false;play('mark');$('#dice-value').textContent=String(result.dice).padStart(2,'0');$('#dice-status').textContent=result.dice===100?'00 + 0，记作100':`${Math.floor(result.dice/10)*10} + ${result.dice%10} · ${result.outcome}`;animate(450,()=>{},()=>turnTo(2,true));});
+let pendingDice:number|undefined;
+async function rollDice(){if(busy||state.page!==1||state.selected.length!==2||state.roll!==null)return;rolling=true;setBusy(true);$('#dice-label').hidden=false;$('#dice-status').textContent='让骰子落定…';$('#dice-value').textContent='··';
+  try{
+    const {prepareDiceThrow,sampleDiceThrow}=await import('./dice-physics');
+    const shapes=dice.map(d=>d.physicsShape()),radii=shapes.map(shape=>{let radius=0;for(let i=0;i<shape.vertices.length;i+=3)radius=Math.max(radius,Math.hypot(shape.vertices[i],shape.vertices[i+1],shape.vertices[i+2]));return radius;});
+    const right=new T.Vector3(1,0,0).applyQuaternion(camera.quaternion),up=new T.Vector3(0,1,0).applyQuaternion(camera.quaternion),point=new T.Vector3();
+    const fitsView=(poses:{position:T.Vector3}[])=>poses.every((pose,i)=>[right,up].every(axis=>[-1,1].every(sign=>{point.copy(pose.position).addScaledVector(axis,radii[i]*sign).project(camera);return Math.abs(point.x)<.995&&Math.abs(point.y)<.98;})));
+    const value=pendingDice??=d100(),throwData=await prepareDiceThrow(shapes,[Math.floor(value%100/10),value%10],Math.random,undefined,fitsView);
+    const result=settle(state,value);pendingDice=undefined;let impact=0;
+    animate(throwData.duration*1000,p=>{
+      if(reduced.matches&&p<1)return;
+      sampleDiceThrow(throwData,p*throwData.duration,dice.map(d=>d.group));
+      while(impact<throwData.impacts.length&&throwData.impacts[impact]<=p*throwData.duration){impact++;if(!reduced.matches)play('dice');}
+    },()=>{dice.forEach((die,i)=>die.rememberFace(i===0?Math.floor(value%100/10):value%10));rolling=false;play('mark');$('#dice-value').textContent=String(result.dice).padStart(2,'0');$('#dice-status').textContent=result.dice===100?'00 + 0，记作100':`${Math.floor(result.dice/10)*10} + ${result.dice%10} · ${result.outcome}`;animate(450,()=>{},()=>turnTo(2,true));});
+  }catch(error){rolling=false;setBusy(false);$('#dice-label').hidden=true;toast('骰子暂未落定，请再试一次。');console.error('Dice simulation failed',error);}
 }
 
 const targetButtons=elements.map((e,i)=>{const b=document.createElement('button');b.className='card-hit';b.type='button';b.setAttribute('aria-label',`${e.name} ${e.level===2?'Ⅱ级':'Ⅰ级'}`);b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="sr-only">${e.name}</span>`;b.addEventListener('click',()=>selectCard(i));b.addEventListener('pointerenter',()=>{cards[i].hover=true;dirty=true;});b.addEventListener('pointerleave',()=>{cards[i].hover=false;dirty=true;});b.addEventListener('focus',()=>{cards[i].hover=true;dirty=true;});b.addEventListener('blur',()=>{cards[i].hover=false;dirty=true;});$('#card-targets').appendChild(b);return b;});

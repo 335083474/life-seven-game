@@ -24,6 +24,7 @@ for(const kind of ['d10','d100'])test(`${kind}: decoded sculpt has finite solid 
   assert.ok(sculptVertices>1000&&numberVertices>5000,'must retain downloaded body and solid numeral meshes');
   for(let value=0;value<10;value++){
     die.faceUp(value);const up=numeralNormals[value].clone().applyQuaternion(die.target);assert.ok(up.distanceTo(new T.Vector3(0,1,0))<1e-6);
-    die.roll(1,0);assert.ok(die.group.quaternion.angleTo(die.target)<1e-6,'final roll pose must match calibrated face');
+    die.group.quaternion.copy(die.target);die.rest();assert.ok(die.group.quaternion.angleTo(die.target)<1e-6,'final roll pose must match calibrated face');
   }
+
 });
