@@ -7,12 +7,14 @@ const BOOK_SCALE=1.90,BASE=.42,HINGE=BASE+.36373345*BOOK_SCALE;
 export class ImportedFateBook{
   group=new T.Group();private left=new T.Group();private right=new T.Group();
   private leafGroup=new T.Group();private front:T.Mesh;private back:T.Mesh;private rest:Float32Array;
-  private opening=0;private atlas?:T.Texture;private pageMaterials:T.MeshStandardMaterial[]=[];private temporary:T.Texture[]=[];private printed?:T.Texture;
+  private opening=0;private atlas?:T.Texture;private leafTextures:T.Texture[]=[];
   private deform:{geometry:T.BufferGeometry;rest:Float32Array;side:number}[]=[];
   constructor(){
     this.left.position.y=HINGE;this.group.add(this.right,this.left);
     const geometry=new T.PlaneGeometry(3.0,3.96,64,12);geometry.rotateX(-Math.PI/2);geometry.translate(1.50,0,0);this.rest=new Float32Array(geometry.attributes.position.array);
     this.front=new T.Mesh(geometry,new T.MeshStandardMaterial({roughness:.97,side:T.FrontSide}));this.back=new T.Mesh(geometry,new T.MeshStandardMaterial({roughness:.97,side:T.BackSide}));this.front.castShadow=this.front.receiveShadow=this.back.castShadow=this.back.receiveShadow=true;
+    // Deforming leaf crosses the gutter; a cached right-side bound would cull it mid-turn.
+    this.front.frustumCulled=this.back.frustumCulled=false;
     this.leafGroup.add(this.front,this.back);this.leafGroup.position.set(.01,HINGE+.015,0);this.leafGroup.visible=false;this.group.add(this.leafGroup);
   }
   setModel(source:T.Object3D){
@@ -22,7 +24,7 @@ export class ImportedFateBook{
       const isPage=/Mesh_000[12]_/.test(child.name),sourceMaterial=(Array.isArray(child.material)?child.material[0]:child.material) as T.MeshStandardMaterial;
       let material=cache.get(sourceMaterial) as T.MeshStandardMaterial|undefined;
       if(!material){material=sourceMaterial.clone();material.envMapIntensity=.85;if(material.map)material.map.anisotropy=8;cache.set(sourceMaterial,material);}
-      if(isPage){this.atlas??=sourceMaterial.map!;this.pageMaterials.push(material);}
+      if(isPage){this.atlas??=sourceMaterial.map!;}
       const geometry=child.geometry,index=geometry.getIndex(),position=geometry.getAttribute('position'),normal=geometry.getAttribute('normal'),uv=geometry.getAttribute('uv'),normalMatrix=new T.Matrix3().getNormalMatrix(child.matrixWorld);
       const vertices:Vertex[]=[];
       for(let i=0;i<position.count;i++)vertices.push({position:new T.Vector3().fromBufferAttribute(position,i).applyMatrix4(child.matrixWorld).multiplyScalar(BOOK_SCALE).add(new T.Vector3(0,BASE,0)),normal:new T.Vector3().fromBufferAttribute(normal,i).applyNormalMatrix(normalMatrix),uv:new T.Vector2().fromBufferAttribute(uv,i)});
@@ -59,29 +61,22 @@ export class ImportedFateBook{
       positions.needsUpdate=true;page.geometry.computeVertexNormals();
     }
   }
-  private page(title:string,body:string,half=1){
-    const canvas=document.createElement('canvas');canvas.width=768;canvas.height=1100;const ctx=canvas.getContext('2d')!;
-    if(this.atlas?.image){const image=this.atlas.image as HTMLImageElement;ctx.drawImage(image,half*image.width/2,0,image.width/2,image.height,0,0,768,1100);}else{ctx.fillStyle='#dccba0';ctx.fillRect(0,0,768,1100);}
-    ctx.fillStyle='#725338';ctx.font='27px "Archive Body","KaiTi",serif';ctx.fillText('命运之书 · 青年纪',92,115);ctx.fillStyle='#38291e';ctx.font='68px "Archive Display","KaiTi",serif';ctx.fillText(title,92,248);ctx.strokeStyle='#84613b';ctx.beginPath();ctx.moveTo(92,285);ctx.lineTo(662,285);ctx.stroke();ctx.fillStyle='#4d3827';ctx.font='38px "Archive Body","KaiTi",serif';
-    let line='',y=366;for(const character of body){if(character==='\n'||ctx.measureText(line+character).width>570){ctx.fillText(line,92,y);line=character==='\n'?'':character;y+=67;}else line+=character;}ctx.fillText(line,92,y);
-    const texture=new T.CanvasTexture(canvas);texture.colorSpace=T.SRGBColorSpace;texture.anisotropy=8;return texture;
-  }
-  beginTurn(oldTitle:string,oldBody:string,newTitle:string,newBody:string){
-    this.temporary.forEach(t=>t.dispose());const front=this.page(oldTitle,oldBody,1),back=this.page(newTitle,newBody,0);back.center.x=.5;back.repeat.x=-1;
-    (this.front.material as T.MeshStandardMaterial).map=front;(this.back.material as T.MeshStandardMaterial).map=back;(this.front.material as T.MeshStandardMaterial).needsUpdate=(this.back.material as T.MeshStandardMaterial).needsUpdate=true;
-    this.temporary=[front,back];this.leafGroup.visible=true;this.setTurn(0);
+  beginTurn(){
+    if(!this.leafTextures.length&&this.atlas){
+      this.leafTextures=[0,1].map(half=>{
+        const texture=this.atlas!.clone();texture.repeat.set(.5,1);texture.offset.x=half*.5;texture.needsUpdate=true;return texture;
+      });
+      (this.front.material as T.MeshStandardMaterial).map=this.leafTextures[1];
+      (this.back.material as T.MeshStandardMaterial).map=this.leafTextures[0];
+      (this.front.material as T.MeshStandardMaterial).needsUpdate=(this.back.material as T.MeshStandardMaterial).needsUpdate=true;
+    }
+    this.leafGroup.visible=true;
   }
   setTurn(p:number){
     const positions=this.front.geometry.attributes.position as T.BufferAttribute,width=3,steps=64,s=Math.sin(Math.PI*p),xs=[0],ys=[0];
     for(let i=1;i<=steps;i++){const u=(i-.5)/steps,angle=Math.PI*p+s*(.48*Math.sin(u*Math.PI)-.13);xs[i]=xs[i-1]+Math.cos(angle)*width/steps;ys[i]=ys[i-1]+Math.sin(angle)*width/steps;}
-    for(let i=0;i<positions.count;i++){const u=this.rest[i*3]/width,index=Math.min(steps,Math.round(u*steps)),z=this.rest[i*3+2];positions.setXYZ(i,xs[index],ys[index]-.18*(1-s)*Math.pow(u,.5)+s*.018*z*Math.sin(u*Math.PI),z+s*.04*Math.sin(u*Math.PI));}
+    for(let i=0;i<positions.count;i++){const u=this.rest[i*3]/width,index=Math.min(steps,Math.round(u*steps)),z=this.rest[i*3+2];positions.setXYZ(i,xs[index],ys[index]+s*.018*z*Math.sin(u*Math.PI),z+s*.04*Math.sin(u*Math.PI));}
     positions.needsUpdate=true;this.front.geometry.computeVertexNormals();
   }
   endTurn(){this.leafGroup.visible=false;}
-  setPrintedPages(leftTitle:string,leftBody:string,rightTitle:string,rightBody:string,printed:boolean){
-    this.printed?.dispose();this.printed=undefined;
-    if(!printed){for(const material of this.pageMaterials){material.map=this.atlas!;material.needsUpdate=true;}return;}
-    const left=this.page(leftTitle,leftBody,0),right=this.page(rightTitle,rightBody,1),canvas=document.createElement('canvas');canvas.width=1536;canvas.height=1100;const ctx=canvas.getContext('2d')!;ctx.drawImage(left.image,0,0,768,1100);ctx.drawImage(right.image,768,0,768,1100);left.dispose();right.dispose();this.printed=new T.CanvasTexture(canvas);this.printed.colorSpace=T.SRGBColorSpace;
-    for(const material of this.pageMaterials){material.map=this.printed;material.needsUpdate=true;}
-  }
 }

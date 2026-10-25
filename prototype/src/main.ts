@@ -25,7 +25,7 @@ const key=new T.DirectionalLight('#ffddb0',2.2);key.position.set(-3.5,8.5,3.2);k
 const readingLight=new T.SpotLight('#ffe8bd',70,20,.70,1,2);readingLight.position.set(1,7.5,1.5);readingLight.target.position.set(0,.7,0);scene.add(readingLight,readingLight.target);
 const rim=new T.DirectionalLight('#a8c3d7',.38);rim.position.set(5,5,-4);scene.add(rim);
 const diceLight=new T.PointLight('#f0d6a5',7,7,2);diceLight.position.set(5.2,3.3,1.5);scene.add(diceLight);
-const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(async({book:model,dice:models})=>{await fontsReady;dice.forEach((die,i)=>die.setModel(models[i]));installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
+const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(async({book:model,dice:models})=>{await fontsReady;dice.forEach((die,i)=>die.setModel(models[i]));openDiceInspector=installDiceInspector(models);book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
 const book=new FateBook();scene.add(book.group);
 const cards=elements.map((_element,index)=>new LifeCard(index));cards.forEach(c=>scene.add(c.group));
 const dice=[new TenDie(true),new TenDie(false)];dice.forEach(d=>scene.add(d.group));
@@ -33,6 +33,7 @@ const cssRenderer=new CSS3DRenderer();cssRenderer.setSize(innerWidth,innerHeight
 const leftDOM=document.createElement('article'),rightDOM=document.createElement('article');leftDOM.className='paper paper-left inactive';rightDOM.className='paper paper-right inactive';leftDOM.setAttribute('aria-label','人生之书左页');rightDOM.setAttribute('aria-label','人生之书右页');
 const leftCSS=new CSS3DObject(leftDOM),rightCSS=new CSS3DObject(rightDOM);for(const object of [leftCSS,rightCSS]){object.rotation.x=-Math.PI/2;object.scale.setScalar(2.80/480);object.position.y=1.10;object.position.z=0;cssScene.add(object);}leftCSS.position.x=-1.51;rightCSS.position.x=1.51;
 
+let openDiceInspector:(()=>void)|undefined;
 let mobile=innerWidth<700,busy=false,opening=0,sound=false,dirty=true,turning=false,rolling=false,hidden=document.hidden;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 type Motion={start:number;duration:number;update:(p:number)=>void;finish?:()=>void};const motions:Motion[]=[];
@@ -55,10 +56,9 @@ function layout(){
 }
 
 const goal=()=>intentions.find(g=>g.id===state.intention)||intentions[0];
-function pageFacts(){return {leftTitle:state.page<2?'一生，尚未写定':'走过，便有痕迹',leftBody:state.page===0?'你来到一座陌生的城市。\n行囊很轻，来日很长。':state.page===1?goal().title+'。\n'+goal().short:'有些选择带来抵达，\n有些选择教人等待。',rightTitle:state.page===0?'青春远行':state.page===1?'此刻的倚仗':state.roll?.outcome||'往事已成',rightBody:state.page===0?'行至此处，你想如何落笔？\n'+intentions.map(i=>i.title).join('\n'):state.page===1?goal().description:state.roll?.outcome==='成功'||state.roll?.outcome==='大成功'?goal().success:goal().failure};}
 function renderPages(){leftDOM.dataset.page=rightDOM.dataset.page=String(state.page);leftDOM.innerHTML=bookLeft(state);rightDOM.innerHTML=bookRight(state);updateTargets();$('#selection-count').textContent=state.page===1?`已选 ${state.selected.length} / 2 · ${state.selected.length<2?'点选桌上元素':'可以掷骰了'}`:state.page===2?'这一页，已经写入往事':'七种元素 · 陪你走过这一生';$('#selection-hint').textContent=state.page===1?'选择此刻的倚仗':'此生所持';dirty=true;}
 function setPagesVisible(visible:boolean){leftDOM.classList.toggle('inactive',!visible||mobile);rightDOM.classList.toggle('inactive',!visible);}
-function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit,.inspect-dice'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
+function setBusy(value:boolean){busy=value;for(const b of document.querySelectorAll<HTMLButtonElement>('.paper button,#open,#close-book,.card-hit,.dice-hit,.inspect-dice'))b.disabled=value||(b.classList.contains('card-hit')&&(!state.opened||state.page!==1))||(b.hasAttribute('data-roll')&&state.selected.length!==2);}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');toastTimer=window.setTimeout(()=>$('#notice').classList.remove('visible'),3300);}
 
 // Audio is entirely opt-in; no downloads or autoplay.
@@ -70,7 +70,21 @@ function play(kind:'paper'|'dice'|'mark'){
 }
 function openBook(){if(busy||state.opened)return;state.opened=true;setBusy(true);$('#invitation').classList.add('leaving');$('#close-book').hidden=false;play('paper');animate(1900,p=>{opening=smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{opening=1;setPagesVisible(true);$('#table-caption').hidden=false;renderPages();setBusy(false);toast('翻开这一页，先选一条想走的路。');});}
 function closeBook(){if(busy||!state.opened)return;setBusy(true);setPagesVisible(false);$('#table-caption').hidden=true;$('#dice-label').hidden=true;play('paper');animate(1500,p=>{opening=1-smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{state.opened=false;$('#invitation').classList.remove('leaving');$('#close-book').hidden=true;setBusy(false);});}
-function turnTo(page:number,fromRoll=false){if((busy&&!fromRoll)||!state.opened)return;const backwards=page<state.page,old=pageFacts();state.page=page;const next=pageFacts();turning=true;setBusy(true);setPagesVisible(false);book.setPrintedPages(old.leftTitle,old.leftBody,next.rightTitle,next.rightBody,true);book.beginTurn(backwards?next.rightTitle:old.rightTitle,backwards?next.rightBody:old.rightBody,backwards?old.leftTitle:next.leftTitle,backwards?old.leftBody:next.leftBody);play('paper');animate(1300,p=>book.setTurn(backwards?1-smooth(p):smooth(p)),()=>{book.endTurn();book.setPrintedPages('','','','',false);turning=false;renderPages();setPagesVisible(true);setBusy(false);});}
+function turnTo(page:number,fromRoll=false){
+  if((busy&&!fromRoll)||!state.opened||page===state.page)return;
+  const backwards=page<state.page;turning=true;setBusy(true);
+  // Keep the actual typeset pages. Never swap in a different canvas layout.
+  book.beginTurn();book.setTurn(backwards?1:0);play('paper');let changed=false;
+  animate(1300,p=>{
+    const t=smooth(p);book.setTurn(backwards?1-t:t);
+    const ink=p<.22?1-smooth(p/.22):p>.74?smooth((p-.74)/.26):0;
+    leftDOM.style.opacity=rightDOM.style.opacity=String(ink);
+    if(p>=.5&&!changed){state.page=page;renderPages();setBusy(true);changed=true;}
+  },()=>{
+    book.endTurn();turning=false;leftDOM.style.opacity=rightDOM.style.opacity='1';
+    setPagesVisible(true);setBusy(false);
+  });
+}
 function selectCard(index:number){if(busy||!state.opened)return;if(state.page!==1){toast('先在书中写下选择，再选两张元素。');return;}const result=toggleElement(state,elements[index].id);if(!result.ok){toast(result.message!);return;}cards.forEach((c,i)=>c.selected=state.selected.includes(elements[i].id));renderPages();setBusy(false);dirty=true;}
 function rollDice(){if(busy||state.page!==1||state.selected.length!==2||state.roll!==null)return;const result=settle(state,d100());rolling=true;setBusy(true);$('#dice-label').hidden=false;$('#dice-status').textContent='让骰子落定…';$('#dice-value').textContent='··';
   dice[0].faceUp(Math.floor(result.dice%100/10));dice[1].faceUp(result.dice%10);play('dice');let lastBounce=0;
@@ -78,9 +92,28 @@ function rollDice(){if(busy||state.page!==1||state.selected.length!==2||state.ro
 }
 
 const targetButtons=elements.map((e,i)=>{const b=document.createElement('button');b.className='card-hit';b.type='button';b.setAttribute('aria-label',`${e.name} ${e.level===2?'Ⅱ级':'Ⅰ级'}`);b.setAttribute('aria-pressed','false');b.innerHTML=`<span class="sr-only">${e.name}</span>`;b.addEventListener('click',()=>selectCard(i));b.addEventListener('pointerenter',()=>{cards[i].hover=true;dirty=true;});b.addEventListener('pointerleave',()=>{cards[i].hover=false;dirty=true;});b.addEventListener('focus',()=>{cards[i].hover=true;dirty=true;});b.addEventListener('blur',()=>{cards[i].hover=false;dirty=true;});$('#card-targets').appendChild(b);return b;});
+const diceButtons=dice.map((_die,i)=>{
+  const button=document.createElement('button');button.className='dice-hit';button.type='button';
+  button.innerHTML='<span class="sr-only">命运之骰</span>';button.hidden=true;
+  button.addEventListener('click',()=>{
+    if(busy||document.querySelector('dialog[open]'))return;
+    if(state.opened&&state.page===1&&state.selected.length===2&&!state.roll)rollDice();
+    else openDiceInspector?.();
+  });
+  $('#interface').append(button);return button;
+});
 function updateTargets(){
   camera.updateMatrixWorld();cards.forEach((c,i)=>{const b=targetButtons[i];b.hidden=!state.opened||opening<.99;vec.copy(c.group.position).project(camera);b.style.left=`${(vec.x*.5+.5)*innerWidth}px`;b.style.top=`${(-vec.y*.5+.5)*innerHeight}px`;
     const scale=c.group.scale.x,distance=c.group.position.distanceTo(camera.position),pixels=innerHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*distance);b.style.width=`${1.10*scale*pixels}px`;b.style.height=`${1.55*scale*pixels*.72}px`;b.setAttribute('aria-pressed',String(c.selected));b.disabled=busy||state.page!==1;});
+  dice.forEach((die,i)=>{
+    const button=diceButtons[i];button.hidden=!openDiceInspector||!die.group.visible||opening>0&&opening<.99;
+    vec.copy(die.group.position).project(camera);
+    button.style.left=`${(vec.x*.5+.5)*innerWidth}px`;button.style.top=`${(-vec.y*.5+.5)*innerHeight}px`;
+    const pixels=innerHeight/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*die.group.position.distanceTo(camera.position));
+    const size=Math.max(44,2.7*die.group.scale.x*pixels);button.style.width=button.style.height=`${size}px`;button.disabled=busy;
+    const label=state.opened&&state.page===1&&state.selected.length===2&&!state.roll?'点击掷骰':'拿起端详 · 拖动旋转';
+    button.title=label;button.setAttribute('aria-label',`${i===0?'十位':'个位'}命运骰 · ${label}`);
+  });
 }
 const vec=new T.Vector3();
 $('#open').addEventListener('click',openBook);$('#close-book').addEventListener('click',closeBook);

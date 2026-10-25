@@ -9,7 +9,8 @@ export function installDiceInspector(models:T.Object3D[]){
   let renderer:T.WebGLRenderer|undefined,controls:OrbitControls|undefined,camera:T.PerspectiveCamera|undefined,scene:T.Scene|undefined,raf=0;
   const close=()=>{dialog.close();cancelAnimationFrame(raf);trigger.focus();};dialog.querySelector('button')!.addEventListener('click',close);dialog.addEventListener('close',()=>cancelAnimationFrame(raf));
   function size(){if(!renderer||!camera)return;const host=dialog.querySelector('.dice-inspector-view')!,width=host.clientWidth,height=host.clientHeight;renderer.setSize(width,height);camera.aspect=width/height;camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(18))*Math.max(1,1.6/camera.aspect)));camera.updateProjectionMatrix();}
-  trigger.addEventListener('click',()=>{
+  const open=()=>{
+    if(dialog.open)return;
     dialog.showModal();
     if(!renderer){
       const host=dialog.querySelector('.dice-inspector-view')!;renderer=new T.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;host.append(renderer.domElement);
@@ -18,5 +19,5 @@ export function installDiceInspector(models:T.Object3D[]){
       camera=new T.PerspectiveCamera(36,1,.1,50);camera.position.set(1.8,3.2,6.3);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=false;controls.minDistance=4;controls.maxDistance=12;controls.target.set(0,0,0);controls.update();
     }
     size();const frame=()=>{if(!dialog.open)return;raf=requestAnimationFrame(frame);controls!.update();renderer!.render(scene!,camera!);};frame();
-  });window.addEventListener('resize',size);
+  };trigger.addEventListener('click',open);window.addEventListener('resize',size);return open;
 }
