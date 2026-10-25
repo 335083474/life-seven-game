@@ -20,7 +20,7 @@ scene.add(new T.AmbientLight('#d9d3be',.10));const hemi=new T.HemisphereLight('#
 const key=new T.DirectionalLight('#ffddb0',2.2);key.position.set(-3.5,8.5,3.2);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-10;key.shadow.camera.right=10;key.shadow.camera.top=9;key.shadow.camera.bottom=-9;key.shadow.camera.far=25;key.shadow.normalBias=.025;key.shadow.bias=-.00015;key.shadow.radius=3;scene.add(key);
 const readingLight=new T.SpotLight('#ffe8bd',70,20,.70,1,2);readingLight.position.set(1,7.5,1.5);readingLight.target.position.set(0,.7,0);scene.add(readingLight,readingLight.target);
 const rim=new T.DirectionalLight('#a8c3d7',.38);rim.position.set(5,5,-4);scene.add(rim);
-const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(model=>{book.setModel(model);layout();dirty=true;});
+const world=new ArchiveWorld();scene.add(world.group);const assetReady=world.load(renderer,scene,message=>{$('#loading p').textContent=message;dirty=true;}).then(model=>{book.setModel(model);let paper:T.Texture|undefined;model.traverse(node=>{if(node instanceof T.Mesh&&/Mesh_000[12]_/.test(node.name)){const material=(Array.isArray(node.material)?node.material[0]:node.material) as T.MeshStandardMaterial;paper??=material.map??undefined;}});if(paper)cards.forEach(card=>card.setPaper(paper!));layout();dirty=true;});
 const book=new FateBook();scene.add(book.group);
 const cards=elements.map((_element,index)=>new LifeCard(index));cards.forEach(c=>scene.add(c.group));
 const dice=[new TenDie(true),new TenDie(false)];dice.forEach(d=>scene.add(d.group));

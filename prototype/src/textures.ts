@@ -45,12 +45,13 @@ function icon(ctx:CanvasRenderingContext2D,name:string,x:number,y:number,r:numbe
   else{for(const sign of [-1,1]){ctx.beginPath();ctx.arc(sign*19,-18,13,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(sign*19,21,22,24,0,Math.PI,Math.PI*2);ctx.stroke();}ctx.beginPath();ctx.moveTo(-40,37);ctx.lineTo(40,37);ctx.stroke();}
   ctx.restore();
 }
-export function cardTexture(card:{name:string;subtitle:string;level:number;icon:string},index:number){
+export function cardTexture(card:{name:string;subtitle:string;level:number;icon:string},index:number,paper?:T.Texture){
   const c=canvas(512,768),ctx=c.getContext('2d')!;const fill=ctx.createLinearGradient(0,0,512,768);fill.addColorStop(0,'#eee4c9');fill.addColorStop(.6,'#d9caa6');fill.addColorStop(1,'#c7b98f');ctx.fillStyle=fill;ctx.fillRect(0,0,512,768);
   seed=50+index;for(let i=0;i<10000;i++){ctx.fillStyle=`rgba(60,42,20,${random()*.035})`;ctx.fillRect(random()*512,random()*768,1+random()*2,1);}
-  ctx.strokeStyle='#8a774d';for(const pad of [18,27]){ctx.lineWidth=1;ctx.strokeRect(pad,pad,512-2*pad,768-2*pad);}
+  if(paper?.image){const image=paper.image as HTMLImageElement;ctx.drawImage(image,image.width/2,0,image.width/2,image.height,0,0,512,768);}
+  ctx.strokeStyle='#78603d';for(const pad of [26,33]){ctx.lineWidth=1;ctx.strokeRect(pad,pad,512-2*pad,768-2*pad);}
   ctx.font='17px Georgia';ctx.fillStyle='#8c7748';ctx.textAlign='left';ctx.fillText(`人生元素 · ${String(index+1).padStart(2,'0')}`,45,63);ctx.textAlign='right';ctx.font='33px Georgia';ctx.fillText(card.level===2?'Ⅱ':'Ⅰ',468,73);
-  icon(ctx,card.icon,256,288,104);ctx.fillStyle='#122c1f';ctx.textAlign='center';ctx.font=`bold 65px ${serif}`;ctx.fillText(card.name.split('').join(' '),256,492);ctx.fillStyle='#7e704e';ctx.font=`23px ${serif}`;ctx.fillText(card.subtitle,256,550);
+  ctx.save();ctx.shadowColor='#f2dfae';ctx.shadowOffsetY=1;icon(ctx,card.icon,256,288,104);ctx.restore();ctx.fillStyle='#30271c';ctx.textAlign='center';ctx.font=`bold 65px ${serif}`;ctx.fillText(card.name.split('').join(' '),256,492);ctx.fillStyle='#665036';ctx.font=`23px ${serif}`;ctx.fillText(card.subtitle,256,550);
   ctx.strokeStyle='#a99665';ctx.beginPath();ctx.moveTo(88,622);ctx.lineTo(424,622);ctx.stroke();ctx.font='19px Georgia';ctx.fillText('命 运 之 书',256,665);ctx.font=`21px ${serif}`;ctx.fillText(card.level===2?'精 进':'初 识',256,713);return texture(c);
 }
 export function pageTexture(title:string,body:string,kicker='青春远行 · 人生的一页'){
@@ -59,4 +60,11 @@ export function pageTexture(title:string,body:string,kicker='青春远行 · 人
   ctx.strokeStyle='#b6a17b';ctx.strokeRect(39,44,690,1010);if(!title&&!body)return texture(c);ctx.fillStyle='#977a4c';ctx.font=`21px ${serif}`;ctx.fillText(kicker,83,121);ctx.fillStyle='#293d31';ctx.font=`48px ${serif}`;ctx.fillText(title,83,260);
   ctx.font=`26px ${serif}`;ctx.fillStyle='#625b48';let line='',y=370;for(const ch of body){if(ch==='\n'||ctx.measureText(line+ch).width>595){ctx.fillText(line,83,y);line=ch==='\n'?'':ch;y+=51;}else line+=ch;}ctx.fillText(line,83,y);compass(ctx,384,848,89,'#aa9161');ctx.textAlign='center';ctx.font='19px Georgia';ctx.fillText('—  命 运 之 书  —',384,1000);return texture(c);
 }
-export function numberTexture(value:string,color:string){const c=canvas(128,128),ctx=c.getContext('2d')!;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 67px Georgia';ctx.fillStyle=color;ctx.fillText(value,64,67);return texture(c);}
+export function numberTexture(value:string,color:string){
+  const c=canvas(256,256),ctx=c.getContext('2d')!;
+  // A recessed engraved cartouche, shared by both dice rather than plastic colours.
+  ctx.strokeStyle='#a28a5b';ctx.lineWidth=2;
+  for(const radius of [104,97]){ctx.beginPath();ctx.arc(128,128,radius,0,Math.PI*2);ctx.stroke();}
+  for(let i=0;i<8;i++){ctx.save();ctx.translate(128,128);ctx.rotate(i*Math.PI/4);ctx.fillStyle='#9c8050';ctx.beginPath();ctx.moveTo(0,-90);ctx.lineTo(3,-83);ctx.lineTo(0,-77);ctx.lineTo(-3,-83);ctx.closePath();ctx.fill();ctx.restore();}
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 100px Georgia';ctx.shadowColor='#17110a';ctx.shadowBlur=2;ctx.shadowOffsetY=2;ctx.fillStyle=color;ctx.fillText(value,128,136);return texture(c);
+}

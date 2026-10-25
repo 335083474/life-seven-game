@@ -6,6 +6,8 @@ Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
 Changes: compressed textures and geometry; split mesh at spine; custom hinge,
 Chinese printing and deforming page animation. The source model is static.
+Card faces also adapt the book's original parchment and ornamental border,
+with new Chinese typography and element symbols, under the same CC BY 4.0.
 Attribution is provided without implying endorsement by the original author.
 
 Poly Haven assets, CC0 1.0:
