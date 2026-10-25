@@ -10,7 +10,7 @@ const dt=1/120;
 function collisionPoints(shape:DieShape){
   // A compact convex proxy keeps engraving triangles out of the contact solver.
   const directions=[...shape.normals,...shape.normals.map(n=>n.clone().negate())];
-  for(let i=0;i<128;i++){const y=1-2*(i+.5)/128,r=Math.sqrt(1-y*y),angle=i*2.3999632297;directions.push(new T.Vector3(Math.cos(angle)*r,y,Math.sin(angle)*r));}
+  for(let i=0;i<256;i++){const y=1-2*(i+.5)/256,r=Math.sqrt(1-y*y),angle=i*2.3999632297;directions.push(new T.Vector3(Math.cos(angle)*r,y,Math.sin(angle)*r));}
   const selected=new Set<number>(),points=shape.vertices;
   for(const direction of directions){let best=-Infinity,index=0;for(let i=0;i<points.length;i+=3){const dot=points[i]*direction.x+points[i+1]*direction.y+points[i+2]*direction.z;if(dot>best){best=dot;index=i;}}selected.add(index);}
   return Float32Array.from([...selected].flatMap(i=>[points[i],points[i+1],points[i+2]]));
@@ -23,18 +23,22 @@ function topFace(normals:T.Vector3[],rotation:T.Quaternion){let index=0,best=-In
  */
 export async function prepareDiceThrow(shapes:DieShape[],values:number[],random:()=>number=Math.random,yieldWork:()=>Promise<void>=()=>new Promise(resolve=>setTimeout(resolve,0)),acceptFrame:(poses:Pose[])=>boolean=()=>true):Promise<DiceThrow>{
   await initDicePhysics();
-  const colliders=shapes.map(shape=>{const desc=RAPIER.ColliderDesc.roundConvexHull(collisionPoints(shape),.012);if(!desc)throw Error('Invalid dice hull');return desc.setMass(.045).setFriction(.65).setRestitution(.28);});
-  const launch=(shape:DieShape)=>{const size=shape.vertices.reduce((maximum,n)=>Math.max(maximum,Math.abs(n)),0)/.55;return {linear:{x:(random()-.4)*.8*size,y:(2.2+random()*1.0)*Math.sqrt(size),z:(random()-.5)*.65*size},angular:{x:(random()-.5)*24,y:(random()-.5)*12,z:(random()-.5)*24}};};
+  const colliders=shapes.map(shape=>{const desc=RAPIER.ColliderDesc.roundConvexHull(collisionPoints(shape),.014);if(!desc)throw Error('Invalid dice hull');return desc.setMass(.018).setFriction(.48).setRestitution(.48);});
+  const launch=(shape:DieShape)=>{
+    const size=shape.vertices.reduce((maximum,n)=>Math.max(maximum,Math.abs(n)),0)/.55;
+    const angle=random()*Math.PI*2,tumble=8+random()*5;
+    return {linear:{x:(random()-.5)*.65*size,y:(4.15+random()*.65)*Math.sqrt(Math.max(.65,size)),z:(random()-.5)*.45*size},angular:{x:Math.cos(angle)*tumble,y:(random()-.5)*8,z:Math.sin(angle)*tumble}};
+  };
   let firstLaunch:ReturnType<typeof launch>|undefined,lockedAt=0;
   for(let attempt=1;attempt<=600;attempt++){
     const world=new RAPIER.World({x:0,y:-9.81,z:0});world.timestep=dt;world.numSolverIterations=8;
     try{
-      world.createCollider(RAPIER.ColliderDesc.cuboid(18,.12,14).setTranslation(0,-.12,0).setFriction(.65).setRestitution(.18));
+      world.createCollider(RAPIER.ColliderDesc.cuboid(18,.12,14).setTranslation(0,-.12,0).setFriction(.48).setRestitution(.3));
       world.createCollider(RAPIER.ColliderDesc.cuboid(3.5,.54,2.2).setTranslation(0,.54,0).setFriction(.7).setRestitution(.1));
       if(attempt-lockedAt>100)firstLaunch=undefined;
       const launches=[firstLaunch??launch(shapes[0]),launch(shapes[1])];
       const bodies=shapes.map((shape,i)=>{
-        const body=world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(shape.position.x,shape.position.y,shape.position.z).setRotation(shape.rotation).setLinearDamping(.35).setAngularDamping(.2).setCcdEnabled(true));
+        const body=world.createRigidBody(RAPIER.RigidBodyDesc.dynamic().setTranslation(shape.position.x,shape.position.y,shape.position.z).setRotation(shape.rotation).setLinearDamping(.12).setAngularDamping(.12).setCcdEnabled(true));
         world.createCollider(colliders[i],body);
         body.setLinvel(launches[i].linear,true);body.setAngvel(launches[i].angular,true);return body;
       });
@@ -48,7 +52,8 @@ export async function prepareDiceThrow(shapes:DieShape[],values:number[],random:
       }
       if(valid&&bodies.every(body=>body.isSleeping())){
         const faces=frames.at(-1)!.map((pose,i)=>topFace(shapes[i].normals,pose.rotation));
-        if(faces.every((face,i)=>face===values[i]))return {frames,duration:(frames.length-1)*dt,impacts,attempts:attempt};
+        const upright=faces.every((face,i)=>shapes[i].normals[face].clone().applyQuaternion(frames.at(-1)![i].rotation).y>.95);
+        if(upright&&faces.every((face,i)=>face===values[i]))return {frames,duration:(frames.length-1)*dt,impacts,attempts:attempt};
         if(!firstLaunch&&faces[0]===values[0]){firstLaunch=launches[0];lockedAt=attempt;}
       }
     }finally{world.free();}

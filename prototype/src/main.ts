@@ -54,7 +54,7 @@ function layout(){
     else{c.home.set((i-3)*1.22,.08,3.55+Math.abs(i-3)*.025);c.group.scale.setScalar(1);c.group.rotation.y=(i-3)*-.025;}c.group.position.copy(c.home);});
   const narrow=!mobile&&innerWidth/innerHeight<1.35;
   dice[0].base.set(mobile?1.18:narrow?4.2:4.6,.43,mobile?2.85:.85);dice[1].base.set(mobile?2.1:narrow?4.35:5.05,.43,mobile?3.05:2.12);dice.forEach(d=>d.group.position.copy(d.base));
-  dice.forEach(d=>d.group.scale.setScalar(mobile?.26:narrow?.32:.37));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
+  dice.forEach(d=>d.group.scale.setScalar(mobile?.20:narrow?.245:.28));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
 }
 
 const goal=()=>intentions.find(g=>g.id===state.intention)||intentions[0];
