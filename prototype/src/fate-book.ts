@@ -50,8 +50,8 @@ export class ImportedFateBook{
       }
     });
     // Original exterior remains visible. Only the Chinese title is newly stamped.
-    const canvas=document.createElement('canvas');canvas.width=768;canvas.height=1024;const ctx=canvas.getContext('2d')!;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='58px "SimSun",serif';ctx.fillText('命 运 之 书',384,485);ctx.font='22px "SimSun",serif';ctx.fillText('一生，尚未写定。',384,554);ctx.fillRect(280,607,208,1);ctx.font='27px Georgia';ctx.fillText('Ⅰ — Ⅶ',384,665);
-    const title=new T.Mesh(new T.PlaneGeometry(2.6,3.8),new T.MeshStandardMaterial({color:'#c8ab6c',metalness:.75,roughness:.48,alphaMap:new T.CanvasTexture(canvas),transparent:true,depthWrite:false,side:T.FrontSide}));title.position.set(-1.52,BASE-.13-HINGE,0);title.rotation.x=Math.PI/2;this.left.add(title);
+    const canvas=document.createElement('canvas');canvas.width=768;canvas.height=1024;const ctx=canvas.getContext('2d')!;ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='64px "Archive Display",serif';ctx.fillText('命 运 之 书',384,810);ctx.font='22px "Archive Body",serif';ctx.fillText('一生，尚未写定。',384,864);ctx.fillRect(280,897,208,1);ctx.font='27px Georgia';ctx.fillText('Ⅰ — Ⅶ',384,949);
+    const title=new T.Mesh(new T.PlaneGeometry(2.6,3.8),new T.MeshStandardMaterial({color:'#e5c78a',metalness:.35,roughness:.65,emissive:'#a0783c',emissiveIntensity:.14,alphaMap:new T.CanvasTexture(canvas),transparent:true,depthWrite:false,depthTest:false,side:T.FrontSide}));title.position.set(-1.52,BASE-.13-HINGE,0);title.name='fate-cover-title';title.rotation.set(Math.PI/2,0,Math.PI);this.left.add(title);
     this.setOpening(this.opening);
   }
   setOpening(p:number){

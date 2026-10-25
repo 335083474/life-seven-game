@@ -21,3 +21,18 @@ test('turning leaf stays finite and lands flat on either side without stale-boun
   }
   book.endTurn();assert.equal(leaves[0].parent.visible,false);
 });
+
+test('closed cover title faces the reader with its top away from the reader',()=>{
+  const originalDocument=globalThis.document;
+  globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>({fillText(){},fillRect(){}})})};
+  try{
+    const book=new ImportedFateBook();book.setModel(new T.Group());book.setOpening(0);book.group.updateMatrixWorld(true);
+    const title=book.group.getObjectByName('fate-cover-title');assert.ok(title);
+    const right=new T.Vector3(1,0,0).transformDirection(title.matrixWorld);
+    const up=new T.Vector3(0,1,0).transformDirection(title.matrixWorld);
+    const normal=new T.Vector3(0,0,1).transformDirection(title.matrixWorld);
+    assert.ok(right.distanceTo(new T.Vector3(1,0,0))<1e-6,'letters must read from left to right');
+    assert.ok(up.distanceTo(new T.Vector3(0,0,-1))<1e-6,'top of title must point toward the far edge');
+    assert.ok(normal.distanceTo(new T.Vector3(0,1,0))<1e-6,'front face must remain above the cover');
+  }finally{globalThis.document=originalDocument;}
+});
