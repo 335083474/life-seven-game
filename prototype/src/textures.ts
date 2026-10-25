@@ -45,14 +45,14 @@ function icon(ctx:CanvasRenderingContext2D,name:string,x:number,y:number,r:numbe
   else{for(const sign of [-1,1]){ctx.beginPath();ctx.arc(sign*19,-18,13,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.ellipse(sign*19,21,22,24,0,Math.PI,Math.PI*2);ctx.stroke();}ctx.beginPath();ctx.moveTo(-40,37);ctx.lineTo(40,37);ctx.stroke();}
   ctx.restore();
 }
-export function cardTexture(card:{name:string;subtitle:string;level:number;icon:string},index:number,paper?:T.Texture){
+export function cardTexture(card:{name:string;subtitle:string;level:number;icon:string;language?:string},index:number,paper?:T.Texture){
   const c=canvas(512,768),ctx=c.getContext('2d')!;const fill=ctx.createLinearGradient(0,0,512,768);fill.addColorStop(0,'#eee4c9');fill.addColorStop(.6,'#d9caa6');fill.addColorStop(1,'#c7b98f');ctx.fillStyle=fill;ctx.fillRect(0,0,512,768);
   seed=50+index;for(let i=0;i<10000;i++){ctx.fillStyle=`rgba(60,42,20,${random()*.035})`;ctx.fillRect(random()*512,random()*768,1+random()*2,1);}
   if(paper?.image){const image=paper.image as HTMLImageElement;ctx.drawImage(image,image.width/2,0,image.width/2,image.height,0,0,512,768);}
   ctx.strokeStyle='#78603d';for(const pad of [26,33]){ctx.lineWidth=1;ctx.strokeRect(pad,pad,512-2*pad,768-2*pad);}
-  ctx.font='17px Georgia';ctx.fillStyle='#8c7748';ctx.textAlign='left';ctx.fillText(`人生元素 · ${String(index+1).padStart(2,'0')}`,45,63);ctx.textAlign='right';ctx.font='33px Georgia';ctx.fillText(card.level===2?'Ⅱ':'Ⅰ',468,73);
-  ctx.save();ctx.shadowColor='#f2dfae';ctx.shadowOffsetY=1;icon(ctx,card.icon,256,288,104);ctx.restore();ctx.fillStyle='#30271c';ctx.textAlign='center';ctx.font=`bold 65px ${serif}`;ctx.fillText(card.name.split('').join(' '),256,492);ctx.fillStyle='#665036';ctx.font=`23px ${serif}`;ctx.fillText(card.subtitle,256,550);
-  ctx.strokeStyle='#a99665';ctx.beginPath();ctx.moveTo(88,622);ctx.lineTo(424,622);ctx.stroke();ctx.font='19px Georgia';ctx.fillText('命 运 之 书',256,665);ctx.font=`21px ${serif}`;ctx.fillText(card.level===2?'精 进':'初 识',256,713);return texture(c);
+  ctx.font='17px Georgia';ctx.fillStyle='#8c7748';ctx.textAlign='left';ctx.fillText(`${card.language==='en'?'LIFE ELEMENT':'人生元素'} · ${String(index+1).padStart(2,'0')}`,45,63);ctx.textAlign='right';ctx.font='33px Georgia';ctx.fillText(['Ⅰ','Ⅱ','Ⅲ'][card.level-1]||'Ⅰ',468,73);
+  ctx.save();ctx.shadowColor='#f2dfae';ctx.shadowOffsetY=1;icon(ctx,card.icon,256,288,104);ctx.restore();ctx.fillStyle='#30271c';ctx.textAlign='center';ctx.font=`bold ${card.name.length>5?34:65}px ${serif}`;ctx.fillText(card.name.length>5?card.name:card.name.split('').join(' '),256,492,430);ctx.fillStyle='#665036';ctx.font=`23px ${serif}`;ctx.fillText(card.subtitle,256,550);
+  ctx.strokeStyle='#a99665';ctx.beginPath();ctx.moveTo(88,622);ctx.lineTo(424,622);ctx.stroke();ctx.font='19px Georgia';ctx.fillText(card.language==='en'?'THE BOOK OF FATE':'命 运 之 书',256,665);ctx.font=`21px ${serif}`;ctx.fillText(card.language==='en'?(card.level===3?'COLLECTED':card.level===2?'REFINED':'AWAKENED'):(card.level===3?'典 藏':card.level===2?'精 进':'初 识'),256,713);return texture(c);
 }
 export function pageTexture(title:string,body:string,kicker='青春远行 · 人生的一页'){
   const c=canvas(768,1100),ctx=c.getContext('2d')!;ctx.fillStyle='#e8dcbe';ctx.fillRect(0,0,768,1100);

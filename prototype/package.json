@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 8770",
+    "dev": "vite --host 127.0.0.1 --port 8767",
     "build": "tsc --noEmit && vite build",
     "test": "node --test tests/*.test.mjs"
   },
@@ -16,6 +16,7 @@
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.1",
     "@types/three": "^0.186.0",
+    "happy-dom": "^21.0.4",
     "typescript": "7.0.2",
     "vite": "8.3.5"
   }

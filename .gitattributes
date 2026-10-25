@@ -1,0 +1,3 @@
+# Vite bundles contain upstream GLSL template strings with intentional whitespace.
+book/assets/*.js linguist-generated=true -whitespace
+book/assets/*.css linguist-generated=true

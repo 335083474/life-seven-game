@@ -10,19 +10,19 @@
       "source": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.530/LXGWWenKai-Regular.ttf",
       "license": "SIL OFL 1.1",
       "licenseUrl": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/OFL.txt",
-      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
       "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b"
     },
     {
       "file": "archive-body.woff2",
-      "bytes": 116024,
-      "sha256": "8b165472a0c8b2f1f24a05c223eb389629b73c34a04d8dc57673a125dc105a83",
+      "bytes": 1596200,
+      "sha256": "02498d692d3375495f2dede2109eb597cb6a6fd05309a253ec2d3948c608d0b6",
       "title": "LXGW WenKai",
       "creator": "LXGW / Fontworks",
       "source": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.530/LXGWWenKai-Regular.ttf",
       "license": "SIL OFL 1.1",
       "licenseUrl": "https://raw.githubusercontent.com/lxgw/LxgwWenKai/main/OFL.txt",
-      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
       "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b"
     },
     {
@@ -34,19 +34,19 @@
       "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf",
       "license": "SIL OFL 1.1",
       "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/OFL.txt",
-      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
       "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb"
     },
     {
       "file": "archive-display.woff2",
-      "bytes": 202588,
-      "sha256": "0d2b4e7c1b3572bdd13ca8f948468012561f9db4d545e3b5d621370378d767e7",
+      "bytes": 412900,
+      "sha256": "664e60ddef5c82f295f6cd5e15c54ba5834211a6b1565d2b7b821cb88d25f466",
       "title": "Ma Shan Zheng",
       "creator": "The Ma Shan Zheng Project Authors",
       "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf",
       "license": "SIL OFL 1.1",
       "licenseUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/OFL.txt",
-      "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
+      "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained.",
       "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb"
     },
     {
@@ -210,8 +210,8 @@
     },
     {
       "file": "fonts.json",
-      "bytes": 1474,
-      "sha256": "aff1384ed2f11f53dc5922e7f2966841c660aa64a209dd0fa89d570659f874ea",
+      "bytes": 1561,
+      "sha256": "ce7f3b5a04f3fba592ddd5fa5314c5f05bf3176f6aa64fc70eae7e0234652ed9",
       "title": "Book typography source records",
       "creator": "Font authors listed in fonts.json",
       "source": "fonts.json",

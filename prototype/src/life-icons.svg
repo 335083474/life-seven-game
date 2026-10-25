@@ -1,0 +1,24 @@
+<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden">
+ <defs>
+  <symbol id="i-hourglass" viewBox="0 0 48 48"><path d="M12 5h24M12 43h24M16 5c0 10 5 11 8 17 3-6 8-7 8-17M16 43c0-10 5-11 8-17 3 6 8 7 8 17M18 10l6 8 6-8M18 37l6-8 6 8"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 48 48"><circle cx="24" cy="24" r="9"/><path d="M24 4v8M24 36v8M4 24h8M36 24h8M10 10l6 6M32 32l6 6M10 38l6-6M32 16l6-6"/></symbol>
+  <symbol id="i-family" viewBox="0 0 48 48"><path d="M6 25l18-17 18 17M11 23v19h26V23M19 42V28h10v14M11 16V9h6v2"/></symbol>
+  <symbol id="i-parents" viewBox="0 0 48 48"><circle cx="16" cy="12" r="5"/><circle cx="32" cy="12" r="5"/><path d="M8 36V25a8 8 0 0 1 16 0v11M24 36V25a8 8 0 0 1 16 0v11M5 42h38M24 22v20"/></symbol>
+  <symbol id="i-book" viewBox="0 0 48 48"><path d="M24 11c-8-7-15-6-20-4v28c8-2 15-2 20 5 5-7 12-7 20-5V7c-6-2-13-3-20 4zM24 11v29M9 14c4-1 7 0 10 2M29 16c3-2 7-3 10-2"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 48 48"><path d="M24 41C17 34 5 26 5 16a10 10 0 0 1 19-5 10 10 0 0 1 19 5c0 10-12 18-19 25Z"/></symbol>
+  <symbol id="i-health" viewBox="0 0 48 48"><path d="M24 42C13 36 9 25 9 16c0-9 9-13 15-5 6-8 15-4 15 5 0 9-4 20-15 26Z"/><path d="M12 24h8l4-9 4 17 4-8h6"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 48 48"><path d="M7 36h34l3-25-12 9-8-13-8 13-12-9 3 25ZM9 42h30M9 32h30"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="12"/><path d="M29 17c-2-3-11-3-11 3s12 2 12 9-10 8-13 3M24 13v22"/></symbol>
+  <symbol id="i-star" viewBox="0 0 48 48"><path d="M24 3 29 18l16 6-16 6-5 15-5-15-16-6 16-6zM5 7l4 4M39 37l4 4"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 48 48"><path d="M7 41C7 20 18 8 43 5c-2 28-17 38-36 36Z"/><path d="M7 41C18 29 29 17 43 5M17 31l-1-12M25 23l12 1"/></symbol>
+  <symbol id="i-handshake" viewBox="0 0 48 48"><path d="M3 17l10-6 9 5 5-2 9-3 9 6-9 16-9 8-5-2-6-1-6-6zM13 16l6 8 9-6M17 31l10 10M22 27l10 10M28 23l9 9"/></symbol>
+  <symbol id="i-feather" viewBox="0 0 48 48"><path d="M5 43C8 28 13 14 31 5c10-5 17 2 12 12-7 15-23 16-38 26ZM5 43l29-27M18 31l-2-14M25 24l12-3"/></symbol>
+  <symbol id="i-child" viewBox="0 0 48 48"><circle cx="24" cy="12" r="7"/><path d="M11 44V29c0-7 6-11 13-11s13 4 13 11v15M18 44V33h12v11M11 30l-7 8M37 30l7 8"/></symbol>
+  <symbol id="i-tree" viewBox="0 0 48 48"><path d="M24 44V10M24 29 12 18M24 23l12-12M24 16l-7-8M24 36l14-11M7 44h34"/><path d="M8 17c2-7 8-12 15-13M28 4c8 2 12 8 13 15M39 25c-1 6-6 10-15 11"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19"/><path d="M17 31l5-14 10-4-4 13-11 5ZM24 3v6M24 39v6M3 24h6M39 24h6"/></symbol>
+  <symbol id="i-scales" viewBox="0 0 48 48"><path d="M24 5v36M10 42h28M5 15h38M13 15 5 32h16l-8-17ZM35 15l-8 17h16l-8-17Z"/></symbol>
+  <symbol id="i-door" viewBox="0 0 48 48"><path d="M9 44V7h30v37M16 44V14h16v30M30 29h-2M4 44h40"/></symbol>
+  <symbol id="i-flower" viewBox="0 0 48 48"><circle cx="24" cy="24" r="5"/><path d="M24 19C14 3 6 14 19 24 3 14 5 31 19 27 6 40 20 46 24 29c4 17 18 11 5-2 14 4 16-13 0-3 13-10 5-21-5-5z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 48 48"><path d="M3 24C14 7 34 7 45 24c-11 17-31 17-42 0Z"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="3"/></symbol>
+ </defs>
+</svg>

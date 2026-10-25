@@ -20,12 +20,18 @@ def fetch(entry):
   if not file.exists():file.write_bytes(urllib.request.urlopen(link,timeout=90).read())
 with ThreadPoolExecutor(max_workers=2) as pool:list(pool.map(fetch,fonts))
 text=''.join(p.read_text(encoding='utf-8') for p in (root/'prototype/src').glob('*') if p.suffix in ['.ts','.mjs','.css'])+(root/'prototype/index.html').read_text(encoding='utf-8')
+text+=''.join(p.read_text(encoding='utf-8') for p in [root/'game.js',root/'art.js',root/'locale.mjs',root/'locales/en.mjs',*list((root/'backend').glob('*.mjs'))])
 codepoints={ord(c) for c in text}|set(range(0x20,0x7f))
+common=set()
+for high in range(0xa1,0xf8):
+ for low in range(0xa1,0xff):
+  try:common.update(map(ord,bytes([high,low]).decode('gb2312')))
+  except UnicodeDecodeError:pass
 records=[]
 for kind,url,license_url,title,creator in fonts:
  file=source/f'{kind}.ttf';font=TTFont(file);font.recalcTimestamp=False
  options=subset.Options();options.flavor='woff2';options.name_IDs=['*'];options.name_legacy=True;options.name_languages=['*'];options.notdef_glyph=True
- cutter=subset.Subsetter(options=options);cutter.populate(unicodes=codepoints);cutter.subset(font)
+ cutter=subset.Subsetter(options=options);cutter.populate(unicodes=codepoints|common if kind=='body' else codepoints);cutter.subset(font)
  family='Fate Archive '+kind.title();full=family+' Regular'
  for record in font['name'].names:
   if record.nameID in [1,2,3,4,6,16,17,18,25]:
@@ -33,6 +39,6 @@ for kind,url,license_url,title,creator in fonts:
    record.string=value.encode(record.getEncoding(),errors='replace')
  font.flavor='woff2';destination=output/f'archive-{kind}.woff2';font.save(destination)
  license_file=output/f'archive-{kind}-OFL.txt';license_file.write_bytes((source/f'{kind}.OFL.txt').read_bytes())
- records.append({'file':destination.name,'source':url,'licenseSource':license_url,'originalTitle':title,'creator':creator,'family':family,'license':'SIL OFL 1.1','originalSha256':hashlib.sha256(file.read_bytes()).hexdigest(),'bytes':destination.stat().st_size,'sha256':hashlib.sha256(destination.read_bytes()).hexdigest(),'modifications':'Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained.'})
+ records.append({'file':destination.name,'source':url,'licenseSource':license_url,'originalTitle':title,'creator':creator,'family':family,'license':'SIL OFL 1.1','originalSha256':hashlib.sha256(file.read_bytes()).hexdigest(),'bytes':destination.stat().st_size,'sha256':hashlib.sha256(destination.read_bytes()).hexdigest(),'modifications':'Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained.'})
 (output/'fonts.json').write_text(json.dumps(records,indent=2)+'\n',encoding='utf-8')
 print(json.dumps(records,indent=2))

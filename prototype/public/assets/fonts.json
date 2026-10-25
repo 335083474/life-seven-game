@@ -8,9 +8,9 @@
     "family": "Fate Archive Body",
     "license": "SIL OFL 1.1",
     "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b",
-    "bytes": 116024,
-    "sha256": "8b165472a0c8b2f1f24a05c223eb389629b73c34a04d8dc57673a125dc105a83",
-    "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained."
+    "bytes": 1596200,
+    "sha256": "02498d692d3375495f2dede2109eb597cb6a6fd05309a253ec2d3948c608d0b6",
+    "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained."
   },
   {
     "file": "archive-display.woff2",
@@ -21,8 +21,8 @@
     "family": "Fate Archive Display",
     "license": "SIL OFL 1.1",
     "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb",
-    "bytes": 202588,
-    "sha256": "0d2b4e7c1b3572bdd13ca8f948468012561f9db4d545e3b5d621370378d767e7",
-    "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained."
+    "bytes": 412900,
+    "sha256": "664e60ddef5c82f295f6cd5e15c54ba5834211a6b1565d2b7b821cb88d25f466",
+    "modifications": "Body includes game UI and GB2312 characters; display subset to game UI; font family renamed to avoid reserved font names. Original copyright and OFL retained."
   }
 ]

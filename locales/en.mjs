@@ -17,6 +17,7 @@ export default {
   "另写一生": "Write Another Life",
   "独自开始人生": "Begin a Life",
   "命运之书 · 3D交互样章": "Book of Fate · 3D Preview",
+  "命运之书 · 3D单人版": "Book of Fate · 3D Solo",
   "你的每一次选择，都会留下痕迹。": "Every choice you make leaves a trace.",
   "单人＋系统人物 · 自动续玩 ·": "Solo · AI companions · Autosaved ·",
   "命运司书": "Fate Scribe",

@@ -1,5 +1,5 @@
-@font-face{font-family:"Archive Body";src:url('/assets/archive-body.woff2?v=8b165472') format('woff2');font-display:swap;font-weight:400 600}
-@font-face{font-family:"Archive Display";src:url('/assets/archive-display.woff2?v=0d2b4e7c') format('woff2');font-display:swap;font-weight:400 600}
+@font-face{font-family:"Archive Body";src:url('/assets/archive-body.woff2?v=02498d69') format('woff2');font-display:swap;font-weight:400 600}
+@font-face{font-family:"Archive Display";src:url('/assets/archive-display.woff2?v=664e60dd') format('woff2');font-display:swap;font-weight:400 600}
 :root{font-family:"Archive Body","Kaiti SC","KaiTi",serif}
 .wordmark,.invitation h1{font-family:"Archive Display","Kaiti SC",serif;font-weight:400}
 .dice-label strong{font-family:"Archive Body",serif}
