@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b17"><title>命运之书 · 一生，尚未写定</title><meta name="description" content="打开命运之书，翻动人生书页，选择两张人生元素，掷下命运之骰。Three.js独立交互样章。">  <script type="module" crossorigin src="./assets/index-CuXEmtsS.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DDIsJ_Dx.css">
+</head>
+<body>
+  <div id="stage" aria-label="古典命运桌与可以打开的三维书本"></div>
+  <div id="pages"></div>
+  <header class="masthead"><a class="wordmark" href="../" aria-label="返回人生游戏"><span class="mark">Ⅶ</span><span>命运之书<small>七 章 人 生 · 一 册 珍 藏</small></span></a><div class="tools"><button id="sound" class="icon-button" aria-label="开启声音" title="开启声音">♪<span class="off-slash"></span></button><button id="guide" class="icon-button" aria-label="查看操作说明" title="操作说明">?</button></div></header>
+  <main id="interface">
+    <section id="invitation" class="invitation"><span class="eyebrow">一 部 尚 未 写 完 的 人 生</span><h1>命运有它的安排。<br><em>你有你的选择。</em></h1><p>七张人生元素，一本等待落笔的书。<br>把这一页，交给此刻的你。</p><button id="open" class="primary">打开命运之书 <span>↗</span></button><span class="opening-note">建议打开声音，慢慢体验</span></section>
+    <div id="card-targets" aria-label="选择人生元素，最多两张"></div>
+    <div id="table-caption" class="table-caption" hidden><span id="selection-hint">此生所持</span><span id="selection-count">选择两张，交给命运</span></div>
+    <div id="dice-label" class="dice-label" hidden><span>命运之骰</span><strong id="dice-value">D100</strong><small id="dice-status">十位与个位，共同决定这一刻</small></div>
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+    <footer><span>交互样章 · 青春远行</span><button id="close-book" hidden>合上此书 <span>↙</span></button><span class="footer-motto">所走的路，终会成为你。</span></footer>
+  </main>
+  <dialog id="help"><button id="dismiss-help" class="dialog-close" aria-label="关闭说明">×</button><span class="eyebrow">关于这个样章</span><h2>先把一页人生，<br>握在手中。</h2><p>打开书本，选择想走的路；翻到下一页，点选桌上的两张卡牌，再掷出命运之骰。</p><p>可以使用书页上的箭头翻页，也可以使用键盘左右键。Tab 可依次选择卡牌和按钮，Enter 确认。</p><p class="fine-print">这是独立的视觉交互原型。三个事件使用预设演示规则，D100在本机随机生成；不会读写正式游戏存档，未接入AI、广告或支付。骰子动画用于呈现结果，不是物理模拟。</p><button id="restart" class="primary">重新打开这一生 <span>↗</span></button></dialog>
+  <div id="loading" class="loading"><span class="loading-seal">Ⅶ</span><p>正在整理命运的书页<span>…</span></p></div>
+  <noscript><p class="no-script">请启用 JavaScript，以打开命运之书。</p></noscript>
+</body></html>

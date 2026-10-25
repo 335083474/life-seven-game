@@ -4,6 +4,8 @@
 
 已按新版 `LIFE-GDD-PRD-001 V1.0` 的70条验收和26项未决逐项核对：[开发对照与补漏记录](docs/development-audit.md) / [机器可读映射](docs/development-audit.json)。没有把NPC测试当作真实联机验收，也没有把未决规则自动升级为正式规则。
 
+独立的 [Three.js 命运之书交互样章](https://335083474.github.io/life-seven-game/book/) 已提供开书、弯曲翻页、选卡及两枚十面骰组成 D100 的试玩；[源码与运行说明](prototype/README.md)。样章使用预设演示内容，与正式存档分开。
+
 ## 运行
 
 试玩：https://335083474.github.io/life-seven-game/
