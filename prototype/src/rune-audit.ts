@@ -1,0 +1,14 @@
+import * as T from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+const renderer=new T.WebGLRenderer({antialias:true});renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.toneMapping=T.ACESFilmicToneMapping;document.body.append(renderer.domElement);
+const scene=new T.Scene();scene.background=new T.Color('#141c18');
+const room=new RoomEnvironment(),pmrem=new T.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(room,.04).texture;scene.environmentIntensity=.65;room.dispose();pmrem.dispose();
+scene.add(new T.HemisphereLight('#e7dac0','#281f15',.6));const light=new T.DirectionalLight('#ffe1ab',2.5);light.position.set(-3,6,4);scene.add(light);
+const camera=new T.PerspectiveCamera(36,innerWidth/innerHeight,.1,40);camera.position.set(1.8,3.2,6.3);const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=false;controls.minDistance=4;controls.maxDistance=12;
+const gltf=await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync('/assets/dice-rune.glb');const die=gltf.scene.getObjectByName('percentile')!;
+die.traverse(node=>{if(node instanceof T.Mesh)for(const material of [node.material].flat())if(material instanceof T.MeshStandardMaterial){material.envMapIntensity=.8;material.emissiveIntensity=.65;}});scene.add(die);
+window.addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();});
+renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});

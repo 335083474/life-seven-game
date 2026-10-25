@@ -15,8 +15,8 @@
     },
     {
       "file": "archive-body.woff2",
-      "bytes": 113268,
-      "sha256": "e9a4ea30f4605f5135a521c7c33af79818faecf23393a04d604a4eabe2908864",
+      "bytes": 116024,
+      "sha256": "8b165472a0c8b2f1f24a05c223eb389629b73c34a04d8dc57673a125dc105a83",
       "title": "LXGW WenKai",
       "creator": "LXGW / Fontworks",
       "source": "https://github.com/lxgw/LxgwWenKai/releases/download/v1.530/LXGWWenKai-Regular.ttf",
@@ -39,8 +39,8 @@
     },
     {
       "file": "archive-display.woff2",
-      "bytes": 197072,
-      "sha256": "6bcbc5db61b8300114800e770fce31498b6dd6dd98592bef91da964ecd853db8",
+      "bytes": 202588,
+      "sha256": "0d2b4e7c1b3572bdd13ca8f948468012561f9db4d545e3b5d621370378d767e7",
       "title": "Ma Shan Zheng",
       "creator": "The Ma Shan Zheng Project Authors",
       "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/mashanzheng/MaShanZheng-Regular.ttf",
@@ -138,6 +138,42 @@
       "modifications": "Selected candleholder 03 and encyclopedia volumes 01/06/13; compressed GLB/WebP; scene scale, placement and lighting."
     },
     {
+      "file": "dice-bronze.glb",
+      "bytes": 3783416,
+      "sha256": "143718f30b9074fcfe69636abcb98c9171c80c5cc273d4cdeebbd292e2954cab",
+      "title": "Metal and Wood Variation - 3D Custom Themed Dice",
+      "creator": "Felipe Carim (Capygon)",
+      "source": "https://sketchfab.com/3d-models/metal-and-wood-variation-3d-custom-themed-dice-d209249a82e04705b6baa5188d26650d",
+      "license": "CC BY 4.0",
+      "originalSha256": "81af146901b6fab0a7ad373bc4b61aedabce7019c00cc3d19cbca879dde45d42",
+      "modifications": "Selected original d10 and percentile die; baked transforms, centered and uniformly scaled; preserved original authored surfaces; resized WebP textures and Meshopt compression; calibrated all numeral faces for runtime landing.",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "file": "dice-rune.glb",
+      "bytes": 566188,
+      "sha256": "64774ce91a2305f09dc494e7e22edfe02b6f5927d5d9236e19200cbabea7d6b4",
+      "title": "Dungeons And Dragons Dice Set - percentile preview",
+      "creator": "JayDesigns3D",
+      "source": "https://sketchfab.com/3d-models/dungeons-and-dragons-dice-set-163950cff9694fe1a686d22fe7737236",
+      "license": "CC BY 4.0",
+      "originalSha256": "032e494505c7271890e0115aa4f83158465d30bc58c286d72d6b70c090969db2",
+      "availability": "preview_only",
+      "modifications": "Selected original 00-90 percentile d10 only; converted legacy specular/glossiness materials, adjusted IOR, body opacity and dark material, centered and uniformly scaled; Meshopt compression. Companion 0-9 die is absent. Not enabled for gameplay.",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "file": "dice-skins.json",
+      "bytes": 1337,
+      "sha256": "9a9505b1867056e1c6682af98027c6becff27339525faafba00726154314e8c1",
+      "title": "Dice appearance source records",
+      "creator": "Model authors listed in dice-skins.json",
+      "source": "dice-skins.json",
+      "license": "CC BY 4.0",
+      "modifications": "Source and runtime adaptation records",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
       "file": "fate-d10.glb",
       "bytes": 83744,
       "sha256": "29abe78aec4ac62a60b59fd3361c93dbdc37ea85bdf924e76e319c6a78e1bd4f",
@@ -175,13 +211,24 @@
     {
       "file": "fonts.json",
       "bytes": 1474,
-      "sha256": "8126015970c431987178bb62de5b971b9cbd923500169e509d71796750304dd3",
+      "sha256": "aff1384ed2f11f53dc5922e7f2966841c660aa64a209dd0fa89d570659f874ea",
       "title": "Book typography source records",
       "creator": "Font authors listed in fonts.json",
       "source": "fonts.json",
       "license": "SIL OFL 1.1",
       "licenseUrl": "https://openfontlicense.org/",
       "modifications": "Source and subset provenance records"
+    },
+    {
+      "file": "rapier-LICENSE.txt",
+      "bytes": 11343,
+      "sha256": "4c05555705e3efde601fb1252ae48f1d63992af8a8fb8947745b7fa834e8f519",
+      "title": "Rapier 3D physics engine license",
+      "creator": "Dimforge contributors",
+      "source": "https://github.com/dimforge/rapier.js",
+      "license": "Apache-2.0",
+      "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
+      "modifications": "Unmodified license text"
     },
     {
       "file": "victor-book.glb",

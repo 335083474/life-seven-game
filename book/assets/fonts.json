@@ -8,8 +8,8 @@
     "family": "Fate Archive Body",
     "license": "SIL OFL 1.1",
     "originalSha256": "2d73eea94ad808999d90c0000c239a84a33b09d4bc6ab6c5b8bbf1eda8a7fc8b",
-    "bytes": 113268,
-    "sha256": "e9a4ea30f4605f5135a521c7c33af79818faecf23393a04d604a4eabe2908864",
+    "bytes": 116024,
+    "sha256": "8b165472a0c8b2f1f24a05c223eb389629b73c34a04d8dc57673a125dc105a83",
     "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained."
   },
   {
@@ -21,8 +21,8 @@
     "family": "Fate Archive Display",
     "license": "SIL OFL 1.1",
     "originalSha256": "6d2546bb189c732a8ca29af9e22457b152387d158aa459e4ac2ce1e51788b7fb",
-    "bytes": 197072,
-    "sha256": "6bcbc5db61b8300114800e770fce31498b6dd6dd98592bef91da964ecd853db8",
+    "bytes": 202588,
+    "sha256": "0d2b4e7c1b3572bdd13ca8f948468012561f9db4d545e3b5d621370378d767e7",
     "modifications": "Subset to sample characters; font family renamed to avoid reserved font names. Original copyright and OFL retained."
   }
 ]

@@ -1,0 +1,21 @@
+[
+  {
+    "file": "dice-bronze.glb",
+    "title": "Metal and Wood Variation - 3D Custom Themed Dice",
+    "creator": "Felipe Carim (Capygon)",
+    "source": "https://sketchfab.com/3d-models/metal-and-wood-variation-3d-custom-themed-dice-d209249a82e04705b6baa5188d26650d",
+    "license": "CC BY 4.0",
+    "originalSha256": "81af146901b6fab0a7ad373bc4b61aedabce7019c00cc3d19cbca879dde45d42",
+    "modifications": "Selected original d10 and percentile die; baked transforms, centered and uniformly scaled; preserved original authored surfaces; resized WebP textures and Meshopt compression; calibrated all numeral faces for runtime landing."
+  },
+  {
+    "file": "dice-rune.glb",
+    "title": "Dungeons And Dragons Dice Set - percentile preview",
+    "creator": "JayDesigns3D",
+    "source": "https://sketchfab.com/3d-models/dungeons-and-dragons-dice-set-163950cff9694fe1a686d22fe7737236",
+    "license": "CC BY 4.0",
+    "originalSha256": "032e494505c7271890e0115aa4f83158465d30bc58c286d72d6b70c090969db2",
+    "availability": "preview_only",
+    "modifications": "Selected original 00-90 percentile d10 only; converted legacy specular/glossiness materials, adjusted IOR, body opacity and dark material, centered and uniformly scaled; Meshopt compression. Companion 0-9 die is absent. Not enabled for gameplay."
+  }
+]

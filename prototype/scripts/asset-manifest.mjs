@@ -4,13 +4,16 @@ import {createHash} from 'node:crypto';
 const root=path.resolve(import.meta.dirname,'../public/assets');
 const source='https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc';
 const files=[];
+const skins=JSON.parse(await fs.readFile(path.join(root,'dice-skins.json'),'utf8'));
 const fonts=JSON.parse(await fs.readFile(path.join(root,'fonts.json'),'utf8'));
 for(const name of (await fs.readdir(root)).filter(n=>n!=='manifest.json').sort()){
   const data=await fs.readFile(path.join(root,name));
+  if(name==='rapier-LICENSE.txt'){files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:'Rapier 3D physics engine license',creator:'Dimforge contributors',source:'https://github.com/dimforge/rapier.js',license:'Apache-2.0',licenseUrl:'https://www.apache.org/licenses/LICENSE-2.0',modifications:'Unmodified license text'});continue;}
   if(name.startsWith('archive-')||name==='fonts.json'){
     const font=fonts.find(f=>name===f.file||name===f.file.replace('.woff2','-OFL.txt'));
     files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:font?.originalTitle||'Book typography source records',creator:font?.creator||'Font authors listed in fonts.json',source:font?.source||'fonts.json',license:'SIL OFL 1.1',licenseUrl:font?.licenseSource||'https://openfontlicense.org/',modifications:font?.modifications||'Source and subset provenance records',...(font?{originalSha256:font.originalSha256}:{})});continue;
   }
+  const skin=skins.find(s=>s.file===name);if(skin||name==='dice-skins.json'){files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),...(skin||{title:'Dice appearance source records',creator:'Model authors listed in dice-skins.json',source:'dice-skins.json',license:'CC BY 4.0',modifications:'Source and runtime adaptation records'}),file:name,licenseUrl:'https://creativecommons.org/licenses/by/4.0/'});continue;}
   const hero=name==='victor-book.glb',dice=name.startsWith('fate-d');
   const id=name.startsWith('ferndale')?'ferndale_studio_09':name.replace(/-(color|normal|roughness)\.webp$|\.glb$/,'');
   files.push({file:name,bytes:data.length,sha256:createHash('sha256').update(data).digest('hex'),title:hero?'Book':dice?'Pointy Metal/Crystal Dice':id,

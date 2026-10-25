@@ -60,6 +60,20 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-Rapier 3D physics engine - Dimforge contributors
+Dice appearance: Metal and Wood Variation - 3D Custom Themed Dice
+Creator: Felipe Carim (Capygon) / BokuNC
+Source: https://sketchfab.com/3d-models/metal-and-wood-variation-3d-custom-themed-dice-d209249a82e04705b6baa5188d26650d
+License: Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/)
+Changes: extracted original d10/percentile, normalized scale and transforms, resized WebP textures, Meshopt compression, calibrated numeral-face landing.
+
+Rapier 3D physics engine — Dimforge contributors
 https://github.com/dimforge/rapier.js
-Apache License 2.0 - full text: assets/rapier-LICENSE.txt
+Apache License 2.0 — full text: assets/rapier-LICENSE.txt
+
+Dungeons And Dragons Dice Set by JayDesigns3D
+https://sketchfab.com/3d-models/dungeons-and-dragons-dice-set-163950cff9694fe1a686d22fe7737236
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Changes: original percentile d10 selected for preview only; legacy materials converted,
+body opacity and IOR corrected, dark material adjusted; centered and scaled; Meshopt compression.
+The source has no companion 0-9 die, so this appearance is not enabled for gameplay.
