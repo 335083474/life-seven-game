@@ -3,11 +3,11 @@ import icons from './life-icons.svg?raw';
 import './life-book.css';
 import {bookText,setBookLocale,watchBookLocale} from './book-locale';
 import {installBookPagination} from './book-pagination';
-import {arrangeBookSpread,instructionHTML} from './book-layout';
+import {arrangeBookSpread,instructionHTML,refreshBookAssessment} from './book-layout';
 
 export type LifeSnapshot={life:any;screen:string;busy:boolean;error:string;locale:string;selected:string[];readyToRoll:boolean;translate:(s:string)=>string};
 type Transition={before:any;after:any;route:string;body:any};
-declare global {interface Window {LifeBook?:{app:HTMLElement;render:(snapshot:LifeSnapshot)=>void;transition:(change:Transition)=>Promise<void>};}}
+declare global {interface Window {LifeBook?:{app:HTMLElement;render:(snapshot:LifeSnapshot)=>void;transition:(change:Transition)=>Promise<void>;edit?:(change:{readyToRoll:boolean})=>void};}}
 const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
   update:(snapshot:LifeSnapshot,table:any[])=>void;
@@ -27,6 +27,7 @@ export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
   document.querySelector('#life-global-nav')!.addEventListener('click',event=>{if((event.target as HTMLElement).closest('[data-book-dossier]'))dossier.showModal();});
   let snapshot:LifeSnapshot|undefined,key='',lastError='',localePending=false;
   window.LifeBook={app,
+    edit(change){if(!snapshot)return;snapshot={...snapshot,...change};refreshBookAssessment(app,snapshot);pagination.reflow();view.update(snapshot,tableCards(snapshot.life));},
     async transition(change){
       const value=savedDie(change.route,change.body,change.after);
       if(value!==null){try{await view.throwDice(value);}catch(error){console.warn('Saved die retained; physical replay unavailable.',error);}}

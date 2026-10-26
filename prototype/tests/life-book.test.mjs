@@ -6,7 +6,7 @@ import {Window} from 'happy-dom';
 import {fixture} from '../../tests/support.mjs';
 import {savedDie,pageKey,tableCards,lastSavedDie} from '../src/life-presentation.mjs';
 
-const {arrangeBookSpread}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(readFileSync(new URL('../src/book-layout.ts',import.meta.url),'utf8'))).toString('base64'));
+const {arrangeBookSpread,refreshBookAssessment}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(readFileSync(new URL('../src/book-layout.ts',import.meta.url),'utf8'))).toString('base64'));
 
 test('real shared UI completes nine rounds through the book host, retains saves, and presents only saved dice',async t=>{
   const f=fixture(t,{dice:Array(100).fill(10)}),window=new Window({url:'https://335083474.github.io/life-seven-game/book/'});
@@ -22,7 +22,7 @@ test('real shared UI completes nine rounds through the book host, retains saves,
     arrangeBookSpread(app,snapshot);
     for(const control of live)assert(app.contains(control),'Facing-page layout must retain '+(control.dataset.action||control.id));
     assert(app.querySelectorAll('.book-leaf').length>=2,'Every game phase needs facing content');
-  },transition:async({route,body,after})=>{
+  },edit:change=>{latest={...latest,...change};refreshBookAssessment(app,latest);},transition:async({route,body,after})=>{
     const die=savedDie(route,body,after);if(die!==null)throws.push(die);
     if(breakReplay){breakReplay=false;throw Error('Simulated presentation interruption');}
   }};
@@ -48,14 +48,21 @@ test('real shared UI completes nine rounds through the book host, retains saves,
     assert.equal(latest.life.round,round);assert.equal(latest.life.phase,'fixed');
     await click('fixed-choice',0);await click('fixed');await drain();
     if(round===0){
-      await click('preset',0);await click('assess');
+      await click('preset',0);
+      const longGoal='我想研究帮助老人的新技术，先走访社区，采访愿意参与的居民，再与旧友一起设计可使用的原型，并用三个月完成小范围验证，为独立生活的长者减少日常困难。';
+      app.querySelector('#free-goal').value=longGoal;app.querySelector('#free-goal').dispatchEvent(new window.Event('input',{bubbles:true}));
+      await click('assess');
+      const focusedGoal=app.querySelector('#free-goal');focusedGoal.value=longGoal+'新目标';focusedGoal.dispatchEvent(new window.Event('input',{bubbles:true}));
+      assert.equal(app.querySelector('#free-goal'),focusedGoal,'Editing must retain the real input');assert(app.classList.contains('book-assessment-stale'));assert(app.querySelector('[data-action="assess"]'));
+      focusedGoal.value=longGoal;focusedGoal.dispatchEvent(new window.Event('input',{bubbles:true}));assert(!app.classList.contains('book-assessment-stale'));assert.equal(app.querySelectorAll('.book-roll-chance').length,1);assert(app.querySelector('[data-action="roll"]'));
+
       const calls=f.calls(),key=tableCards(latest.life)[0].key;
       await click('select-card',key);await click('select-card',key);
       assert.equal(f.calls(),calls,'Changing cards must not call AI');
       breakReplay=true;await click('roll');
       assert.equal(latest.life.phase,'rolled','Presentation failure must not discard a committed roll');
       assert.equal(throws.at(-1),latest.life.roll.dice);await click('settle');await drain();
-      await click('narrate');assert(latest.life.lastResult.narrative);
+      await click('narrate');assert(latest.life.lastResult.narrative);assert(app.querySelector('.book-leaf--story details'));assert(app.querySelector('.book-leaf--choice [data-action=advance]'));assert(app.textContent.includes(longGoal),'The complete action is retained, not truncated');
     }else{await click('skip-confirm');await click('skip-free');}
     await click('advance');assert.equal(latest.life.phase,'swan');
     await click('swan');assert.equal(throws.at(-1),latest.life.swan.dice);await drain();await click('advance');

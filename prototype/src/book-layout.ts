@@ -1,5 +1,20 @@
 type Snapshot={screen:string;locale:string;life:any;readyToRoll:boolean;selected:string[]};
 const escape=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+function compactAssessment(panel:Element,en:boolean){
+  const rate=panel.children[1] as HTMLElement|undefined,reasoning=panel.firstElementChild;
+  const paragraphs=reasoning?[...reasoning.children].filter(n=>n.tagName==='P'):[];
+  const audit=document.createElement('details'),title=document.createElement('summary');audit.className='book-calculation';title.textContent=en?'Element matches and calculation':'逐卡匹配与计算明细';audit.append(title);
+  for(const p of paragraphs)if(p!==paragraphs[0]&&!p.classList.contains('risk'))audit.append(p);reasoning?.append(audit);
+  if(rate){rate.classList.add('book-roll-chance');const label=document.createElement('span');label.textContent=en?'Chance of success':'本次成功率';rate.prepend(label);rate.remove();}
+  return rate;
+}
+/** The shared goal input updates its panel without replacing the focused textarea. */
+export function refreshBookAssessment(app:HTMLElement,s:Snapshot){
+  const panel=app.querySelector('#probability-panel');if(!panel||!app.querySelector('.book-leaf--assessment'))return;
+  app.classList.toggle('book-assessment-stale',!s.readyToRoll);
+  const message=app.querySelector<HTMLElement>('.book-action-updated');if(message)message.hidden=s.readyToRoll;
+  if(s.readyToRoll){const rate=compactAssessment(panel,s.locale==='en');if(rate)app.querySelector('.book-roll-chance')?.replaceWith(rate);}
+}
 export function bookInstruction(s:Snapshot){
   const en=s.locale==='en',text=(zh:string,english:string)=>en?english:zh;
   if(s.screen==='home')return {title:text('从这里落笔','Begin your story'),body:text('选择继续这一生，或另写一生。从七岁抽取四张初始元素开始。','Continue a saved life or begin a new one with four initial elements at age seven.')};
@@ -26,6 +41,7 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
   const note=(title:string,body:string)=>{const node=document.createElement('div');node.className='book-instruction';const h=document.createElement('h3'),p=document.createElement('p');h.textContent=title;p.textContent=body;node.append(h,p);return node;};
   const pages:HTMLElement[]=[];
   const main=app.querySelector<HTMLElement>('main')!;if(!main)return;
+  app.classList.remove('book-assessment-stale');
   const append=(...nodes:(Node|null|undefined)[])=>nodes.forEach(n=>n&&pages.at(-1)!.append(n));
   const next=(side:string)=>{const p=leaf(side);pages.push(p);return p;};
   const intro=(node:HTMLElement)=>{
@@ -72,14 +88,11 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
       for(const child of [...center.children]){if(child===panel||child===bottom||child===warning||child===skip)continue;append(child);if(child===presets)break;}
       pages.push(choices);
       if(s.readyToRoll){
-        const rate=panel.children[1] as HTMLElement|undefined;
-        const reasoning=panel.firstElementChild,paragraphs=reasoning?[...reasoning.children].filter(n=>n.tagName==='P'):[];
-        const audit=document.createElement('details'),auditTitle=document.createElement('summary');audit.className='book-calculation';auditTitle.textContent=text('逐卡匹配与计算明细','Element matches and calculation');audit.append(auditTitle);
-        for(const p of paragraphs)if(p!==paragraphs[0]&&!p.classList.contains('risk'))audit.append(p);
-        reasoning?.append(audit);
+        const rate=compactAssessment(panel,en);
         next('assessment');append(note(text('司书已读过你的行动','The scribe has assessed your action'),text('难度与风险已确定。展开明细可看逐卡理由；改目标或同行者要重新评估。','Difficulty and risk are set. Expand the details for each element. Changing the goal or companions needs a new assessment.')),panel);
         next('choice');append(note(text('准备好，就掷下这一刻','When ready, cast the dice'),text('这是正式行动。点击桌上任一颗骰子，或下方的锁定并投骰按钮；确认后不能反悔。','This is the committed action. Click either table die or the lock-and-roll button below. The action cannot be undone.')));
-        if(rate){rate.classList.add('book-roll-chance');const label=document.createElement('span');label.textContent=text('本次成功率','Chance of success');rate.prepend(label);append(rate);}
+        const updated=note(text('行动已更改','Your action has changed'),text('请重新评估，旧概率不再适用于这次行动。','Request a new assessment; the previous chance no longer applies.'));updated.classList.add('book-action-updated');updated.hidden=true;append(updated);
+        if(rate)append(rate);
         append(agreement,bottom,skip);
       }else{agreementTitle.textContent=text('其他选择：跳过／规则','Other options: skip / rules');agreement.append(skip);append(panel,agreement,bottom);}
     }else{

@@ -128,3 +128,4 @@ html[lang=en] .folio-content[data-book-phase=fixed] .option small{font-size:18px
 .book-roll-chance small{font-size:26px!important}
 .folio-content .book-leaf .solo-narrative,.folio-content .book-leaf [data-live-prose]{font-size:22px;line-height:1.75}.book-story-notes{font-size:20px;line-height:1.5}.book-story-notes>summary{padding:5px 0;border-bottom:1px solid #8c6c4655}
 .folio-content[data-book-phase=free-result] .event-kicker{display:none}.folio-content[data-book-phase=free-result] .solo-die{line-height:1}.folio-content[data-book-phase=free-result] .book-instruction--compact>span{display:none}.folio-content[data-book-phase=free-result] .book-instruction--compact{padding-top:8px;margin-top:10px}
+.book-action-updated[hidden]{display:none}.book-assessment-stale .book-roll-chance,.book-assessment-stale .book-leaf:has(.book-roll-chance)>.book-instruction:not(.book-action-updated),.book-assessment-stale .book-leaf--assessment>.book-instruction{display:none}
