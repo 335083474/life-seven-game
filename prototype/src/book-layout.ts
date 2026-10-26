@@ -31,7 +31,7 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
   const intro=(node:HTMLElement)=>{
     const concise:Record<string,[string,string]>={
       fixed:['读左页的处境，在对页选一项，再写下选择。','Read this situation, choose an option opposite, then confirm it.'],
-      'free-result':['故事记在对页。读完后，选择面对黑天鹅。','Read the story opposite, then face the Black Swan.'],
+      'free-result':['故事见对页，读完后继续。','Read the story opposite, then continue.'],
       rolled:['骰点已保存。在对页接受结果，或明确使用机遇重掷。','The die result is saved. Accept it opposite or explicitly use an opportunity to reroll.'],
       swan:['这一步不选卡、不评估。读完对页说明，点击骰子。','No cards or assessment here. Read the facing page, then click a die.'],
       'round-end':['读完对页记录，再继续人生。','Read the record opposite, then continue this life.'],
@@ -86,7 +86,7 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
       const children=[...center.children];
       if(s.life.phase==='free-result'){
         const goal=children.find(n=>n.tagName==='P');
-        if(goal&&(goal.textContent?.length||0)>85){const d=document.createElement('details'),summary=document.createElement('summary');summary.textContent=text('重读本次行动','Read the full action');goal.before(d);d.append(summary,goal);children.splice(children.indexOf(goal),1,d);}
+        if(goal&&(goal.textContent?.length||0)>50){const d=document.createElement('details'),summary=document.createElement('summary');summary.textContent=text('重读本次行动','Read the full action');goal.before(d);d.append(summary,goal);children.splice(children.indexOf(goal),1,d);}
         const records=children.filter(n=>n.matches('.solo-hint,.solo-panel:not(.solo-stream),.solo-audit,[data-action="source-facts"]'));
         if(records.length){const d=document.createElement('details'),summary=document.createElement('summary');d.className='book-story-notes';summary.textContent=text('本次记录与故事依据','Event record and story sources');d.append(summary,...records);for(const record of records)children.splice(children.indexOf(record),1);const action=children.findIndex(n=>n.classList.contains('solo-actions'));children.splice(action<0?children.length:action,0,d);}
       }
