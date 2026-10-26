@@ -21,6 +21,7 @@ export function installBookPagination(
     previous.disabled=busy||paging||index===0;next.disabled=busy||paging||index+stride>=count;
     counter.textContent=locale==='en'?`Pages ${index+1}${stride===2?'–'+(index+2):''} of ${count}`:`第 ${index+1}${stride===2?'—'+(index+2):''} 页 / 共 ${count} 页`;
     nav.setAttribute('aria-label',locale==='en'?'Browse book pages':'翻阅书页');
+    const viewport=app.parentElement!;viewport.scrollLeft=0;
   }
   function reflow(){
     queued=false;observer.disconnect();
@@ -39,11 +40,18 @@ export function installBookPagination(
     try{await view.turn(direction<0);index=Math.min(target,count-stride);}
     finally{paging=false;paint();view.reveal();}
   }
+  function focus(selector:string){
+    const target=app.querySelector<HTMLElement>(selector);if(!target)return;
+    let x=target.offsetLeft,parent=target.offsetParent as HTMLElement|null;
+    while(parent&&parent!==app){x+=parent.offsetLeft;parent=parent.offsetParent as HTMLElement|null;}
+    index=Math.floor(Math.max(0,x)/518);paint();
+  }
   previous.addEventListener('click',()=>void go(-1));next.addEventListener('click',()=>void go(1));
   window.addEventListener('resize',schedule);document.fonts.addEventListener('loadingdone',schedule);
   observe();
   return {
     go,
+    focus,
     update(options:{reset:boolean;locale:string;busy:boolean;closingHTML:string}){
       locale=options.locale;busy=options.busy;closingHTML=options.closingHTML;if(options.reset)index=0;reflow();
     },

@@ -9,6 +9,7 @@ import {elements} from './state.mjs';
 import {installLifeBook,LifeSnapshot} from './life-book';
 import {bookText} from './book-locale';
 import {lastSavedDie} from './life-presentation.mjs';
+import {installBookGuide} from './book-guide';
 import './style.css';
 import './book-typography.css';
 
@@ -40,6 +41,7 @@ const leftCSS=new CSS3DObject(leftDOM),rightCSS=new CSS3DObject(rightDOM);for(co
 let openDiceInspector:(()=>void)|undefined;
 let tableCount=0,reading=false,requestBusy=false,presentationBusy=false,shownDiceKey='';
 let mobile=innerWidth<700,busy=false,opening=0,sound=false,dirty=true,turning=false,rolling=false,hidden=document.hidden;
+let bookGuide:ReturnType<typeof installBookGuide>|undefined;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 type Motion={start:number;duration:number;update:(p:number)=>void;finish?:()=>void};const motions:Motion[]=[];
 const smooth=(p:number)=>p*p*(3-2*p);
@@ -49,8 +51,8 @@ function cameraTargets(){
   book.group.position.z=mobile?-2.5*(1-opening):0;cards.forEach((c,i)=>c.group.visible=i<tableCount&&(!mobile||opening>.7));dice.forEach(d=>d.group.visible=!mobile||opening>.7);
   if(mobile){targetCamera.set(T.MathUtils.lerp(.4,1.66,opening),T.MathUtils.lerp(11,10.1,opening),T.MathUtils.lerp(8.8,7.8,opening));targetLookAt.set(T.MathUtils.lerp(.2,1.66,opening),.20,T.MathUtils.lerp(.0,1.75,opening));camera.fov=opening>.5?42:45;}
   else{targetCamera.set(.4*(1-opening)+pointerX*.14,11.5+pointerY*.12,7.8+pointerY*.07);targetCamera.x+=fateFocus*1.3;targetCamera.y-=fateFocus*.5;targetLookAt.set(.1*(1-opening)+fateFocus*1.4,.10,1.05);camera.fov=T.MathUtils.lerp(37,32,opening)-fateFocus*1.5;}
+  if(reading&&state.opened){targetCamera.set(mobile?1.66:0,mobile?7.8:8.8,mobile?5.5:6.2);targetLookAt.set(mobile?1.66:0,.4,.25);camera.fov=mobile?42:32;}
   if(!mobile && camera.aspect<1.5)camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(camera.fov/2))*1.5/camera.aspect));
-  if(reading&&state.opened){targetCamera.set(mobile?1.66:1.05,mobile?7.8:8.5,mobile?5.5:5.7);targetLookAt.set(mobile?1.66:.7,.4,.25);camera.fov=mobile?42:32;}
   camera.updateProjectionMatrix();
 }
 function layout(){
@@ -153,11 +155,12 @@ const vec=new T.Vector3();
 $('#reading-mode').addEventListener('click',()=>{if(busy||!state.opened)return;reading=!reading;$('#reading-mode').setAttribute('aria-pressed',String(reading));cameraTargets();dirty=true;});
 $('#open').addEventListener('click',openBook);$('#close-book').addEventListener('click',closeBook);
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
+$('#start-tour').addEventListener('click',()=>{dialog.close();bookGuide?.start();});
 $('#restart').addEventListener('click',()=>{if(busy){toast('请等这一页落定。');return;}dialog.close();const button=document.createElement('button');button.dataset.action='home';rightDOM.append(button);button.click();button.remove();if(state.opened)closeBook();});
 $('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');else stopPaper();});
 document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open],#overlay')||busy||(e.target as HTMLElement).matches('input,textarea,select'))return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened){e.preventDefault();void lifeBook.page(1);}if(e.key==='ArrowLeft'&&state.opened){e.preventDefault();void lifeBook.page(-1);}});
 window.addEventListener('pointermove',e=>{if(mobile||busy||document.querySelector('dialog[open],#overlay'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
-window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&opening>.99&&!turning);});
+window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&opening>.99&&!turning);bookGuide?.refresh();});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;dirty=true;});
 renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();toast('画面暂时中断。恢复后可以继续这一页。');});
 renderer.domElement.addEventListener('webglcontextrestored',()=>{dirty=true;toast('画面已恢复。');});
@@ -180,9 +183,10 @@ const lifeBook=installLifeBook(leftDOM,rightDOM,{
     $('#selection-hint').textContent=snapshot.translate('此生所持');
     $('#selection-count').textContent=snapshot.locale==='en'?`${table.length} / 7 · ${snapshot.selected.length} selected`:`${table.length} / 7 · 已选 ${snapshot.selected.length} 张`;
     const footer=$('#interface footer>span');footer.textContent=snapshot.locale==='en'?'Seven chapters · One life':'单人人生 · 七章一生';
-    $('#book-status').hidden=!snapshot.busy;$('#book-status').textContent=rightDOM.classList.contains('translating')?(snapshot.locale==='en'?'Translating this life…':'正在切换这一生的语言…'):(snapshot.locale==='en'?'The keeper is writing… Your progress is being saved.':'司书正在落笔… 请等这一笔保存。');requestBusy=snapshot.busy;if(previousCount!==tableCount)layout();if(!snapshot.busy)restoreSavedDice();syncBusy();dirty=true;
+    $('#book-status').hidden=!snapshot.busy;$('#book-status').textContent=rightDOM.classList.contains('translating')?(snapshot.locale==='en'?'Translating this life…':'正在切换这一生的语言…'):(snapshot.locale==='en'?'The keeper is writing… Your progress is being saved.':'司书正在落笔… 请等这一笔保存。');requestBusy=snapshot.busy;if(previousCount!==tableCount)layout();if(!snapshot.busy)restoreSavedDice();syncBusy();bookGuide?.refresh();dirty=true;
   }
 });
+bookGuide=installBookGuide({snapshot:()=>lifeBook.snapshot,opened:()=>state.opened,open:openBook});
 layout();camera.position.copy(targetCamera);lookAt.copy(targetLookAt);camera.lookAt(lookAt);book.setOpening(0);if(!mobile)book.group.position.x+=2.4;setBusy(false);requestAnimationFrame(frame);
 void lifeBook.start().catch(error=>{toast('游戏书页未能载入，请刷新后重试。');console.error(error);});
-void Promise.all([assetReady,Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1600))])]).then(()=>{$('#loading').classList.add('finished');$('#loading').setAttribute('aria-hidden','true');dirty=true;}).catch(error=>{$('#loading').innerHTML='<span class="loading-seal">Ⅶ</span><p>旧日的物件未能全部抵达。</p><button class="primary" onclick="location.reload()">重新加载</button><p><a href="../" style="color:#d2ba80">打开原版人生游戏</a></p>';console.error('Asset loading failed',error);});
+void Promise.all([assetReady,Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1600))])]).then(()=>{$('#loading').classList.add('finished');$('#loading').setAttribute('aria-hidden','true');bookGuide?.ready();dirty=true;}).catch(error=>{$('#loading').innerHTML='<span class="loading-seal">Ⅶ</span><p>旧日的物件未能全部抵达。</p><button class="primary" onclick="location.reload()">重新加载</button><p><a href="../" style="color:#d2ba80">打开原版人生游戏</a></p>';console.error('Asset loading failed',error);});

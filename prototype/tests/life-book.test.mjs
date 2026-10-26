@@ -1,8 +1,12 @@
 import {test} from 'node:test';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
 import assert from 'node:assert/strict';
 import {Window} from 'happy-dom';
 import {fixture} from '../../tests/support.mjs';
 import {savedDie,pageKey,tableCards,lastSavedDie} from '../src/life-presentation.mjs';
+
+const {arrangeBookSpread}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(readFileSync(new URL('../src/book-layout.ts',import.meta.url),'utf8'))).toString('base64'));
 
 test('real shared UI completes nine rounds through the book host, retains saves, and presents only saved dice',async t=>{
   const f=fixture(t,{dice:Array(100).fill(10)}),window=new Window({url:'https://335083474.github.io/life-seven-game/book/'});
@@ -11,7 +15,14 @@ test('real shared UI completes nine rounds through the book host, retains saves,
   t.after(()=>{Object.assign(globalThis,previous);window.happyDOM.abort();});
   window.document.body.innerHTML='<article><div id="book-app"></div></article>';
   const app=window.document.getElementById('book-app'),throws=[];let latest,breakReplay=false;
-  window.LifeBook={app,render:snapshot=>latest=snapshot,transition:async({route,body,after})=>{
+  window.LifeBook={app,render:snapshot=>{
+    latest=snapshot;
+    const aside=app.querySelector('.play-aside'),header=app.querySelector('.subbar');aside?.remove();header?.remove();
+    const live=[...app.querySelectorAll('button,input,textarea,select')].filter(n=>!n.closest('.hero__frame,.chapter-rail,.home__bottom'));
+    arrangeBookSpread(app,snapshot);
+    for(const control of live)assert(app.contains(control),'Facing-page layout must retain '+(control.dataset.action||control.id));
+    assert(app.querySelectorAll('.book-leaf').length>=2,'Every game phase needs facing content');
+  },transition:async({route,body,after})=>{
     const die=savedDie(route,body,after);if(die!==null)throws.push(die);
     if(breakReplay){breakReplay=false;throw Error('Simulated presentation interruption');}
   }};

@@ -22,6 +22,10 @@ const english:Record<string,string>={
  '「暗色符文」仅供预览：缺少配套个位骰。桌面仍使用「古铜雕刻」。':'Dark Runes is a preview: its matching units die is missing. Engraved Bronze remains on the table.',
  '点击掷骰':'Roll the dice','拿起端详 · 拖动旋转':'Inspect · Drag to rotate','父母健在':'Parents living','父母已离世':'Parents have passed away','已有婚姻关系':'Married','人生七章':'Seven chapters','此生所持':'Life elements',
 };
+english['跟随引导']='Guided tour';
+english['进度自动保存，刷新后可以续玩。完整传记在终局生成，已发生的手记可以在档案中查看。真人联机、广告与支付尚未开放。']='Progress is saved automatically, so you can refresh and continue. The full memoir is generated at the end; existing notes are in your dossier. Multiplayer, advertising and payments are not available yet.';
+english['左页交代处境，右页承接选择或故事。页底前后翻阅只改变阅读位置，不会推进人生。固定事件先选一项再确认；自由事件先写目标、选至多两张元素并请司书评估，读清概率与风险后再点击桌上骰子执行。']='The left page sets the scene and the right holds choices or story. Page arrows change your reading position without advancing life. Confirm a fixed choice, or write a free-action goal, select up to two elements and request an assessment before clicking a table die to act.';
+english['左右方向键也可以翻阅书页。顶部的此生档案可查看全部卡牌、同行者和手记。点击跟随引导，可以随时重看操作步骤。']='The left and right arrow keys also turn pages. Open Life dossier at the top for all cards, companions and notes. Use Guided tour below to replay the instructions at any time.';
 const keys=Object.keys(english).sort((a,b)=>b.length-a.length);
 export function bookText(value:string,locale:string,fallback=(v:string)=>translateText(v,locale)):string{
   if(locale!=='en')return fallback(value);if(english[value])return english[value];
