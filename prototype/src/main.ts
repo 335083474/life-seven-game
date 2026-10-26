@@ -74,6 +74,7 @@ function paintBookView(){
   const en=bookLanguage==='en';document.documentElement.dataset.bookView=bookView;
   $('#reading-hint').hidden=bookView!=='spread';$('#reading-hint').textContent=en?'Click a page to read · Turn from a corner':'点书页靠近 · 页角翻阅';
   $('#return-spread').hidden=bookView==='spread';$('#return-spread').textContent=en?'↙ Both pages':'↙ 返回双页';
+  $('#dice-label').hidden=!state.opened||bookView!=='spread'||lastSavedDie(lifeBook.snapshot?.life)===null;
   $('#reading-mode').setAttribute('aria-pressed',String(reading||bookView!=='spread'));
 }
 function chooseBookView(view:BookView){bookView=view;reading=false;pointerX=pointerY=0;paintBookView();cameraTargets();dirty=true;}
@@ -122,7 +123,7 @@ function selectCard(index:number){if(busy||!state.opened)return;lifeBook.select(
 function restoreSavedDice(force=false){
   const life=lifeBook.snapshot?.life,value=lastSavedDie(life);if(value===null){$('#dice-label').hidden=true;shownDiceKey='';return;}if(rolling||turning)return;
   const key=life.id+':'+value;if(force||key!==shownDiceKey){dice.forEach((die,i)=>{die.faceUp(i===0?Math.floor(value%100/10):value%10);die.group.quaternion.copy(die.target);die.rest();});shownDiceKey=key;}
-  $('#dice-label').hidden=!state.opened;$('#dice-value').textContent=String(value).padStart(2,'0');$('#dice-status').textContent=value===100?'00 + 0 = 100':`${Math.floor(value/10)*10} + ${value%10}`;
+  $('#dice-label').hidden=!state.opened||bookView!=='spread';$('#dice-value').textContent=String(value).padStart(2,'0');$('#dice-status').textContent=value===100?'00 + 0 = 100':`${Math.floor(value/10)*10} + ${value%10}`;
 }
 async function showSavedDice(value:number){
   if(!state.opened)return;
