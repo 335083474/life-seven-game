@@ -26,6 +26,7 @@ english['跟随引导']='Guided tour';
 english['进度自动保存，刷新后可以续玩。完整传记在终局生成，已发生的手记可以在档案中查看。真人联机、广告与支付尚未开放。']='Progress is saved automatically, so you can refresh and continue. The full memoir is generated at the end; existing notes are in your dossier. Multiplayer, advertising and payments are not available yet.';
 english['左页交代处境，右页承接选择或故事。页底前后翻阅只改变阅读位置，不会推进人生。固定事件先选一项再确认；自由事件先写目标、选至多两张元素并请司书评估，读清概率与风险后再点击桌上骰子执行。']='The left page sets the scene and the right holds choices or story. Page arrows change your reading position without advancing life. Confirm a fixed choice, or write a free-action goal, select up to two elements and request an assessment before clicking a table die to act.';
 english['左右方向键也可以翻阅书页。顶部的此生档案可查看全部卡牌、同行者和手记。点击跟随引导，可以随时重看操作步骤。']='The left and right arrow keys also turn pages. Open Life dossier at the top for all cards, companions and notes. Use Guided tour below to replay the instructions at any time.';
+english['点击书页靠近阅读，点桌面或按 Esc 返回双页。点击或拖动外侧页角翻页，左右方向键也可翻阅。输入和选牌照常操作。顶部此生档案可查看卡牌、同行者与手记。']='Click a page to read closer. Click the table or press Esc to return. Click or drag an outer corner, or use the arrow keys to turn pages. Text fields and card choices work normally. Open Life dossier for cards, companions and notes.';
 const keys=Object.keys(english).sort((a,b)=>b.length-a.length);
 export function bookText(value:string,locale:string,fallback=(v:string)=>translateText(v,locale)):string{
   if(locale!=='en')return fallback(value);if(english[value])return english[value];

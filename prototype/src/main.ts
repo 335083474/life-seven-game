@@ -11,6 +11,7 @@ import {bookText} from './book-locale';
 import {lastSavedDie} from './life-presentation.mjs';
 import {installBookGuide} from './book-guide';
 import {BookView,bookViewX,spreadFov,pageFov} from './book-framing';
+import {installBookInput} from './book-input';
 import './style.css';
 import './book-typography.css';
 
@@ -44,6 +45,7 @@ let tableCount=0,reading=false,requestBusy=false,presentationBusy=false,shownDic
 let mobile=innerWidth<700,busy=false,opening=0,sound=false,dirty=true,turning=false,rolling=false,hidden=document.hidden;
 let bookGuide:ReturnType<typeof installBookGuide>|undefined;
 let bookView:BookView='spread',bookLanguage='zh-CN';
+let targetFov=32,previewTurn:{direction:number;progress:number}|undefined;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 type Motion={start:number;duration:number;update:(p:number)=>void;finish?:()=>void};const motions:Motion[]=[];
 const smooth=(p:number)=>p*p*(3-2*p);
@@ -51,15 +53,14 @@ function animate(duration:number,update:(p:number)=>void,finish?:()=>void){motio
 const targetCamera=new T.Vector3(),lookAt=new T.Vector3(),targetLookAt=new T.Vector3();let pointerX=0,pointerY=0,fateFocus=0;
 function cameraTargets(){
   book.group.position.z=mobile?-2.5*(1-opening):0;cards.forEach((c,i)=>c.group.visible=i<tableCount&&(!mobile||opening>.7));dice.forEach(d=>d.group.visible=!mobile||opening>.7);
-  if(mobile){targetCamera.set(T.MathUtils.lerp(.4,0,opening),T.MathUtils.lerp(11,11.5,opening),T.MathUtils.lerp(8.8,7.8,opening));targetLookAt.set(T.MathUtils.lerp(.2,0,opening),.20,T.MathUtils.lerp(.0,1.05,opening));camera.fov=opening>.5?32:45;}
-  else{targetCamera.set(.4*(1-opening)+pointerX*.14,11.5+pointerY*.12,7.8+pointerY*.07);targetCamera.x+=fateFocus*1.3;targetCamera.y-=fateFocus*.5;targetLookAt.set(.1*(1-opening)+fateFocus*1.4,.10,1.05);camera.fov=T.MathUtils.lerp(37,32,opening)-fateFocus*1.5;}
-  if(reading&&state.opened){targetCamera.set(0,8.8,6.2);targetLookAt.set(0,.4,.25);camera.fov=32;}
-  if(state.opened&&bookView!=='spread'){const x=bookViewX(bookView);targetCamera.set(x,8.7,6);targetLookAt.set(x,.4,.3);camera.fov=pageFov(camera.aspect,targetCamera.distanceTo(targetLookAt));}
-  else if(opening>.5)camera.fov=spreadFov(camera.aspect,targetCamera.distanceTo(targetLookAt),camera.fov);
-  camera.updateProjectionMatrix();
+  if(mobile){targetCamera.set(T.MathUtils.lerp(.4,0,opening),T.MathUtils.lerp(11,11.5,opening),T.MathUtils.lerp(8.8,7.8,opening));targetLookAt.set(T.MathUtils.lerp(.2,0,opening),.20,T.MathUtils.lerp(.0,1.05,opening));targetFov=opening>.5?32:45;}
+  else{targetCamera.set(.4*(1-opening)+pointerX*.14,11.5+pointerY*.12,7.8+pointerY*.07);targetCamera.x+=fateFocus*1.3;targetCamera.y-=fateFocus*.5;targetLookAt.set(.1*(1-opening)+fateFocus*1.4,.10,1.05);targetFov=T.MathUtils.lerp(37,32,opening)-fateFocus*1.5;}
+  if(reading&&state.opened){targetCamera.set(0,8.8,6.2);targetLookAt.set(0,.4,.25);targetFov=32;}
+  if(state.opened&&bookView!=='spread'){const x=bookViewX(bookView);targetCamera.set(x,8.7,6);targetLookAt.set(x,.4,.3);targetFov=pageFov(camera.aspect,targetCamera.distanceTo(targetLookAt));}
+  else if(opening>.5)targetFov=spreadFov(camera.aspect,targetCamera.distanceTo(targetLookAt),targetFov);
 }
 function layout(){
-  mobile=innerWidth<700;rightCSS.position.x=0;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
+  mobile=innerWidth<700;rightCSS.position.x=0;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
   cards.forEach((c,i)=>{if(mobile){const row=i<4?0:1,col=row===0?i:i-4,count=row===0?Math.min(4,Math.max(1,tableCount)):Math.max(1,tableCount-4);c.home.set((col-(count-1)/2)*.89,.08,3.68+row*1.27);c.group.scale.setScalar(.72);c.group.rotation.y=(col-(count-1)/2)*.015;}
     else{c.home.set((i-(Math.max(1,tableCount)-1)/2)*1.22,.08,3.55+Math.abs(i-(Math.max(1,tableCount)-1)/2)*.025);c.group.scale.setScalar(1);c.group.rotation.y=(i-3)*-.025;}c.group.position.copy(c.home);});
   const narrow=!mobile&&innerWidth/innerHeight<1.35;
@@ -67,15 +68,15 @@ function layout(){
   dice.forEach(d=>d.group.scale.setScalar(mobile?.20:narrow?.245:.28));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
 }
 
-function setPagesVisible(visible:boolean){leftDOM.classList.add('inactive');rightDOM.classList.toggle('inactive',!visible);$('#book-view').hidden=!visible;}
-function syncBusy(){busy=requestBusy||presentationBusy;for(const b of document.querySelectorAll<HTMLButtonElement>('#open,#close-book,#reading-mode,.card-hit,.dice-hit,.inspect-dice,button[data-book-view]'))b.disabled=busy;rightDOM.inert=turning||rolling;leftDOM.inert=turning||rolling;}
+function setPagesVisible(visible:boolean){leftDOM.classList.add('inactive');rightDOM.classList.toggle('inactive',!visible);$('#book-reading').hidden=!visible;}
+function syncBusy(){busy=requestBusy||presentationBusy;for(const b of document.querySelectorAll<HTMLButtonElement>('#open,#close-book,#reading-mode,.card-hit,.dice-hit,.inspect-dice,#return-spread,.book-corner'))b.disabled=busy;rightDOM.inert=turning||rolling;leftDOM.inert=turning||rolling;}
 function paintBookView(){
   const en=bookLanguage==='en';document.documentElement.dataset.bookView=bookView;
-  $('#book-view').setAttribute('aria-label',en?'Book view':'书本视角');
-  for(const button of document.querySelectorAll<HTMLButtonElement>('button[data-book-view]' )){const mode=button.dataset.bookView as BookView;button.textContent=mode==='spread'?(en?'Both pages':'双页'):mode==='left'?(en?'Read left':'阅读左页'):(en?'Read right':'阅读右页');button.setAttribute('aria-pressed',String(mode===bookView));}
+  $('#reading-hint').hidden=bookView!=='spread';$('#reading-hint').textContent=en?'Click a page to read · Turn from a corner':'点书页靠近 · 页角翻阅';
+  $('#return-spread').hidden=bookView==='spread';$('#return-spread').textContent=en?'↙ Both pages':'↙ 返回双页';
   $('#reading-mode').setAttribute('aria-pressed',String(reading||bookView!=='spread'));
 }
-function chooseBookView(view:BookView){bookView=view;reading=false;paintBookView();cameraTargets();dirty=true;}
+function chooseBookView(view:BookView){bookView=view;reading=false;pointerX=pointerY=0;paintBookView();cameraTargets();dirty=true;}
 function setBusy(value:boolean){presentationBusy=value;syncBusy();}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');$('#notice').setAttribute('aria-hidden','false');toastTimer=window.setTimeout(()=>{$('#notice').classList.remove('visible');$('#notice').setAttribute('aria-hidden','true');},3300);}
 
@@ -105,8 +106,16 @@ function openBook(){if(busy||state.opened)return;state.opened=true;chooseBookVie
 function closeBook(){if(busy||!state.opened)return;setBusy(true);setPagesVisible(false);$('#table-caption').hidden=true;$('#dice-label').hidden=true;play('paper');animate(1500,p=>{opening=1-smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{state.opened=false;$('#invitation').classList.remove('leaving');$('#close-book').hidden=true;setBusy(false);});}
 async function turnPage(backwards=false){
   if(!state.opened)return;
-  turning=true;const manual=!requestBusy;if(manual)setBusy(true);rightDOM.inert=leftDOM.inert=true;book.beginTurn();book.setTurn(backwards?1:0);play('paper');
-  await new Promise<void>(resolve=>animate(1100,p=>{book.setTurn(backwards?1-smooth(p):smooth(p));leftDOM.style.opacity=rightDOM.style.opacity=String(1-smooth(Math.min(1,p/.3)));},()=>{book.endTurn();turning=false;if(manual)setBusy(false);resolve();}));
+  const from=previewTurn?.direction===(backwards?-1:1)?previewTurn.progress:0;previewTurn=undefined;
+  turning=true;const manual=!requestBusy;if(manual)setBusy(true);rightDOM.inert=leftDOM.inert=true;book.beginTurn();book.setTurn(backwards?1-from:from);play('paper');
+  await new Promise<void>(resolve=>animate(900*(1-from),p=>{const progress=T.MathUtils.lerp(from,1,smooth(p));book.setTurn(backwards?1-progress:progress);leftDOM.style.opacity=rightDOM.style.opacity=String(1-smooth(Math.min(1,progress/.3)));},()=>{book.endTurn();turning=false;if(manual)setBusy(false);resolve();}));
+}
+function previewPage(direction:number,progress:number){
+  if(busy)return;previewTurn={direction,progress};book.beginTurn();book.setTurn(direction<0?1-progress:progress);rightDOM.style.opacity=String(1-Math.min(1,progress/.3));dirty=true;
+}
+function cancelPagePreview(){
+  const preview=previewTurn;previewTurn=undefined;if(!preview)return;setBusy(true);
+  animate(250,p=>{const progress=preview.progress*(1-smooth(p));book.setTurn(preview.direction<0?1-progress:progress);rightDOM.style.opacity=String(1-Math.min(1,progress/.3));},()=>{book.endTurn();rightDOM.style.opacity='1';setBusy(false);});
 }
 function revealPages(){if(!turning){leftDOM.style.opacity=rightDOM.style.opacity='1';}}
 function selectCard(index:number){if(busy||!state.opened)return;lifeBook.select(index);}
@@ -162,26 +171,26 @@ function updateTargets(){
   });
 }
 const vec=new T.Vector3();
-$('#reading-mode').addEventListener('click',()=>{if(busy||!state.opened)return;if(bookView!=='spread')chooseBookView('spread');else{reading=!reading;paintBookView();cameraTargets();dirty=true;}});
-document.querySelectorAll<HTMLButtonElement>('button[data-book-view]' ).forEach(button=>button.addEventListener('click',()=>{if(!busy&&state.opened)chooseBookView(button.dataset.bookView as BookView);}));
+$('#reading-mode').addEventListener('click',()=>{if(!busy&&state.opened)chooseBookView(bookView==='spread'?'left':'spread');});
+$('#return-spread').addEventListener('click',()=>{if(!busy)chooseBookView('spread');});
 $('#open').addEventListener('click',openBook);$('#close-book').addEventListener('click',closeBook);
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
 $('#start-tour').addEventListener('click',()=>{dialog.close();bookGuide?.start();});
 $('#restart').addEventListener('click',()=>{if(busy){toast('请等这一页落定。');return;}dialog.close();const button=document.createElement('button');button.dataset.action='home';rightDOM.append(button);button.click();button.remove();if(state.opened)closeBook();});
 $('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');else stopPaper();});
-document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open],#overlay')||busy||(e.target as HTMLElement).matches('input,textarea,select'))return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened){e.preventDefault();void lifeBook.page(1);}if(e.key==='ArrowLeft'&&state.opened){e.preventDefault();void lifeBook.page(-1);}});
-window.addEventListener('pointermove',e=>{if(mobile||busy||document.querySelector('dialog[open],#overlay'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
-window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&opening>.99&&!turning);bookGuide?.refresh();});
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open],#overlay')||busy||(e.target as HTMLElement).matches('input,textarea,select'))return;if(e.key==='Escape'&&state.opened){if(bookView!=='spread'||reading)chooseBookView('spread');else closeBook();}if(e.key==='ArrowRight'&&state.opened){e.preventDefault();void lifeBook.page(1);}if(e.key==='ArrowLeft'&&state.opened){e.preventDefault();void lifeBook.page(-1);}});
+window.addEventListener('pointermove',e=>{if(mobile||state.opened||busy||document.querySelector('dialog[open],#overlay'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
+window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&opening>.99);bookGuide?.refresh();});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;dirty=true;});
 renderer.domElement.addEventListener('webglcontextlost',event=>{event.preventDefault();toast('画面暂时中断。恢复后可以继续这一页。');});
 renderer.domElement.addEventListener('webglcontextrestored',()=>{dirty=true;toast('画面已恢复。');});
 let previous=performance.now(),lastAmbient=0;renderer.shadowMap.autoUpdate=false;renderer.shadowMap.needsUpdate=true;
 function frame(now:number){requestAnimationFrame(frame);if(hidden){previous=now;return;}const dt=Math.min(.05,(now-previous)/1000);previous=now;
   let moving=false;for(let i=motions.length-1;i>=0;i--){const m=motions[i],p=Math.min(1,(now-m.start)/m.duration);m.update(p);moving=true;if(p>=1){motions.splice(i,1);m.finish?.();}}
-  cameraTargets();if(camera.position.distanceTo(targetCamera)>.0001||lookAt.distanceTo(targetLookAt)>.0001){camera.position.lerp(targetCamera,1-Math.exp(-dt*6));lookAt.lerp(targetLookAt,1-Math.exp(-dt*6));camera.lookAt(lookAt);moving=true;}
+  cameraTargets();if(camera.position.distanceTo(targetCamera)>.0001||lookAt.distanceTo(targetLookAt)>.0001||Math.abs(camera.fov-targetFov)>.001){const ease=1-Math.exp(-dt*6);camera.position.lerp(targetCamera,ease);lookAt.lerp(targetLookAt,ease);camera.fov=T.MathUtils.lerp(camera.fov,targetFov,ease);camera.updateProjectionMatrix();camera.lookAt(lookAt);moving=true;}
   cards.forEach(c=>{if(c.update(dt))moving=true;});
   const ambient=now-lastAmbient>1000/24;if(ambient){world.update(now/1000,turning,opening);lastAmbient=now;}
-  if(dirty||moving||rolling||turning||ambient){if(dirty||moving||rolling||turning)renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);cssRenderer.render(cssScene,camera);updateTargets();dirty=false;}
+  if(dirty||moving||rolling||turning||ambient){if(dirty||moving||rolling||turning)renderer.shadowMap.needsUpdate=true;renderer.render(scene,camera);cssRenderer.render(cssScene,camera);updateTargets();bookInput.update(direction=>{vec.set(direction*2.55,1.1,1.74).project(camera);return {x:(vec.x*.5+.5)*innerWidth,y:(-.5*vec.y+.5)*innerHeight};});dirty=false;}
 }
 const lifeBook=installLifeBook(leftDOM,rightDOM,{
   throwDice:showSavedDice,turn:turnPage,reveal:revealPages,
@@ -198,6 +207,11 @@ const lifeBook=installLifeBook(leftDOM,rightDOM,{
   }
 });
 bookGuide=installBookGuide({snapshot:()=>lifeBook.snapshot,opened:()=>state.opened,open:openBook});
-layout();camera.position.copy(targetCamera);lookAt.copy(targetLookAt);camera.lookAt(lookAt);book.setOpening(0);if(!mobile)book.group.position.x+=2.4;setBusy(false);requestAnimationFrame(frame);
+const hitRay=new T.Raycaster(),hitPlane=new T.Plane(new T.Vector3(0,1,0),-1.1),hitPoint=new T.Vector3();
+const bookInput=installBookInput({paper:rightDOM,host:$('#interface'),state:()=>({opened:state.opened&&opening>.99,busy:busy||turning||rolling,view:bookView,locale:bookLanguage}),
+  hit(x,y){hitRay.setFromCamera(new T.Vector2(x/innerWidth*2-1,1-y/innerHeight*2),camera);if(!hitRay.ray.intersectPlane(hitPlane,hitPoint)||Math.abs(hitPoint.x)>2.91||Math.abs(hitPoint.z)>1.9)return null;return {x:hitPoint.x,z:hitPoint.z};},
+  read:chooseBookView,page:direction=>lifeBook.page(direction),canPage:direction=>{const app=rightDOM.querySelector<HTMLElement>('#app');return !!app&&(direction<0?Number(app.dataset.pageStart)>1:Number(app.dataset.pageStart)+1<Number(app.dataset.pageCount));},preview:previewPage,cancelPreview:cancelPagePreview,
+});
+layout();camera.position.copy(targetCamera);camera.fov=targetFov;camera.updateProjectionMatrix();lookAt.copy(targetLookAt);camera.lookAt(lookAt);book.setOpening(0);if(!mobile)book.group.position.x+=2.4;setBusy(false);requestAnimationFrame(frame);
 void lifeBook.start().catch(error=>{toast('游戏书页未能载入，请刷新后重试。');console.error(error);});
 void Promise.all([assetReady,Promise.race([document.fonts.ready,new Promise(resolve=>setTimeout(resolve,1600))])]).then(()=>{$('#loading').classList.add('finished');$('#loading').setAttribute('aria-hidden','true');bookGuide?.ready();dirty=true;}).catch(error=>{$('#loading').innerHTML='<span class="loading-seal">Ⅶ</span><p>旧日的物件未能全部抵达。</p><button class="primary" onclick="location.reload()">重新加载</button><p><a href="../" style="color:#d2ba80">打开原版人生游戏</a></p>';console.error('Asset loading failed',error);});

@@ -1,0 +1,30 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {Window} from 'happy-dom';
+const {installBookInput}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(readFileSync(new URL('../src/book-input.ts',import.meta.url),'utf8'))).toString('base64'));
+
+test('direct reading protects game controls; corner drag commits once or cancels without advancing life',t=>{
+  const w=new Window(),old={window:globalThis.window,document:globalThis.document};Object.assign(globalThis,{window:w,document:w.document});t.after(()=>{Object.assign(globalThis,old);w.happyDOM.abort();});
+  document.body.innerHTML='<article id="paper"><p>Read this page</p><button id="choice">Confirm</button><textarea>Keep my goal</textarea><label>A label</label><details><summary>Details</summary></details></article><div id="table"></div><main></main>';
+  const paper=document.querySelector('#paper'),host=document.querySelector('main'),state={opened:true,busy:false,view:'spread',locale:'zh-CN'};
+  const turns=[],previews=[],reads=[];let cancelled=0,actions=0;
+  const input=installBookInput({paper,host,state:()=>state,hit:(x)=>x===0?null:{x:x<100?-1.5:1.5,z:0},read:view=>{state.view=view;reads.push(view);},page:async direction=>{turns.push(direction);},canPage:direction=>direction===1,preview:(...args)=>previews.push(args),cancelPreview:()=>cancelled++});
+  input.update(()=>({x:200,y:300}));
+  const pointer=(target,type,x)=>target.dispatchEvent(new w.PointerEvent(type,{bubbles:true,clientX:x,clientY:50,pointerId:1,button:0}));
+  const click=(target,x=50)=>{pointer(target,'pointerdown',x);target.dispatchEvent(new w.MouseEvent('click',{bubbles:true,clientX:x,clientY:50,detail:1}));};
+  click(paper.querySelector('p'));assert.equal(state.view,'left');click(document.querySelector('#table'),0);assert.equal(state.view,'spread');
+  paper.querySelector('#choice').addEventListener('click',()=>actions++);
+  for(const selector of ['button','textarea','label','summary'])click(paper.querySelector(selector));
+  assert.equal(actions,1);assert.equal(reads.length,2);assert.equal(paper.querySelector('textarea').value,'Keep my goal');
+  const next=host.querySelector('[data-book-corner=next]');
+  pointer(next,'pointerdown',300);pointer(next,'pointermove',280);pointer(next,'pointerup',280);
+  assert.equal(cancelled,1);assert.equal(turns.length,0);assert.ok(previews.length);
+  pointer(next,'pointerdown',300);pointer(next,'pointermove',100);pointer(next,'pointerup',100);
+  assert.deepEqual(turns,[1]);next.dispatchEvent(new w.MouseEvent('click',{bubbles:true,detail:1}));assert.equal(turns.length,1);
+  next.dispatchEvent(new w.MouseEvent('click',{bubbles:true,detail:0}));assert.equal(turns.length,2,'keyboard activation remains available');
+  pointer(next,'pointerdown',300);pointer(next,'pointermove',100);pointer(next,'pointercancel',100);assert.equal(cancelled,2);assert.equal(turns.length,2);
+  state.busy=true;next.click();click(paper.querySelector('p'),150);assert.equal(turns.length,2);assert.equal(reads.length,2);
+  state.busy=false;const overlay=document.createElement('div');overlay.id='overlay';document.body.append(overlay);click(paper.querySelector('p'),150);assert.equal(reads.length,2);
+});

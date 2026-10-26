@@ -61,7 +61,7 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
     next('story');append(app.querySelector('.hero__title'),app.querySelector('.hero__desc'));intro(pages[0]);
     next('choice');append(note(text('一生，分七章书写','One life, seven chapters'),text('每回合先经历固定事件，再选择自由行动，最后面对黑天鹅。终局需要留下七种不同元素。','Each round brings a fixed event, a free action and a Black Swan. Keep seven distinct elements by the end.')),
       app.querySelector('.hero__actions'),status,
-      note(text('翻书不会替你决定','Reading leaves choices to you'),text('页底的前后翻页只改变阅读位置。书内写下选择、接受结果等按钮，才会推进这一生。','The page arrows only change what you read. Confirming a choice or accepting a result advances this life.')));
+      note(text('翻书不会替你决定','Reading leaves choices to you'),text('点击或拖动外侧页角，只改变阅读位置。书内写下选择、接受结果等按钮，才会推进这一生。','Clicking or dragging an outer corner only changes what you read. Confirming a choice or accepting a result advances this life.')));
   }else if(s.screen==='new'||s.life?.phase==='draw'){
     const draw=app.querySelector('.draw')!,cards=draw.querySelector('.draw__cards'),actions=draw.querySelector('.draw__actions'),foot=draw.querySelector('.draw__footnote');
     next('story');append(...[...draw.children].filter(n=>n!==cards&&n!==actions&&n!==foot&&n!==status),foot);

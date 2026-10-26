@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b17"><title>命运之书 · 一生，尚未写定</title><meta name="description" content="打开命运之书，翻动人生书页，选择两张人生元素，掷下命运之骰。单人完整规则与自动续玩。">  <script type="module" crossorigin src="./assets/index-ClQQFiFS.js"></script>
-  <link rel="modulepreload" crossorigin href="./assets/three.core-pmr0lEA8.js">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#101b17"><title>命运之书 · 一生，尚未写定</title><meta name="description" content="打开命运之书，翻动人生书页，选择两张人生元素，掷下命运之骰。单人完整规则与自动续玩。">  <script type="module" crossorigin src="./assets/index-BRU6Px0z.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/three.core-BA8HbV32.js">
   <link rel="modulepreload" crossorigin href="./assets/locale-ZUMdk9FS.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-BxB4dVeI.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-D5GBkUj6.css">
 </head>
 <body>
   <div id="stage" aria-label="古典命运桌与可以打开的三维书本"></div>
   <div id="pages"></div>
   <header class="masthead"><a class="wordmark" href="../" aria-label="返回人生游戏"><span class="mark">Ⅶ</span><span>命运之书<small>七 章 人 生 · 一 册 珍 藏</small></span></a><nav id="life-global-nav" aria-label="游戏导航"></nav><div class="tools"><button id="reading-mode" class="icon-button" aria-pressed="false" aria-label="靠近阅读" title="靠近阅读／返回全景">⌕</button><button id="sound" class="icon-button" aria-label="开启声音" title="开启声音">♪<span class="off-slash"></span></button><button id="guide" class="icon-button" aria-label="查看操作说明" title="操作说明">?</button></div></header>
   <main id="interface">
-    <nav id="book-view" class="book-view" aria-label="书本视角" hidden><button type="button" data-book-view="spread" aria-pressed="true">双页</button><button type="button" data-book-view="left" aria-pressed="false">阅读左页</button><button type="button" data-book-view="right" aria-pressed="false">阅读右页</button></nav>
+    <div id="book-reading" class="book-reading" hidden><span id="reading-hint">点书页靠近 · 页角翻阅</span><button id="return-spread" type="button" hidden>↙ 返回双页</button></div>
     <section id="invitation" class="invitation"><span class="eyebrow">一 部 尚 未 写 完 的 人 生</span><h1>命运有它的安排。<br><em>你有你的选择。</em></h1><p>七张人生元素，一本等待落笔的书。<br>把这一页，交给此刻的你。</p><button id="open" class="primary">打开命运之书 <span>↗</span></button><span class="opening-note">建议打开声音，慢慢体验</span></section>
     <div id="card-targets" aria-label="选择人生元素，最多两张"></div>
     <div id="table-caption" class="table-caption" hidden><span id="selection-hint">此生所持</span><span id="selection-count">选择两张，交给命运</span></div>
@@ -19,7 +19,7 @@
     <div id="notice" aria-hidden="true" class="notice" role="status" aria-live="polite"></div>
     <footer><span>单人人生 · 七章一生</span><button id="close-book" hidden>合上此书 <span>↙</span></button><span class="footer-motto">所走的路，终会成为你。</span></footer>
   </main>
-  <dialog id="help"><button id="dismiss-help" class="dialog-close" aria-label="关闭说明">×</button><span class="eyebrow">关于命运之书</span><h2>先把一页人生，<br>握在手中。</h2><button id="start-tour" class="primary">跟随引导 <span>↗</span></button><p>左页交代处境，右页承接选择或故事。页底前后翻阅只改变阅读位置，不会推进人生。固定事件先选一项再确认；自由事件先写目标、选至多两张元素并请司书评估，读清概率与风险后再点击桌上骰子执行。</p><p>左右方向键也可以翻阅书页。顶部的此生档案可查看全部卡牌、同行者和手记。点击跟随引导，可以随时重看操作步骤。</p><p class="fine-print">进度自动保存，刷新后可以续玩。完整传记在终局生成，已发生的手记可以在档案中查看。真人联机、广告与支付尚未开放。</p><p class="fine-print">模型署名：<a href="https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc" target="_blank" rel="noopener">Book — victorberdugo1</a>，<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>；已压缩、拆分铰接并添加翻页。烛台、怀表、旧书及环境材质来自 <a href="https://polyhaven.com/" target="_blank" rel="noopener">Poly Haven</a>（CC0）。<a href="assets/manifest.json" target="_blank" rel="noopener">完整来源记录</a></p><button id="restart" class="primary">返回卷首 <span>↗</span></button></dialog>
+  <dialog id="help"><button id="dismiss-help" class="dialog-close" aria-label="关闭说明">×</button><span class="eyebrow">关于命运之书</span><h2>先把一页人生，<br>握在手中。</h2><button id="start-tour" class="primary">跟随引导 <span>↗</span></button><p>左页交代处境，右页承接选择或故事。页底前后翻阅只改变阅读位置，不会推进人生。固定事件先选一项再确认；自由事件先写目标、选至多两张元素并请司书评估，读清概率与风险后再点击桌上骰子执行。</p><p>点击书页靠近阅读，点桌面或按 Esc 返回双页。点击或拖动外侧页角翻页，左右方向键也可翻阅。输入和选牌照常操作。顶部此生档案可查看卡牌、同行者与手记。</p><p class="fine-print">进度自动保存，刷新后可以续玩。完整传记在终局生成，已发生的手记可以在档案中查看。真人联机、广告与支付尚未开放。</p><p class="fine-print">模型署名：<a href="https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc" target="_blank" rel="noopener">Book — victorberdugo1</a>，<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>；已压缩、拆分铰接并添加翻页。烛台、怀表、旧书及环境材质来自 <a href="https://polyhaven.com/" target="_blank" rel="noopener">Poly Haven</a>（CC0）。<a href="assets/manifest.json" target="_blank" rel="noopener">完整来源记录</a></p><button id="restart" class="primary">返回卷首 <span>↗</span></button></dialog>
   <div id="loading" class="loading"><span class="loading-seal">Ⅶ</span><p>正在整理命运的书页<span>…</span></p></div>
   <noscript><p class="no-script">请启用 JavaScript，以打开命运之书。</p></noscript>
 </body></html>
