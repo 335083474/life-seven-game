@@ -34,8 +34,18 @@ test('real shared UI completes nine rounds through the book host, retains saves,
     const button=buttons.find(b=>b.dataset.action===action&&(value===undefined||b.dataset.value===value||b.dataset.index===String(value))&&!b.disabled);
     assert(button,`Missing usable action ${action} in ${f.life?.phase}`);button.click();await idle();
   };
-  await click('start');app.querySelector('#life-name').value='三维规则验收';await click('reveal');
+  assert(app.querySelector('[data-action=start]').textContent.includes('抽取天赋'));
+  await click('start');
+  assert.equal(latest.screen,'new');assert.equal(app.querySelectorAll('.element-card--back').length,3,'New life must show three unrevealed gifts');
+  assert(app.querySelector('.book-leaf--story #life-name'),'Name belongs on the opening left page');
+  assert(app.querySelector('.book-leaf--choice [data-action=reveal]'),'Reveal stays on the facing page');
+  assert(!app.querySelector('[data-action=advance]'),'Cannot skip the initial draw');
+  app.querySelector('#life-name').value='三维规则验收';await click('reveal');
   assert.equal(latest.life.phase,'draw');assert.equal(tableCards(latest.life).length,4);
+  assert.equal(latest.life.round,-1,'Revealing gifts must not begin a regular round');
+  assert.equal(app.querySelectorAll('.element-card--back').length,0);
+  assert(latest.life.cards.some(card=>card.name==='父母'));assert.equal(new Set(latest.life.cards.map(card=>card.name)).size,4);
+  assert(app.querySelector('.book-leaf--choice [data-action=advance]').textContent.includes('确认天赋'));
   assert.equal(window.localStorage.getItem('life-seven-current-v2'),JSON.stringify(f.life.id));
   await click('advance');
   async function drain(){
@@ -70,6 +80,8 @@ test('real shared UI completes nine rounds through the book host, retains saves,
   assert.equal(latest.life.phase,'ending');assert.equal(throws.length,10);
   await click('memoir');assert.equal(latest.life.biography.chapters.length,7);
   const id=latest.life.id;await click('home');await click('resume');assert.equal(latest.life.id,id);assert.equal(latest.life.phase,'ending');
+  await click('home');await click('start');assert.equal(latest.screen,'new');assert.equal(app.querySelectorAll('.element-card--back').length,3,'Starting again must offer a fresh draw even with a save');
+  assert.equal(window.localStorage.getItem('life-seven-current-v2'),JSON.stringify(id),'Opening setup alone must not replace the saved life');
   assert.equal(window.document.querySelectorAll('#app').length,0,'The game uses the host element, not a second page');
   assert(!window.document.querySelector('#book-app [data-action="swan"]'));
 });

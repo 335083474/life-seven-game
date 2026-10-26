@@ -18,7 +18,8 @@ export function refreshBookAssessment(app:HTMLElement,s:Snapshot){
 export function bookInstruction(s:Snapshot){
   const en=s.locale==='en',text=(zh:string,english:string)=>en?english:zh;
   if(s.screen==='home')return {title:text('从这里落笔','Begin your story'),body:text('选择继续这一生，或另写一生。从七岁抽取四张初始元素开始。','Continue a saved life or begin a new one with four initial elements at age seven.')};
-  if(s.screen==='new'||s.life?.phase==='draw')return {title:text('先认识你的四张牌','Meet your first four elements'),body:text('写下卷宗姓名，揭晓天赋。父母与三张随机元素是这一生的起点，随后进入少年时期。','Name this life and reveal its gifts. Parents and three random elements begin your journey, followed by youth.')};
+  if(s.screen==='new')return {title:text('从七岁抽天赋开始','Begin with your gifts at seven'),body:text('写下姓名，再揭晓父母与三张随机人生元素。确认这副初始手牌后，才进入少年抉择。','Name this life, then reveal Parents and three random elements. Confirm your starting hand before entering youth.')};
+  if(s.life?.phase==='draw')return {title:text('天赋已揭晓，确认后启程','Your gifts are revealed'),body:text('这四张初始元素已经保存。看过后点击「确认天赋，进入少年抉择」，开始这一生的第一次选择。','Your four starting elements are saved. Review them, then confirm your gifts to enter youth and make your first choice.')};
   if(s.life?.pending)return {title:text('先处理眼前的代价','Resolve this consequence'),body:text('读清本次失去的原因，再选择自行承担或使用当前可用的保护。处理完成后才能继续。','Read the cause of this loss, then accept it or use an available protection before continuing.')};
   if(s.life?.awards?.length)return {title:text('七个位置，认真取舍','Make room among seven elements'),body:text('这次获得新元素时手牌已满。比较要留下的东西，再在对页确认取舍。','Your hand is full. Compare what you wish to keep, then confirm your decision on the facing page.')};
   const items:Record<string,[string,string,string,string]>={
@@ -58,14 +59,21 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
   const chapter=app.querySelector('.play__stage-head'),progress=app.querySelector('.phase-progress'),status=app.querySelector('.solo-status');
   app.dataset.bookPhase=s.screen==='home'||s.screen==='new'?s.screen:s.life?.pending?'pending':s.life?.awards?.length?'award':s.life?.phase||s.screen;
   if(s.screen==='home'){
+    const start=app.querySelector('[data-action="start"]'),resume=app.querySelector('[data-action="resume"]');
+    if(start)start.textContent=text('开启新人生 · 抽取天赋','New life · draw your gifts');
+    if(resume)resume.textContent=text('继续这一生 · 读取存档','Continue this life · saved progress');
     next('story');append(app.querySelector('.hero__title'),app.querySelector('.hero__desc'));intro(pages[0]);
     next('choice');append(note(text('一生，分七章书写','One life, seven chapters'),text('每回合先经历固定事件，再选择自由行动，最后面对黑天鹅。终局需要留下七种不同元素。','Each round brings a fixed event, a free action and a Black Swan. Keep seven distinct elements by the end.')),
       app.querySelector('.hero__actions'),status,
       note(text('翻书不会替你决定','Reading leaves choices to you'),text('点击或拖动外侧页角，只改变阅读位置。书内写下选择、接受结果等按钮，才会推进这一生。','Clicking or dragging an outer corner only changes what you read. Confirming a choice or accepting a result advances this life.')));
   }else if(s.screen==='new'||s.life?.phase==='draw'){
     const draw=app.querySelector('.draw')!,cards=draw.querySelector('.draw__cards'),actions=draw.querySelector('.draw__actions'),foot=draw.querySelector('.draw__footnote');
+    const revealed=s.screen==='draw'&&s.life?.phase==='draw';
+    const steps=document.createElement('div');steps.className='book-opening-steps';steps.setAttribute('aria-label',text('新人生开局流程','New life opening'));
+    steps.innerHTML=[text('① 写下姓名','① Name'),text('② 抽取天赋','② Draw gifts'),text('③ 确认启程','③ Begin')].map((label,index)=>`<span${index===(revealed?2:1)?' aria-current="step"':''}>${label}</span>`).join('');
+    const confirm=actions?.querySelector('[data-action="advance"]');if(confirm)confirm.textContent=text('确认天赋，进入少年抉择 →','Confirm gifts · enter youth →');
     next('story');append(...[...draw.children].filter(n=>n!==cards&&n!==actions&&n!==foot&&n!==status),foot);
-    next('choice');append(note(text('你最初拥有的东西','What you begin with'),text('每张牌都是可以投入人生行动的元素。揭晓后，桌上也会出现相同的牌。','Each card is an element you can bring to an action. Once revealed, the same elements appear on the table.')),cards,status,actions);
+    next('choice');append(steps,note(text(revealed?'此生的初始天赋':'七岁 · 抽取初始天赋',revealed?'Your starting gifts':'Age seven · draw your gifts'),text(revealed?'父母与三张随机元素已经保存。确认后，才进入第一场固定事件。':'父母固定保留，另外三张随机抽取。写好名字后，点击下方揭晓。',revealed?'Parents and three random elements are saved. Confirm to enter your first fixed event.':'Parents is guaranteed; three other elements are drawn at random. Write your name, then reveal them below.')),cards,status,actions);
   }else if(s.screen==='ending'){
     next('story');append(app.querySelector('.ending-header'),app.querySelector('.solo-summary'));
     next('choice');const wrap=app.querySelector('.ending-wrap');if(wrap)append(...wrap.children);else append(...main.children);intro(pages.at(-1)!);
