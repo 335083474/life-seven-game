@@ -1,0 +1,27 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+import {Window} from 'happy-dom';
+const source=readFileSync(new URL('../src/book-pagination.ts',import.meta.url),'utf8');
+const {installBookPagination}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
+test('book pagination retains live controls, guards concurrent turns, clamps after reflow and supports mobile pages',async t=>{
+  const w=new Window(),names=['window','document','MutationObserver','requestAnimationFrame','innerWidth'],old=Object.fromEntries(names.map(n=>[n,globalThis[n]]));
+  Object.assign(globalThis,{window:w,document:w.document,MutationObserver:w.MutationObserver,requestAnimationFrame:()=>0,innerWidth:1200});
+  Object.defineProperty(w.document,'fonts',{value:{addEventListener(){}}});
+  t.after(()=>{Object.assign(globalThis,old);w.happyDOM.abort();});
+  const paper=w.document.createElement('article'),app=w.document.createElement('div');paper.append(app);w.document.body.append(paper);
+  const input=w.document.createElement('input');input.value='my ongoing choice';app.append(input);
+  let columns=5,resolveTurn,turns=[];
+  Object.defineProperty(w.HTMLElement.prototype,'offsetLeft',{get(){return this.classList.contains('folio-end')?518*(columns-1+(app.querySelector('.folio-closing')?1:0)):0;}});
+  const pager=installBookPagination(paper,app,{turn:back=>{turns.push(back);return new Promise(resolve=>resolveTurn=resolve);},reveal(){}});
+  const update=(reset=false,busy=false)=>pager.update({reset,busy,locale:'zh-CN',closingHTML:'<p>Actual saved facts</p>'});
+  update();assert.equal(app.dataset.pageCount,'6');assert.equal(app.querySelector('input'),input);assert.equal(input.value,'my ongoing choice');
+  const turning=pager.go(1);await pager.go(1);assert.equal(turns.length,1);assert.equal(paper.querySelector('[data-folio-next]').disabled,true);
+  resolveTurn();await turning;assert.equal(app.dataset.pageStart,'3');assert.equal(app.style.transform,'translateX(-1036px)');
+  update(false,true);await pager.go(1);assert.equal(turns.length,1);update();
+  const back=pager.go(-1);assert.equal(turns[1],true);resolveTurn();await back;assert.equal(app.dataset.pageStart,'1');
+  globalThis.innerWidth=390;update();const mobile=pager.go(1);resolveTurn();await mobile;assert.equal(app.dataset.pageStart,'2');
+  columns=1;update();assert.equal(app.dataset.pageCount,'2');update(true);assert.equal(app.dataset.pageStart,'1');assert.equal(input.value,'my ongoing choice');
+  columns=2;update();assert.equal(app.querySelector('.folio-closing'),null);assert.equal(app.dataset.pageCount,'2');
+});

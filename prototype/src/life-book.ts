@@ -1,8 +1,8 @@
-import {engraving} from './book-engraving';
 import {savedDie,pageKey,tableCards,diceAction} from './life-presentation.mjs';
 import icons from './life-icons.svg?raw';
 import './life-book.css';
 import {bookText,setBookLocale,watchBookLocale} from './book-locale';
+import {installBookPagination} from './book-pagination';
 
 export type LifeSnapshot={life:any;screen:string;busy:boolean;error:string;locale:string;selected:string[];readyToRoll:boolean;translate:(s:string)=>string};
 type Transition={before:any;after:any;route:string;body:any};
@@ -11,15 +11,15 @@ const esc=(s:unknown)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
   update:(snapshot:LifeSnapshot,table:any[])=>void;
   throwDice:(value:number)=>Promise<void>;
-  turn:()=>Promise<void>;
+  turn:(backwards?:boolean)=>Promise<void>;
   reveal:()=>void;
 }){
   document.body.insertAdjacentHTML('beforeend',icons);watchBookLocale();
-  right.classList.add('life-paper');left.classList.add('life-left');
-  right.innerHTML='<div class="life-page-tools"><span>命运之书</span><span class="scroll-cue">轻扫书页 · 继续阅读 ↓</span></div><div id="app" class="life-book" aria-label="人生游戏书页"></div>';
+  right.classList.add('life-paper','life-spread');left.replaceChildren();
+  right.innerHTML='<div class="folio-running-head"><span></span><span></span></div><div class="folio-viewport"><div id="app" class="life-book folio-content" aria-label="人生游戏书页"></div></div>';
   const app=right.querySelector<HTMLElement>('#app')!;
-  let snapshot:LifeSnapshot|undefined,key='',scroll=0,lastError='',localePending=false;
-  right.addEventListener('scroll',()=>scroll=right.scrollTop);
+  const pagination=installBookPagination(right,app,view);
+  let snapshot:LifeSnapshot|undefined,key='',lastError='',localePending=false;
   window.LifeBook={app,
     async transition(change){
       const value=savedDie(change.route,change.body,change.after);
@@ -37,16 +37,16 @@ export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
       app.querySelector('a[href="./book/"]')?.remove();
       const header=app.querySelector('.subbar');if(header)document.querySelector('#life-global-nav')!.replaceChildren(header);
       const title=life&&next.screen!=='home'?tr(life.chapterName):tr('人生七章');
-      left.innerHTML=`<span class="kicker">${esc(tr('命运之书'))}</span><h2>${esc(title)}</h2><div class="printer-flower">❧</div>${engraving}<div class="life-ledger">${life?`<p>${esc(life.name)} · ${life.age}${next.locale==='en'?' years':'岁'}</p><p>${esc(tr('此生所持'))} ${table.length} / 7 · ${esc(tr('健康剩余 '+life.health+' 次'))}</p><p>${esc(tr(life.parentsAlive?'父母健在':'父母已离世'))}${life.married?' · '+esc(tr('配偶'))+' '+esc(life.npcs.find((n:any)=>n.id===life.spouseId)?.name||''):''}</p>${life.child?`<p>${esc(tr('孩子'))} · ${esc(life.child.name)} · ${life.childAge}${next.locale==='en'?' years':'岁'} · ${esc(tr(life.child.independent?'已独立':life.child.custody==='joint'?'共同抚养':life.child.custody==='self'?'由你主要抚养':life.child.custody==='separated'?'暂时失去日常联系':(life.npcs.find((n:any)=>n.id===life.child.custody)?.name||'')+'主要抚养'))}</p>`:''}<p class="ledger-note">${esc(tr(life.journal.at(-1)?.text||''))}</p><nav>${[['journal','人生手记'],['companions','查看同行者'],['collection','机遇与典藏'],...(life.married?[['transfer','夫妻赠送与交换']]:[])].map(([action,label])=>`<button data-action="${action}" ${next.busy?'disabled':''}>${esc(tr(label))}</button>`).join('')}</nav>`:`<p>${esc(tr('七岁，命运交给你最初的四张牌。'))}</p><p>${esc(tr('你的每一次选择，都会留下痕迹。'))}</p>`}</div><span class="page-number">${life?esc(tr(life.round<0?'命运初启':'第'+(life.round+1)+'回合')):'Ⅰ — Ⅶ'}</span>`;
-      // On phones the left folio is hidden, so all archive functions stay here.
       if(life&&next.screen!=='home'){
         const nav=document.createElement('nav');nav.className='life-archive-nav';
-        nav.innerHTML=left.querySelector('nav')?.innerHTML||'';app.append(nav);
+        nav.innerHTML=[['journal','人生手记'],['companions','查看同行者'],['collection','机遇与典藏'],...(life.married?[['transfer','夫妻赠送与交换']]:[])].map(([action,label])=>`<button data-action="${action}" ${next.busy?'disabled':''}>${esc(tr(label))}</button>`).join('');app.append(nav);
         const aside=app.querySelector('.play-aside');if(aside){const dossier=document.createElement('details');dossier.className='life-dossier';const summary=document.createElement('summary');summary.textContent=tr('此生档案');dossier.append(summary,aside);app.append(dossier);}
       }
-      right.scrollTop=changed||(next.error&&next.error!==lastError)?0:scroll;scroll=right.scrollTop;lastError=next.error;
-      const tools=right.querySelector('.life-page-tools')!;
-      tools.firstElementChild!.textContent=tr('命运之书');tools.lastElementChild!.textContent=next.locale==='en'?'Scroll to read ↓':'轻扫书页 · 继续阅读 ↓';
+      const running=right.querySelector('.folio-running-head')!;
+      running.firstElementChild!.textContent=title;running.lastElementChild!.textContent=tr('命运之书');
+      pagination.update({reset:changed||!!next.error&&next.error!==lastError,locale:next.locale,busy:next.busy,
+        closingHTML:life?`<span class="kicker">${esc(tr('此生档案'))}</span><h3>${esc(life.name)}</h3><p>${life.age}${next.locale==='en'?' years':'岁'} · ${esc(tr(life.chapterName))}</p><p>${esc(tr('此生所持'))} ${table.length} / 7</p><p>${table.map((card:any)=>esc(tr(card.name))+['Ⅰ','Ⅱ','Ⅲ'][card.level-1]).join(' · ')}</p><p>${esc(tr(life.parentsAlive?'父母健在':'父母已离世'))}</p><p>${esc(tr('健康剩余 '+life.health+' 次'))}</p>`:`<span class="kicker">${esc(tr('命运之书'))}</span><h3>${esc(tr('人生七章'))}</h3><p>${esc(tr('你的每一次选择，都会留下痕迹。'))}</p>`});
+      lastError=next.error;
       view.update(next,table);view.reveal();
     }
   };
@@ -57,6 +57,7 @@ export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
       await import('../../ai-client.js');await import('../../game.js');
     },
     get snapshot(){return snapshot;},
+    page:pagination.go,
     select(index:number){
       if(!snapshot||snapshot.busy)return;
       const card=tableCards(snapshot.life)[index];if(!card)return;

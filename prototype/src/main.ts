@@ -54,7 +54,7 @@ function cameraTargets(){
   camera.updateProjectionMatrix();
 }
 function layout(){
-  mobile=innerWidth<700;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
+  mobile=innerWidth<700;rightCSS.position.x=mobile?1.51:0;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
   cards.forEach((c,i)=>{if(mobile){const row=i<4?0:1,col=row===0?i:i-4,count=row===0?Math.min(4,Math.max(1,tableCount)):Math.max(1,tableCount-4);c.home.set(1.66+(col-(count-1)/2)*.89,.08,3.68+row*1.27);c.group.scale.setScalar(.72);c.group.rotation.y=(col-(count-1)/2)*.015;}
     else{c.home.set((i-(Math.max(1,tableCount)-1)/2)*1.22,.08,3.55+Math.abs(i-(Math.max(1,tableCount)-1)/2)*.025);c.group.scale.setScalar(1);c.group.rotation.y=(i-3)*-.025;}c.group.position.copy(c.home);});
   const narrow=!mobile&&innerWidth/innerHeight<1.35;
@@ -62,7 +62,7 @@ function layout(){
   dice.forEach(d=>d.group.scale.setScalar(mobile?.20:narrow?.245:.28));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
 }
 
-function setPagesVisible(visible:boolean){leftDOM.classList.toggle('inactive',!visible||mobile);rightDOM.classList.toggle('inactive',!visible);}
+function setPagesVisible(visible:boolean){leftDOM.classList.add('inactive');rightDOM.classList.toggle('inactive',!visible);}
 function syncBusy(){busy=requestBusy||presentationBusy;for(const b of document.querySelectorAll<HTMLButtonElement>('#open,#close-book,#reading-mode,.card-hit,.dice-hit,.inspect-dice'))b.disabled=busy;rightDOM.inert=turning||rolling;leftDOM.inert=turning||rolling;}
 function setBusy(value:boolean){presentationBusy=value;syncBusy();}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');$('#notice').setAttribute('aria-hidden','false');toastTimer=window.setTimeout(()=>{$('#notice').classList.remove('visible');$('#notice').setAttribute('aria-hidden','true');},3300);}
@@ -91,10 +91,10 @@ function play(kind:'paper'|'dice'|'mark'){
 }
 function openBook(){if(busy||state.opened)return;state.opened=true;setBusy(true);$('#invitation').classList.add('leaving');$('#close-book').hidden=false;play('paper');animate(1900,p=>{opening=smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{opening=1;setPagesVisible(true);$('#table-caption').hidden=false;setBusy(false);restoreSavedDice();toast(lifeBook.snapshot?.locale==='en'?'Your next choice awaits in the book.':'从七岁开始，把这一生写进书里。');});}
 function closeBook(){if(busy||!state.opened)return;setBusy(true);setPagesVisible(false);$('#table-caption').hidden=true;$('#dice-label').hidden=true;play('paper');animate(1500,p=>{opening=1-smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{state.opened=false;$('#invitation').classList.remove('leaving');$('#close-book').hidden=true;setBusy(false);});}
-async function turnPage(){
+async function turnPage(backwards=false){
   if(!state.opened)return;
-  turning=true;rightDOM.inert=leftDOM.inert=true;book.beginTurn();book.setTurn(0);play('paper');
-  await new Promise<void>(resolve=>animate(1100,p=>{book.setTurn(smooth(p));leftDOM.style.opacity=rightDOM.style.opacity=String(1-smooth(Math.min(1,p/.3)));},()=>{book.endTurn();turning=false;resolve();}));
+  turning=true;const manual=!requestBusy;if(manual)setBusy(true);rightDOM.inert=leftDOM.inert=true;book.beginTurn();book.setTurn(backwards?1:0);play('paper');
+  await new Promise<void>(resolve=>animate(1100,p=>{book.setTurn(backwards?1-smooth(p):smooth(p));leftDOM.style.opacity=rightDOM.style.opacity=String(1-smooth(Math.min(1,p/.3)));},()=>{book.endTurn();turning=false;if(manual)setBusy(false);resolve();}));
 }
 function revealPages(){if(!turning){leftDOM.style.opacity=rightDOM.style.opacity='1';}}
 function selectCard(index:number){if(busy||!state.opened)return;lifeBook.select(index);}
@@ -155,7 +155,7 @@ $('#open').addEventListener('click',openBook);$('#close-book').addEventListener(
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
 $('#restart').addEventListener('click',()=>{if(busy){toast('请等这一页落定。');return;}dialog.close();const button=document.createElement('button');button.dataset.action='home';rightDOM.append(button);button.click();button.remove();if(state.opened)closeBook();});
 $('#sound').addEventListener('click',()=>{sound=!sound;$('#sound').setAttribute('aria-pressed',String(sound));$('#sound').setAttribute('aria-label',sound?'关闭声音':'开启声音');$('#sound').title=sound?'关闭声音':'开启声音';if(sound)play('paper');else stopPaper();});
-document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open],#overlay')||busy||(e.target as HTMLElement).matches('input,textarea,select'))return;if(e.key==='Escape'&&state.opened)closeBook();});
+document.addEventListener('keydown',e=>{if(document.querySelector('dialog[open],#overlay')||busy||(e.target as HTMLElement).matches('input,textarea,select'))return;if(e.key==='Escape'&&state.opened)closeBook();if(e.key==='ArrowRight'&&state.opened){e.preventDefault();void lifeBook.page(1);}if(e.key==='ArrowLeft'&&state.opened){e.preventDefault();void lifeBook.page(-1);}});
 window.addEventListener('pointermove',e=>{if(mobile||busy||document.querySelector('dialog[open],#overlay'))return;pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5;cameraTargets();dirty=true;});
 window.addEventListener('resize',()=>{layout();setPagesVisible(state.opened&&opening>.99&&!turning);});
 document.addEventListener('visibilitychange',()=>{hidden=document.hidden;dirty=true;});

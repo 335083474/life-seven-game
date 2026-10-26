@@ -67,3 +67,27 @@
 #life-global-nav .language-setting{display:flex;align-items:center;gap:8px;white-space:nowrap}
 #life-global-nav select{max-width:150px}#life-global-nav button:disabled,#life-global-nav select:disabled{opacity:.45;cursor:default}
 @media(max-width:900px){header.masthead{display:grid;grid-template-columns:1fr auto;row-gap:12px;align-items:center}#life-global-nav{grid-column:1/-1;grid-row:2;margin:0}#life-global-nav .subbar__right{justify-content:space-between;gap:8px}#life-global-nav button,#life-global-nav select{font-size:12px;padding:6px 9px;min-height:32px}#life-global-nav .language-setting>span{display:none}.masthead>.tools{grid-column:2;grid-row:1}#interface .inspect-dice{top:110px;bottom:auto}}
+/* A single live DOM flows through both physical leaves; overflow becomes pages. */
+.paper.life-spread{width:998px;height:650px;padding:30px;overflow:hidden;isolation:isolate;filter:opacity(1);text-align:left}
+.folio-running-head{height:24px;line-height:24px;margin-bottom:8px;display:flex;justify-content:space-between;border-bottom:1px solid #87664055;font-size:16px;letter-spacing:.08em;color:#5b4029}
+.folio-viewport{width:938px;height:518px;overflow:hidden}
+.life-book.folio-content{position:relative;width:938px;height:518px;column-width:420px;column-count:2;column-gap:98px;column-fill:auto;font-size:24px;line-height:1.65}
+.folio-content .solo-status{position:static;background:transparent}
+.folio-content .fixed-options,.folio-content .free-cards,.folio-content .draw__cards,.folio-content .solo-grid,.folio-content .aside-cards{display:block}
+.folio-content .option{margin-bottom:10px;break-inside:avoid}
+.folio-content .free-cards>.card-select,.folio-content .solo-grid>.card-select{display:inline-block;width:calc(33.333% - 7px);vertical-align:top;margin:0 6px 10px 0;break-inside:avoid}
+.folio-content .draw__cards>.element-card{display:inline-flex;width:calc(50% - 8px);vertical-align:top;margin:0 7px 10px 0;break-inside:avoid}
+.folio-content button,.folio-content input,.folio-content select,.folio-content textarea,.folio-content .play__stage-head,.folio-content .phase-progress,.folio-content .solo-npc-check{break-inside:avoid}
+.folio-content h1,.folio-content h2,.folio-content h3,.folio-content .solo-label{break-after:avoid}
+.folio-content .hero__actions,.folio-content .draw__cards,.folio-content .fixed-options{break-before:column}
+.folio-content .solo-actions,.folio-content .event-bottom,.folio-content .draw__actions{display:block;break-inside:avoid}
+.folio-content .solo-actions button,.folio-content .draw__actions button{margin:0 7px 8px 0}
+.folio-content .solo-story,.folio-content .solo-panel,.folio-content .roll-panel,.folio-content .solo-summary,.folio-content details{max-height:none;overflow:visible}
+.folio-content .folio-end{display:block;width:1px;height:1px;margin:0;padding:0}
+.folio-content .folio-closing{break-before:column;padding-top:25px}
+.paper .folio-content p{font-size:24px;line-height:1.75}
+.folio-navigation{position:absolute;left:auto;width:420px;right:30px;bottom:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#4b3120;font:21px/1.5 "Archive Body","KaiTi",serif}
+.folio-navigation button{font:inherit;padding:8px 10px;border:0;border-bottom:1px solid #8c6c4655;color:inherit;background:transparent;cursor:pointer}
+.folio-navigation button:disabled{opacity:.65;cursor:default}.folio-counter{font-size:16px}
+@media(max-width:700px){.paper.life-spread{width:480px}.folio-viewport,.life-book.folio-content{width:420px}.life-book.folio-content{column-count:1}.folio-navigation{gap:4px;font-size:17px}.folio-counter{font-size:14px}}
+.folio-content .aside-cards>button{display:inline-block;width:calc(33.333% - 8px);vertical-align:top;margin:0 7px 10px 0;padding:0;break-inside:avoid}
