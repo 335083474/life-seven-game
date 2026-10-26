@@ -250,7 +250,7 @@
       "source": "https://sketchfab.com/3d-models/book-7f702789fd444ad3b1c4cb3987d955fc",
       "license": "CC BY 4.0",
       "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "modifications": "WebP textures and Meshopt compression; runtime triangle split, hinge rig, added Chinese print and deforming page animation. Original model is static.",
+      "modifications": "WebP textures and Meshopt compression; runtime triangle split, hinge rig, added Chinese print and deforming page animation; front-cover effigy rotated upright within its cover. Original model is static.",
       "originalSha256": "3210393d368848c7c3b8f78741dbfac52d1ebe0060b768e0204639bfe15e7c83"
     },
     {

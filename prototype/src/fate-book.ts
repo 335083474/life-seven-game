@@ -28,6 +28,15 @@ export class ImportedFateBook{
       const geometry=child.geometry,index=geometry.getIndex(),position=geometry.getAttribute('position'),normal=geometry.getAttribute('normal'),uv=geometry.getAttribute('uv'),normalMatrix=new T.Matrix3().getNormalMatrix(child.matrixWorld);
       const vertices:Vertex[]=[];
       for(let i=0;i<position.count;i++)vertices.push({position:new T.Vector3().fromBufferAttribute(position,i).applyMatrix4(child.matrixWorld).multiplyScalar(BOOK_SCALE).add(new T.Vector3(0,BASE,0)),normal:new T.Vector3().fromBufferAttribute(normal,i).applyNormalMatrix(normalMatrix),uv:new T.Vector2().fromBufferAttribute(uv,i)});
+      if(/^Mesh_0012_/.test(child.name)){
+        // This authored part combines the lining and the front-cover effigy.
+        // Its separate UV island contains the complete sculpt, including rivets.
+        // Rotate only that sculpt in the cover plane; keep the lining, hinge,
+        // cover title and reading surface in their established coordinates.
+        const effigy=vertices.filter(vertex=>vertex.uv.x>.44);
+        const center=new T.Box3().setFromPoints(effigy.map(vertex=>vertex.position)).getCenter(new T.Vector3());
+        for(const vertex of effigy){vertex.position.x=2*center.x-vertex.position.x;vertex.position.z=2*center.z-vertex.position.z;vertex.normal.x*=-1;vertex.normal.z*=-1;}
+      }
       for(const side of [-1,1]){
         const positions:number[]=[],normals:number[]=[],uvs:number[]=[];
         const mix=(a:Vertex,b:Vertex,t:number):Vertex=>({position:a.position.clone().lerp(b.position,t),normal:a.normal.clone().lerp(b.normal,t).normalize(),uv:a.uv.clone().lerp(b.uv,t)});
