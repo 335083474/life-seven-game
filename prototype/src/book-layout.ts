@@ -87,6 +87,8 @@ export function arrangeBookSpread(app:HTMLElement,s:Snapshot){
       if(s.life.phase==='free-result'){
         const goal=children.find(n=>n.tagName==='P');
         if(goal&&(goal.textContent?.length||0)>85){const d=document.createElement('details'),summary=document.createElement('summary');summary.textContent=text('重读本次行动','Read the full action');goal.before(d);d.append(summary,goal);children.splice(children.indexOf(goal),1,d);}
+        const records=children.filter(n=>n.matches('.solo-hint,.solo-panel:not(.solo-stream),.solo-audit,[data-action="source-facts"]'));
+        if(records.length){const d=document.createElement('details'),summary=document.createElement('summary');d.className='book-story-notes';summary.textContent=text('本次记录与故事依据','Event record and story sources');d.append(summary,...records);for(const record of records)children.splice(children.indexOf(record),1);const action=children.findIndex(n=>n.classList.contains('solo-actions'));children.splice(action<0?children.length:action,0,d);}
       }
       const boundary=s.life.phase==='fixed'?center.querySelector('.paper-rule'):s.life.phase==='free-result'?center.querySelector('.solo-story'):s.life.phase==='rolled'?center.querySelector('.solo-panel,.solo-actions'):s.life.phase==='swan'?center.querySelector('.solo-hint'):center.querySelector('.solo-panel,.solo-actions');
       let choicePage=false;
