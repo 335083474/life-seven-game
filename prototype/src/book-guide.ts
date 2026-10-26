@@ -19,7 +19,7 @@ export function installBookGuide(options:Options){
     if(!active)return;const en=options.snapshot()?.locale==='en',step=steps[index];
     panel.hidden=false;panel.dataset.step=step[0];panel.setAttribute('aria-label',en?'How to play':'新手引导');
     heading.textContent=step[en?3:1];body.textContent=step[en?4:2];count.textContent=en?`FIRST STEPS · ${index+1} / 5`:`初次落笔 · ${index+1} / 5`;
-    if(index===1&&window.innerWidth<700)body.textContent=en?'On a phone, read one page at a time. Next continues and Previous goes back. Turning pages does not advance life.':'手机每次读一页。点页底下一页继续，上一页回看；翻页本身不会推进人生。';
+    if(index===1&&window.innerWidth<700)body.textContent=en?'Both pages stay visible on a phone too. Use Read left or Read right above to enlarge either page, and Both pages to return. Page arrows turn a pair of pages.':'手机也默认显示左右双页。用上方阅读左页／阅读右页放大，再点双页返回。页底一次翻过两页。';
     skip.textContent=en?'Skip':'跳过';skip.setAttribute('aria-label',en?'Skip tutorial':'跳过引导');back.textContent=en?'Back':'上一步';back.disabled=index===0;
     next.textContent=index===0?(en?'Open the book':'打开书本'):index===4?(en?'Start playing':'开始游玩'):(en?'Got it, next':'知道了，下一步');
     highlight?.classList.remove('book-guide-target');highlight=document.querySelector(step[5]);highlight?.classList.add('book-guide-target');

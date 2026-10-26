@@ -10,11 +10,10 @@ export function installBookPagination(
   paper.append(nav);
   const previous=nav.querySelector<HTMLButtonElement>('[data-folio-prev]')!,next=nav.querySelector<HTMLButtonElement>('[data-folio-next]')!,counter=nav.querySelector<HTMLElement>('.folio-counter')!;
   let index=0,count=2,locale='zh-CN',busy=false,paging=false,queued=false,closingHTML='';
-  const mobile=()=>innerWidth<700;
   const observe=()=>observer.observe(app,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['open']});
   function paint(){
-    const stride=mobile()?1:2;
-    index=Math.max(0,Math.min(index,count-stride));if(!mobile())index-=index%2;
+    const stride=2;
+    index=Math.max(0,Math.min(index,count-stride));index-=index%2;
     app.style.transform=`translateX(${-index*518}px)`;
     app.dataset.pageStart=String(index+1);app.dataset.pageCount=String(count);
     previous.textContent=locale==='en'?'← Previous':'← 上一页';next.textContent=locale==='en'?'Next →':'下一页 →';
@@ -34,7 +33,7 @@ export function installBookPagination(
   function schedule(){if(!queued){queued=true;requestAnimationFrame(reflow);}}
   const observer=new MutationObserver(schedule);
   async function go(direction:number){
-    const stride=mobile()?1:2,target=index+direction*stride;
+    const stride=2,target=index+direction*stride;
     if(busy||paging||target<0||target>=count)return;
     paging=true;paint();
     try{await view.turn(direction<0);index=Math.min(target,count-stride);}

@@ -89,7 +89,7 @@
 .folio-navigation{position:absolute;left:auto;width:420px;right:30px;bottom:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#4b3120;font:21px/1.5 "Archive Body","KaiTi",serif}
 .folio-navigation button{font:inherit;padding:8px 10px;border:0;border-bottom:1px solid #8c6c4655;color:inherit;background:transparent;cursor:pointer}
 .folio-navigation button:disabled{opacity:.65;cursor:default}.folio-counter{font-size:16px}
-@media(max-width:700px){.paper.life-spread{width:480px}.folio-viewport,.life-book.folio-content{width:420px}.life-book.folio-content{column-count:1}.folio-navigation{gap:4px;font-size:17px}.folio-counter{font-size:14px}}
+@media(max-width:700px){.folio-navigation{gap:4px;font-size:17px}.folio-counter{font-size:14px}}
 .folio-content .aside-cards>button{display:inline-block;width:calc(33.333% - 8px);vertical-align:top;margin:0 7px 10px 0;padding:0;break-inside:avoid}
 /* Facing leaves are composed for the book, rather than a scaled web form. */
 .folio-content .book-leaf{break-before:column;margin:0;padding:3px 0;orphans:2;widows:2}
@@ -129,3 +129,5 @@ html[lang=en] .folio-content[data-book-phase=fixed] .option small{font-size:18px
 .folio-content .book-leaf .solo-narrative,.folio-content .book-leaf [data-live-prose]{font-size:22px;line-height:1.75}.book-story-notes{font-size:20px;line-height:1.5}.book-story-notes>summary{padding:5px 0;border-bottom:1px solid #8c6c4655}
 .folio-content[data-book-phase=free-result] .event-kicker{display:none}.folio-content[data-book-phase=free-result] .solo-die{line-height:1}.folio-content[data-book-phase=free-result] .book-instruction--compact>span{display:none}.folio-content[data-book-phase=free-result] .book-instruction--compact{padding-top:8px;margin-top:10px}
 .book-action-updated[hidden]{display:none}.book-assessment-stale .book-roll-chance,.book-assessment-stale .book-leaf:has(.book-roll-chance)>.book-instruction:not(.book-action-updated),.book-assessment-stale .book-leaf--assessment>.book-instruction{display:none}
+
+.book-view{position:absolute;left:30px;top:100px;display:flex;gap:3px;padding:4px;border:1px solid #ad925d66;background:#142219e8;box-shadow:0 5px 20px #0004;pointer-events:auto;font:12px/1.5 "Archive Body",KaiTi,serif}.book-view[hidden]{display:none}.book-view button{font:inherit;padding:7px 11px;background:transparent;border:1px solid transparent;color:#d8c89e}.book-view button[aria-pressed=true]{border-color:#b49b6455;background:#b49b641c;color:#f0ddb0}.book-view button:disabled{opacity:.4}@media(max-width:700px){.book-view{left:50%;top:116px;transform:translateX(-50%);white-space:nowrap}.book-view button{padding:6px 12px}}

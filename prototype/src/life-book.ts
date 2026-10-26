@@ -37,7 +37,7 @@ export function installLifeBook(left:HTMLElement,right:HTMLElement,view:{
       const assessmentReady=next.readyToRoll&&!snapshot?.readyToRoll&&!next.busy;
       if(snapshot&&snapshot.locale!==next.locale)localePending=true;if(!next.busy)localePending=false;
       snapshot=next;app.style.visibility=localePending?'hidden':'';app.setAttribute('aria-busy',String(next.busy));right.classList.toggle('translating',localePending);left.classList.toggle('translating',localePending);
-      app.setAttribute('aria-label',next.locale==='en'?'Life game folio':'人生游戏书页');right.setAttribute('aria-label',next.locale==='en'?'Right folio':'人生之书右页');left.setAttribute('aria-label',next.locale==='en'?'Left folio':'人生之书左页');
+      app.setAttribute('aria-label',next.locale==='en'?'Life game folio':'人生游戏书页');right.setAttribute('aria-label',next.locale==='en'?'Open book · facing pages':'人生之书 · 左右双页');left.setAttribute('aria-label',next.locale==='en'?'Left folio':'人生之书左页');
       const nextKey=pageKey(next),changed=key!==nextKey;key=nextKey;
       if(changed)expanded.clear();
       const tr=(value:string)=>bookText(value,next.locale,next.translate),life=next.screen==='new'?null:next.life,table=tableCards(life);setBookLocale(next.locale);

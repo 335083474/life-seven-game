@@ -10,6 +10,7 @@ import {installLifeBook,LifeSnapshot} from './life-book';
 import {bookText} from './book-locale';
 import {lastSavedDie} from './life-presentation.mjs';
 import {installBookGuide} from './book-guide';
+import {BookView,bookViewX,spreadFov,pageFov} from './book-framing';
 import './style.css';
 import './book-typography.css';
 
@@ -42,6 +43,7 @@ let openDiceInspector:(()=>void)|undefined;
 let tableCount=0,reading=false,requestBusy=false,presentationBusy=false,shownDiceKey='';
 let mobile=innerWidth<700,busy=false,opening=0,sound=false,dirty=true,turning=false,rolling=false,hidden=document.hidden;
 let bookGuide:ReturnType<typeof installBookGuide>|undefined;
+let bookView:BookView='spread',bookLanguage='zh-CN';
 const reduced=matchMedia('(prefers-reduced-motion: reduce)');
 type Motion={start:number;duration:number;update:(p:number)=>void;finish?:()=>void};const motions:Motion[]=[];
 const smooth=(p:number)=>p*p*(3-2*p);
@@ -49,23 +51,31 @@ function animate(duration:number,update:(p:number)=>void,finish?:()=>void){motio
 const targetCamera=new T.Vector3(),lookAt=new T.Vector3(),targetLookAt=new T.Vector3();let pointerX=0,pointerY=0,fateFocus=0;
 function cameraTargets(){
   book.group.position.z=mobile?-2.5*(1-opening):0;cards.forEach((c,i)=>c.group.visible=i<tableCount&&(!mobile||opening>.7));dice.forEach(d=>d.group.visible=!mobile||opening>.7);
-  if(mobile){targetCamera.set(T.MathUtils.lerp(.4,1.66,opening),T.MathUtils.lerp(11,10.1,opening),T.MathUtils.lerp(8.8,7.8,opening));targetLookAt.set(T.MathUtils.lerp(.2,1.66,opening),.20,T.MathUtils.lerp(.0,1.75,opening));camera.fov=opening>.5?42:45;}
+  if(mobile){targetCamera.set(T.MathUtils.lerp(.4,0,opening),T.MathUtils.lerp(11,11.5,opening),T.MathUtils.lerp(8.8,7.8,opening));targetLookAt.set(T.MathUtils.lerp(.2,0,opening),.20,T.MathUtils.lerp(.0,1.05,opening));camera.fov=opening>.5?32:45;}
   else{targetCamera.set(.4*(1-opening)+pointerX*.14,11.5+pointerY*.12,7.8+pointerY*.07);targetCamera.x+=fateFocus*1.3;targetCamera.y-=fateFocus*.5;targetLookAt.set(.1*(1-opening)+fateFocus*1.4,.10,1.05);camera.fov=T.MathUtils.lerp(37,32,opening)-fateFocus*1.5;}
-  if(reading&&state.opened){targetCamera.set(mobile?1.66:0,mobile?7.8:8.8,mobile?5.5:6.2);targetLookAt.set(mobile?1.66:0,.4,.25);camera.fov=mobile?42:32;}
-  if(!mobile && camera.aspect<1.5)camera.fov=T.MathUtils.radToDeg(2*Math.atan(Math.tan(T.MathUtils.degToRad(camera.fov/2))*1.5/camera.aspect));
+  if(reading&&state.opened){targetCamera.set(0,8.8,6.2);targetLookAt.set(0,.4,.25);camera.fov=32;}
+  if(state.opened&&bookView!=='spread'){const x=bookViewX(bookView);targetCamera.set(x,8.7,6);targetLookAt.set(x,.4,.3);camera.fov=pageFov(camera.aspect,targetCamera.distanceTo(targetLookAt));}
+  else if(opening>.5)camera.fov=spreadFov(camera.aspect,targetCamera.distanceTo(targetLookAt),camera.fov);
   camera.updateProjectionMatrix();
 }
 function layout(){
-  mobile=innerWidth<700;rightCSS.position.x=mobile?1.51:0;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
-  cards.forEach((c,i)=>{if(mobile){const row=i<4?0:1,col=row===0?i:i-4,count=row===0?Math.min(4,Math.max(1,tableCount)):Math.max(1,tableCount-4);c.home.set(1.66+(col-(count-1)/2)*.89,.08,3.68+row*1.27);c.group.scale.setScalar(.72);c.group.rotation.y=(col-(count-1)/2)*.015;}
+  mobile=innerWidth<700;rightCSS.position.x=0;book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);renderer.setSize(innerWidth,innerHeight);cssRenderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;
+  cards.forEach((c,i)=>{if(mobile){const row=i<4?0:1,col=row===0?i:i-4,count=row===0?Math.min(4,Math.max(1,tableCount)):Math.max(1,tableCount-4);c.home.set((col-(count-1)/2)*.89,.08,3.68+row*1.27);c.group.scale.setScalar(.72);c.group.rotation.y=(col-(count-1)/2)*.015;}
     else{c.home.set((i-(Math.max(1,tableCount)-1)/2)*1.22,.08,3.55+Math.abs(i-(Math.max(1,tableCount)-1)/2)*.025);c.group.scale.setScalar(1);c.group.rotation.y=(i-3)*-.025;}c.group.position.copy(c.home);});
   const narrow=!mobile&&innerWidth/innerHeight<1.35;
   dice[0].base.set(mobile?1.18:narrow?4.2:4.6,.43,mobile?2.85:.85);dice[1].base.set(mobile?2.1:narrow?4.35:5.05,.43,mobile?3.05:2.12);dice.forEach(d=>d.group.position.copy(d.base));
   dice.forEach(d=>d.group.scale.setScalar(mobile?.20:narrow?.245:.28));dice.forEach(d=>d.rest());cameraTargets();dirty=true;
 }
 
-function setPagesVisible(visible:boolean){leftDOM.classList.add('inactive');rightDOM.classList.toggle('inactive',!visible);}
-function syncBusy(){busy=requestBusy||presentationBusy;for(const b of document.querySelectorAll<HTMLButtonElement>('#open,#close-book,#reading-mode,.card-hit,.dice-hit,.inspect-dice'))b.disabled=busy;rightDOM.inert=turning||rolling;leftDOM.inert=turning||rolling;}
+function setPagesVisible(visible:boolean){leftDOM.classList.add('inactive');rightDOM.classList.toggle('inactive',!visible);$('#book-view').hidden=!visible;}
+function syncBusy(){busy=requestBusy||presentationBusy;for(const b of document.querySelectorAll<HTMLButtonElement>('#open,#close-book,#reading-mode,.card-hit,.dice-hit,.inspect-dice,button[data-book-view]'))b.disabled=busy;rightDOM.inert=turning||rolling;leftDOM.inert=turning||rolling;}
+function paintBookView(){
+  const en=bookLanguage==='en';document.documentElement.dataset.bookView=bookView;
+  $('#book-view').setAttribute('aria-label',en?'Book view':'书本视角');
+  for(const button of document.querySelectorAll<HTMLButtonElement>('button[data-book-view]' )){const mode=button.dataset.bookView as BookView;button.textContent=mode==='spread'?(en?'Both pages':'双页'):mode==='left'?(en?'Read left':'阅读左页'):(en?'Read right':'阅读右页');button.setAttribute('aria-pressed',String(mode===bookView));}
+  $('#reading-mode').setAttribute('aria-pressed',String(reading||bookView!=='spread'));
+}
+function chooseBookView(view:BookView){bookView=view;reading=false;paintBookView();cameraTargets();dirty=true;}
 function setBusy(value:boolean){presentationBusy=value;syncBusy();}
 let toastTimer:number|undefined;function toast(message:string){clearTimeout(toastTimer);$('#notice').textContent=message;$('#notice').classList.add('visible');$('#notice').setAttribute('aria-hidden','false');toastTimer=window.setTimeout(()=>{$('#notice').classList.remove('visible');$('#notice').setAttribute('aria-hidden','true');},3300);}
 
@@ -91,7 +101,7 @@ function play(kind:'paper'|'dice'|'mark'){
     const source=audio.createBufferSource(),filter=audio.createBiquadFilter(),gain=audio.createGain();source.buffer=buffer;filter.type='lowpass';filter.frequency.value=430;gain.gain.value=.6;source.connect(filter).connect(gain).connect(audio.destination);source.start();
   }catch{/* The experience remains playable without Web Audio. */}
 }
-function openBook(){if(busy||state.opened)return;state.opened=true;setBusy(true);$('#invitation').classList.add('leaving');$('#close-book').hidden=false;play('paper');animate(1900,p=>{opening=smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{opening=1;setPagesVisible(true);$('#table-caption').hidden=false;setBusy(false);restoreSavedDice();toast(lifeBook.snapshot?.locale==='en'?'Your next choice awaits in the book.':'从七岁开始，把这一生写进书里。');});}
+function openBook(){if(busy||state.opened)return;state.opened=true;chooseBookView('spread');setBusy(true);$('#invitation').classList.add('leaving');$('#close-book').hidden=false;play('paper');animate(1900,p=>{opening=smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{opening=1;setPagesVisible(true);$('#table-caption').hidden=false;setBusy(false);restoreSavedDice();toast(lifeBook.snapshot?.locale==='en'?'Your next choice awaits in the book.':'从七岁开始，把这一生写进书里。');});}
 function closeBook(){if(busy||!state.opened)return;setBusy(true);setPagesVisible(false);$('#table-caption').hidden=true;$('#dice-label').hidden=true;play('paper');animate(1500,p=>{opening=1-smooth(p);book.setOpening(opening);if(!mobile)book.group.position.x+=2.4*(1-opening);cameraTargets();},()=>{state.opened=false;$('#invitation').classList.remove('leaving');$('#close-book').hidden=true;setBusy(false);});}
 async function turnPage(backwards=false){
   if(!state.opened)return;
@@ -107,7 +117,7 @@ function restoreSavedDice(force=false){
 }
 async function showSavedDice(value:number){
   if(!state.opened)return;
-  if(reading){reading=false;$('#reading-mode').setAttribute('aria-pressed','false');cameraTargets();await new Promise<void>(resolve=>animate(900,()=>{},resolve));}
+  if(reading||bookView!=='spread'){chooseBookView('spread');cameraTargets();await new Promise<void>(resolve=>animate(900,()=>{},resolve));}
   let replayed=false;rolling=true;rightDOM.inert=leftDOM.inert=true;$('#dice-label').hidden=false;$('#dice-status').textContent=lifeBook.snapshot?.locale==='en'?'Let fate settle…':'让骰子落定…';$('#dice-value').textContent='··';
   try{
     const {prepareDiceThrow,sampleDiceThrow}=await import('./dice-physics');
@@ -152,7 +162,8 @@ function updateTargets(){
   });
 }
 const vec=new T.Vector3();
-$('#reading-mode').addEventListener('click',()=>{if(busy||!state.opened)return;reading=!reading;$('#reading-mode').setAttribute('aria-pressed',String(reading));cameraTargets();dirty=true;});
+$('#reading-mode').addEventListener('click',()=>{if(busy||!state.opened)return;if(bookView!=='spread')chooseBookView('spread');else{reading=!reading;paintBookView();cameraTargets();dirty=true;}});
+document.querySelectorAll<HTMLButtonElement>('button[data-book-view]' ).forEach(button=>button.addEventListener('click',()=>{if(!busy&&state.opened)chooseBookView(button.dataset.bookView as BookView);}));
 $('#open').addEventListener('click',openBook);$('#close-book').addEventListener('click',closeBook);
 const dialog=$<HTMLDialogElement>('#help');$('#guide').addEventListener('click',()=>dialog.showModal());$('#dismiss-help').addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{if(e.target===dialog){const r=dialog.getBoundingClientRect();const p=e as MouseEvent;if(p.clientX<r.left||p.clientX>r.right||p.clientY<r.top||p.clientY>r.bottom)dialog.close();}});
 $('#start-tour').addEventListener('click',()=>{dialog.close();bookGuide?.start();});
@@ -175,7 +186,7 @@ function frame(now:number){requestAnimationFrame(frame);if(hidden){previous=now;
 const lifeBook=installLifeBook(leftDOM,rightDOM,{
   throwDice:showSavedDice,turn:turnPage,reveal:revealPages,
   update(snapshot:LifeSnapshot,table:any[]){
-    const previousCount=tableCount;tableCount=table.length;
+    bookLanguage=snapshot.locale;paintBookView();const previousCount=tableCount;tableCount=table.length;
     cards.forEach((card,i)=>{const item=table[i];if(item){const name=snapshot.translate(item.name),signature=name+':'+item.level;
       if(card.label!==signature){card.setCard({name,subtitle:snapshot.translate(item.level===3?'典藏':item.level===2?'精进':'初识'),language:snapshot.locale,level:item.level,icon:elements.find(e=>e.name===item.name)?.icon||'sun'});card.label=signature;}
       card.selected=snapshot.selected.includes(item.key);targetButtons[i].setAttribute('aria-label',name+' '+['Ⅰ','Ⅱ','Ⅲ'][item.level-1]);

@@ -5,7 +5,7 @@ import {stripTypeScriptTypes} from 'node:module';
 import {Window} from 'happy-dom';
 const source=readFileSync(new URL('../src/book-pagination.ts',import.meta.url),'utf8');
 const {installBookPagination}=await import('data:text/javascript;base64,'+Buffer.from(stripTypeScriptTypes(source)).toString('base64'));
-test('book pagination retains live controls, guards concurrent turns, clamps after reflow and supports mobile pages',async t=>{
+test('book pagination retains live controls, guards concurrent turns, clamps after reflow and keeps facing pages paired on narrow screens',async t=>{
   const w=new Window(),names=['window','document','MutationObserver','requestAnimationFrame','innerWidth'],old=Object.fromEntries(names.map(n=>[n,globalThis[n]]));
   Object.assign(globalThis,{window:w,document:w.document,MutationObserver:w.MutationObserver,requestAnimationFrame:()=>0,innerWidth:1200});
   Object.defineProperty(w.document,'fonts',{value:{addEventListener(){}}});
@@ -21,7 +21,7 @@ test('book pagination retains live controls, guards concurrent turns, clamps aft
   resolveTurn();await turning;assert.equal(app.dataset.pageStart,'3');assert.equal(app.style.transform,'translateX(-1036px)');
   update(false,true);await pager.go(1);assert.equal(turns.length,1);update();
   const back=pager.go(-1);assert.equal(turns[1],true);resolveTurn();await back;assert.equal(app.dataset.pageStart,'1');
-  globalThis.innerWidth=390;update();const mobile=pager.go(1);resolveTurn();await mobile;assert.equal(app.dataset.pageStart,'2');
+  globalThis.innerWidth=390;update();const mobile=pager.go(1);resolveTurn();await mobile;assert.equal(app.dataset.pageStart,'3');assert.equal(app.style.transform,'translateX(-1036px)');
   columns=1;update();assert.equal(app.dataset.pageCount,'2');update(true);assert.equal(app.dataset.pageStart,'1');assert.equal(input.value,'my ongoing choice');
   columns=2;update();assert.equal(app.querySelector('.folio-closing'),null);assert.equal(app.dataset.pageCount,'2');
 });
